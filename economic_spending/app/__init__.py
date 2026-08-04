@@ -1,0 +1,1 @@
+"""Economic spending agent package."""
