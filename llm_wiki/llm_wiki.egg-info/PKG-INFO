@@ -1,0 +1,41 @@
+Metadata-Version: 2.4
+Name: llm-wiki
+Version: 0.1.0
+Summary: Local-first, AI-maintained knowledge system based on Obsidian, Markdown, YAML frontmatter, Git, Python, FastAPI, Typer CLI, Watchdog, and LLM abstraction.
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: typer>=0.9.0
+Requires-Dist: watchdog>=3.0.0
+Requires-Dist: httpx>=0.26.0
+Requires-Dist: python-frontmatter>=1.0.0
+Requires-Dist: fastapi>=0.100.0
+Requires-Dist: uvicorn>=0.22.0
+Requires-Dist: python-dotenv>=1.0.0
+Requires-Dist: pytest>=7.0.0
+
+# LLM Wiki
+
+A local-first, AI-maintained knowledge system based on Obsidian, Markdown, YAML Frontmatter, Git, Python, FastAPI, Typer CLI, Watchdog, and LLM Provider Abstraction.
+
+## Quick Start CLI
+
+```bash
+# Add file to a domain inbox
+wiki add research /path/to/paper.pdf
+
+# Run natural language query over research domain
+wiki ask research "What do we know about multi-agent planning?"
+
+# Run vault integrity check
+wiki lint
+```
+
+## Directory Structure Overview
+
+- `inbox/`: Universal entry point for new files and notes.
+- `raw/`: Immutable raw source store.
+- `wiki/`: Synthesized knowledge domains (`personal`, `research`, `business`, `competitive`).
+- `shared/`: Reusable cross-domain knowledge promoted via `promote()`.
+- `mocs/`: Maps of Content for topic navigation.
+- `system/`: State, logs, operational SQLite database.
