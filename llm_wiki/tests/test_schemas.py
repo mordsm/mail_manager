@@ -39,3 +39,4 @@ def test_competitive_signal_schema():
     )
     assert sig.company == "CompanyX"
     assert sig.signal_type == "pricing_change"
+

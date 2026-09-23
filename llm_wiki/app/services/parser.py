@@ -52,3 +52,4 @@ class MarkdownParser:
         Extracts #tags from text.
         """
         return list(set(match.group(1) for match in self.TAG_PATTERN.finditer(text)))
+

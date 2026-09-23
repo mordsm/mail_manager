@@ -23,3 +23,4 @@ class ContradictionModel(BaseModel):
     possible_explanation: Optional[str] = None
     current_synthesis: str
     remaining_uncertainty: str
+

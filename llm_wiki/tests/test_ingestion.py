@@ -52,3 +52,4 @@ def test_markdown_parser(tmp_path):
     assert res["wikilinks"][1]["label"] == "Multi Agent Systems"
     assert "agents" in res["tags"]
     assert "architecture" in res["tags"]
+

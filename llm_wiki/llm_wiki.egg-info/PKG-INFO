@@ -12,6 +12,7 @@ Requires-Dist: python-frontmatter>=1.0.0
 Requires-Dist: fastapi>=0.100.0
 Requires-Dist: uvicorn>=0.22.0
 Requires-Dist: python-dotenv>=1.0.0
+Requires-Dist: python-multipart>=0.0.6
 Requires-Dist: pytest>=7.0.0
 
 # LLM Wiki
@@ -39,3 +40,4 @@ wiki lint
 - `shared/`: Reusable cross-domain knowledge promoted via `promote()`.
 - `mocs/`: Maps of Content for topic navigation.
 - `system/`: State, logs, operational SQLite database.
+

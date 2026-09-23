@@ -23,3 +23,4 @@ wiki lint
 - `shared/`: Reusable cross-domain knowledge promoted via `promote()`.
 - `mocs/`: Maps of Content for topic navigation.
 - `system/`: State, logs, operational SQLite database.
+

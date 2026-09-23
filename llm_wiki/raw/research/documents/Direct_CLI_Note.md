@@ -1,0 +1,1 @@
+Testing writing note content directly via CLI command without any file.

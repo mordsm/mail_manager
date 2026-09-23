@@ -71,3 +71,48 @@ class LLMWikiPipeline:
             "raw_path": str(raw_path),
             "note_path": str(note_path)
         }
+
+    def process_text(self, content: str, title: str = "Untitled Note", domain: str = "research") -> Dict[str, Any]:
+        target_domain = domain if domain and domain != "unclassified" else "research"
+
+        # 1. Save Raw Immutable Copy
+        job = self.inbox_service.ingest_text(content, title=title, domain=target_domain)
+        if job.status == "DUPLICATE":
+            return {"status": "DUPLICATE", "job": job.model_dump()}
+
+        raw_path = Path(job.target_raw_path)
+
+        # 2. AI Extraction
+        extraction = self.llm.extract_entities_and_claims(content, domain=target_domain)
+
+        # 3. Synthesize Atomic Note
+        summary = extraction.get("summary", content[:500])
+        concepts = extraction.get("concepts", [])
+
+        note_path = self.atomic_service.create_or_update_note(
+            title=title,
+            domain=target_domain,
+            note_type="concept",
+            content=content if len(content) <= 1000 else f"{summary}\n\n## Content\n{content}",
+            sources=[str(raw_path.relative_to(self.root_dir))] if raw_path.exists() else [],
+            related=[f"[[{c}]]" for c in concepts],
+            tags=[target_domain]
+        )
+
+        # 4. Update MOC and Domain Log
+        moc_title = f"{target_domain.capitalize()} Overview"
+        self.moc_service.update_moc(moc_title, "Recent Ingestions", f"{note_path.stem}")
+        self.moc_service.append_domain_log(target_domain, f"Ingested text note: {title}")
+
+        # 5. Git Commit
+        commit_msg = f"ingest({target_domain}): process note '{title}'"
+        self.git_service.commit(commit_msg)
+
+        return {
+            "status": "COMPLETED",
+            "job_id": job.job_id,
+            "raw_path": str(raw_path),
+            "note_path": str(note_path)
+        }
+
+

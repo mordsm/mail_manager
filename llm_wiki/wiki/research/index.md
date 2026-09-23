@@ -13,3 +13,4 @@ Welcome to the Research & Technology Domain.
 ## Domain Log
 
 See [[log|Research Domain Log]].
+

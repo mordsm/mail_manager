@@ -1,0 +1,1 @@
+Testing 1-word shortcut for notes

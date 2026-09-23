@@ -111,3 +111,4 @@ class InboxIngestionService:
         )
         self.db.create_job(job)
         return job
+

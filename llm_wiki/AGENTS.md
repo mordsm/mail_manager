@@ -61,3 +61,4 @@ Never make a database the canonical wiki.
 ```text
 RECEIVE ──► VALIDATE ──► HASH (SHA-256) ──► DEDUPLICATE ──► CLASSIFY ──► SAVE RAW ──► PARSE ──► EXTRACT ──► COMPARE ──► UPDATE WIKI ──► CREATE LINKS ──► CHECK SHARED PROMOTION ──► UPDATE MOCS ──► UPDATE INDEX ──► UPDATE LOG ──► GIT COMMIT
 ```
+

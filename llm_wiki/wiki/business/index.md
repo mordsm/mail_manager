@@ -13,3 +13,4 @@ Welcome to the Business & Operations Domain.
 ## Domain Log
 
 See [[log|Business Domain Log]].
+

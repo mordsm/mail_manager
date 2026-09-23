@@ -13,3 +13,4 @@ Welcome to the Personal Domain.
 ## Domain Log
 
 See [[log|Personal Domain Log]].
+

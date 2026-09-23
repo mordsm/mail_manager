@@ -28,3 +28,4 @@ class LLMProvider(ABC):
         Extracts entities, concepts, claims, signals, and wikilinks from raw source.
         """
         pass
+

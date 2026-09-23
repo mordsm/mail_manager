@@ -13,3 +13,4 @@ Welcome to **LLM Wiki** — Your AI-maintained local personal knowledge base and
 ## Navigation Maps of Content (MOCs)
 
 See [[mocs/index|Maps of Content Index]].
+

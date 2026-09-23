@@ -22,3 +22,4 @@ class GitService:
         except Exception as e:
             print(f"[GitService Warning] Could not perform git commit: {e}")
             return False
+

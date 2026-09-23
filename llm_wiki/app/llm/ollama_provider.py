@@ -96,3 +96,4 @@ class OllamaProvider(LLMProvider):
             else:
                 fallback_data[name] = "fallback"
         return response_model.model_construct(**fallback_data)
+

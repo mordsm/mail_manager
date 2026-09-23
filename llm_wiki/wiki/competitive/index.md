@@ -13,3 +13,4 @@ Welcome to the Competitive Analysis Domain.
 ## Domain Log
 
 See [[log|Competitive Domain Log]].
+

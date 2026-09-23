@@ -15,3 +15,4 @@ class IngestionJob(BaseModel):
     updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
     error_message: Optional[str] = None
     extracted_metadata: Dict[str, Any] = Field(default_factory=dict)
+

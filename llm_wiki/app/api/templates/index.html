@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Wiki Ingestion Interface — Knowledge Portal</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 2rem; }
+        .container { max-width: 750px; margin: 0 auto; background: #1e293b; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        h1 { margin-top: 0; color: #38bdf8; font-size: 1.75rem; text-align: center; }
+        .tabs { display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 2px solid #334155; }
+        .tab { padding: 0.75rem 1.25rem; cursor: pointer; color: #94a3b8; font-weight: 600; border-bottom: 3px solid transparent; user-select: none; }
+        .tab.active { color: #38bdf8; border-color: #38bdf8; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .dropzone { border: 2px dashed #38bdf8; border-radius: 8px; padding: 2.5rem 1.5rem; text-align: center; background: #0f172a; cursor: pointer; transition: 0.2s; margin-bottom: 1.25rem; }
+        .dropzone:hover { background: #1e293b; border-color: #818cf8; }
+        .form-group { margin-bottom: 1.25rem; }
+        label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: #cbd5e1; }
+        input[type="text"], textarea, select, button { width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 1rem; box-sizing: border-box; }
+        textarea { height: 160px; font-family: monospace; resize: vertical; }
+        button { background: #4f46e5; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 0.5rem; }
+        button:hover { background: #6366f1; }
+        #status { margin-top: 1.5rem; padding: 1rem; border-radius: 6px; display: none; background: #065f46; color: #a7f3d0; white-space: pre-wrap; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 LLM Wiki Knowledge Portal</h1>
+        
+        <div class="tabs">
+            <div class="tab active" id="tabHeaderFile" onclick="switchTab('fileTab')">📁 Ingest File</div>
+            <div class="tab" id="tabHeaderText" onclick="switchTab('textTab')">📝 Ingest Note / Text</div>
+        </div>
+
+        <!-- TAB 1: FILE INGESTION -->
+        <div id="fileTab" class="tab-content active">
+            <form id="uploadForm">
+                <div class="dropzone" id="dropzone">
+                    <p>📂 Drag & Drop PDF, Document, Audio, or Note File Here</p>
+                    <input type="file" id="fileInput" style="display:none">
+                    <span id="fileName" style="color: #94a3b8;">No file selected</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="domainSelectFile">Target Domain</label>
+                    <select id="domainSelectFile">
+                        <option value="unclassified">Auto classify</option>
+                        <option value="personal">Personal</option>
+                        <option value="research">Research & Technology</option>
+                        <option value="business">Business & Operations</option>
+                        <option value="competitive">Competitive Analysis</option>
+                    </select>
+                </div>
+
+                <button type="submit">INGEST FILE</button>
+            </form>
+        </div>
+
+        <!-- TAB 2: NOTE / TEXT INGESTION -->
+        <div id="textTab" class="tab-content">
+            <form id="textForm">
+                <div class="form-group">
+                    <label for="noteTitle">Note Title</label>
+                    <input type="text" id="noteTitle" placeholder="e.g. Agent Memory Architecture Insights" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="noteContent">Note Content / Markdown Text</label>
+                    <textarea id="noteContent" placeholder="Paste your markdown note or text here..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="domainSelectText">Target Domain</label>
+                    <select id="domainSelectText">
+                        <option value="research">Research & Technology</option>
+                        <option value="personal">Personal</option>
+                        <option value="business">Business & Operations</option>
+                        <option value="competitive">Competitive Analysis</option>
+                    </select>
+                </div>
+
+                <button type="submit">INGEST NOTE</button>
+            </form>
+        </div>
+
+        <div id="status"></div>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            document.getElementById('tabHeaderFile').classList.remove('active');
+            document.getElementById('tabHeaderText').classList.remove('active');
+            document.getElementById('fileTab').classList.remove('active');
+            document.getElementById('textTab').classList.remove('active');
+
+            if (tabId === 'fileTab') {
+                document.getElementById('tabHeaderFile').classList.add('active');
+                document.getElementById('fileTab').classList.add('active');
+            } else {
+                document.getElementById('tabHeaderText').classList.add('active');
+                document.getElementById('textTab').classList.add('active');
+            }
+        }
+
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const uploadForm = document.getElementById('uploadForm');
+        const textForm = document.getElementById('textForm');
+        const status = document.getElementById('status');
+
+        dropzone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) fileName.textContent = fileInput.files[0].name;
+        });
+
+        dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.style.borderColor = '#818cf8'; });
+        dropzone.addEventListener('dragleave', () => dropzone.style.borderColor = '#38bdf8');
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.style.borderColor = '#38bdf8';
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                fileName.textContent = fileInput.files[0].name;
+            }
+        });
+
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!fileInput.files.length) { alert('Please select a file'); return; }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('domain', document.getElementById('domainSelectFile').value);
+
+            showStatus('PROCESSING FILE INGESTION...');
+            try {
+                const res = await fetch('/api/v1/ingest/file', { method: 'POST', body: formData });
+                const data = await res.json();
+                showStatus('COMPLETED FILE INGESTION:\n' + JSON.stringify(data, null, 2));
+            } catch (err) {
+                showStatus('ERROR: ' + err.message);
+            }
+        });
+
+        textForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('title', document.getElementById('noteTitle').value);
+            formData.append('content', document.getElementById('noteContent').value);
+            formData.append('domain', document.getElementById('domainSelectText').value);
+
+            showStatus('PROCESSING NOTE INGESTION...');
+            try {
+                const res = await fetch('/api/v1/ingest/text', { method: 'POST', body: formData });
+                const data = await res.json();
+                showStatus('COMPLETED NOTE INGESTION:\n' + JSON.stringify(data, null, 2));
+            } catch (err) {
+                showStatus('ERROR: ' + err.message);
+            }
+        });
+
+        function showStatus(msg) {
+            status.style.display = 'block';
+            status.textContent = msg;
+        }
+    </script>
+</body>
+</html>

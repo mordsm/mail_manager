@@ -30,3 +30,4 @@ class WikiFrontmatter(BaseModel):
     share_policy: SharePolicy = "allowed"
     tags: List[str] = Field(default_factory=list)
     ai_edit: bool = True
+

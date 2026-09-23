@@ -1,0 +1,1 @@
+uv run python -m app.cli.main serve --port 8050
