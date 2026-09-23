@@ -7,7 +7,7 @@ app = typer.Typer(help="LLM Wiki CLI — Personal & Research Knowledge Assistant
 
 @app.command("add")
 def add_file(
-    domain: str = typer.Argument(..., help="Target domain: personal, research, business, competitive"),
+    domain: str = typer.Argument(..., help="Target domain: personal, research, business, competitive, development"),
     filepath: str = typer.Argument(..., help="Path to raw source file to ingest")
 ):
     """
@@ -22,7 +22,7 @@ def add_file(
 
 @app.command("add-note")
 def add_note(
-    domain: str = typer.Argument("research", help="Target domain: personal, research, business, competitive"),
+    domain: str = typer.Argument("research", help="Target domain: personal, research, business, competitive, development"),
     notepath_or_title: str = typer.Argument(..., help="Path to existing .md note file OR title for new note"),
     content: Optional[str] = typer.Option(None, "--content", "-c", help="Markdown content (if providing title)"),
     direct: bool = typer.Option(True, "--direct", help="Skip creating raw file copy"),
@@ -89,7 +89,7 @@ def note_cmd(
 
 @app.command("ask")
 def ask(
-    domain: str = typer.Argument("research", help="Domain to query (research, personal, business, competitive, or all)"),
+    domain: str = typer.Argument("research", help="Domain to query (research, personal, business, competitive, development, or all)"),
     query: str = typer.Argument(..., help="Question or prompt to answer")
 ):
     """
@@ -100,7 +100,6 @@ def ask(
     res = planner.query(domain=domain, question=query)
     typer.echo(f"\n--- Answer ({res['domain']}) ---")
     typer.echo(res['answer'])
-
 
 @app.command("lint")
 def lint():
@@ -133,7 +132,6 @@ def watch():
 @app.callback(invoke_without_command=True)
 def main_callback(
     ctx: typer.Context,
-    text: Optional[str] = typer.Argument(None, help="Note text or prompt for auto-ingestion"),
     domain: Optional[str] = typer.Option(None, "--domain", "-d", help="Target domain"),
     title: Optional[str] = typer.Option(None, "--title", "-t", help="Title of note"),
     content: Optional[str] = typer.Option(None, "--content", "-c", help="Text content"),
@@ -141,9 +139,8 @@ def main_callback(
     append: bool = typer.Option(False, "--append", help="Append to existing note/log")
 ):
     if ctx.invoked_subcommand is None:
-        raw_text = content or text
-        if raw_text or title or domain:
-            actual_text = raw_text or f"# {title}\n\nNote text."
+        if content or title or domain:
+            actual_text = content or f"# {title}\n\nNote text."
             pipeline = LLMWikiPipeline()
             res = pipeline.smart_ingest(actual_text, title=title, domain=domain, direct=direct, append=append)
             typer.echo(f"Smart Ingest [{res['action']}]: {res['title']}")
@@ -152,11 +149,5 @@ def main_callback(
         else:
             typer.echo(ctx.get_help())
 
-
 if __name__ == "__main__":
     app()
-
-
-
-
-

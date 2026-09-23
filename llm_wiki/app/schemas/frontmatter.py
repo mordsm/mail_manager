@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Literal
 from datetime import date
 
-DomainType = Literal["personal", "research", "business", "competitive"]
+DomainType = Literal["personal", "research", "business", "competitive", "development"]
 PageType = Literal[
     "concept", "entity", "person", "company", "technology", "project",
     "claim", "evidence", "hypothesis", "question", "decision", "signal",

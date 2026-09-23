@@ -6,7 +6,7 @@ from app.services.hasher import Hasher
 from app.services.db import OperationalDatabase
 from app.schemas.job import IngestionJob, JobStatus
 
-ALLOWED_DOMAINS = {"personal", "research", "business", "competitive", "unclassified"}
+ALLOWED_DOMAINS = {"personal", "research", "business", "competitive", "development", "unclassified"}
 
 class InboxIngestionService:
     """

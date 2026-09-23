@@ -133,7 +133,7 @@ class LLMWikiPipeline:
         extraction = self.llm.extract_entities_and_claims(content, domain=domain or "research")
 
         target_domain = domain if (domain and domain != "unclassified") else extraction.get("domain", "research")
-        if target_domain not in ["personal", "research", "business", "competitive"]:
+        if target_domain not in ["personal", "research", "business", "competitive", "development"]:
             target_domain = "research"
 
         if not title or title == "Untitled Note":
