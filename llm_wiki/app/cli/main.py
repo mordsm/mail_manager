@@ -24,10 +24,12 @@ def add_file(
 def add_note(
     domain: str = typer.Argument("research", help="Target domain: personal, research, business, competitive"),
     notepath_or_title: str = typer.Argument(..., help="Path to existing .md note file OR title for new note"),
-    content: Optional[str] = typer.Option(None, "--content", "-c", help="Markdown content (if providing title)")
+    content: Optional[str] = typer.Option(None, "--content", "-c", help="Markdown content (if providing title)"),
+    direct: bool = typer.Option(True, "--direct", help="Skip creating raw file copy"),
+    append: bool = typer.Option(False, "--append", help="Append to existing note/log")
 ):
     """
-    Ingests an existing Markdown note file or note text directly into the specified domain.
+    Ingests an existing Markdown note file or note text into the specified domain.
     """
     pipeline = LLMWikiPipeline()
     path_candidate = Path(notepath_or_title)
@@ -40,43 +42,50 @@ def add_note(
             typer.echo(f"Wiki note synthesized at: {res['note_path']}")
     else:
         note_content = content or f"# {notepath_or_title}\n\nNote content."
-        res = pipeline.process_text(note_content, title=notepath_or_title, domain=domain)
-        typer.echo(f"Note Text Ingested: {res['status']}")
-        if res['status'] == 'COMPLETED':
-            typer.echo(f"Raw saved at: {res['raw_path']}")
-            typer.echo(f"Wiki note created at: {res['note_path']}")
+        res = pipeline.smart_ingest(note_content, title=notepath_or_title, domain=domain, direct=direct, append=append)
+        typer.echo(f"Smart Ingest Result: {res['action']}")
+        typer.echo(f"Domain: {res['domain']}")
+        typer.echo(f"Wiki Note: {res['note_path']}")
 
 @app.command("add-text")
 def add_text(
     domain: str = typer.Option("research", "--domain", "-d", help="Target domain"),
     title: str = typer.Option("Untitled Note", "--title", "-t", help="Title of note"),
-    content: str = typer.Option(..., "--content", "-c", help="Text content")
+    content: str = typer.Option(..., "--content", "-c", help="Text content"),
+    direct: bool = typer.Option(True, "--direct", help="Skip creating raw file copy"),
+    append: bool = typer.Option(False, "--append", help="Append to existing note/log")
 ):
     """
     Ingests raw text directly into the wiki domain.
     """
     pipeline = LLMWikiPipeline()
-    res = pipeline.process_text(content, title=title, domain=domain)
-    typer.echo(f"Text Ingested: {res['status']}")
-    if res['status'] == 'COMPLETED':
-        typer.echo(f"Raw saved at: {res['raw_path']}")
-        typer.echo(f"Wiki note created at: {res['note_path']}")
+    res = pipeline.smart_ingest(content, title=title, domain=domain, direct=direct, append=append)
+    typer.echo(f"Smart Ingest Result: {res['action']}")
+    typer.echo(f"Domain: {res['domain']}")
+    typer.echo(f"Wiki Note: {res['note_path']}")
 
 @app.command("note")
 def note_cmd(
-    title: str = typer.Argument("Untitled Note", help="Note title"),
-    content: str = typer.Argument("", help="Note content"),
-    domain: str = typer.Option("research", "--domain", "-d", help="Target domain")
+    text_or_title: str = typer.Argument(..., help="Note text OR title"),
+    content: Optional[str] = typer.Argument(None, help="Note content (optional)"),
+    domain: Optional[str] = typer.Option(None, "--domain", "-d", help="Target domain"),
+    title: Optional[str] = typer.Option(None, "--title", "-t", help="Title override"),
+    direct: bool = typer.Option(True, "--direct", help="Skip raw copy"),
+    append: bool = typer.Option(False, "--append", help="Append to existing note")
 ):
     """
-    Short command syntax: wiki note "Title" "Content" -d research
+    Short command syntax:
+    - Zero effort: wiki note "Your note text here"
+    - Explicit: wiki note "Title" "Content" -d research
     """
     pipeline = LLMWikiPipeline()
-    res = pipeline.process_text(content or f"# {title}\n\nNote content.", title=title, domain=domain)
-    typer.echo(f"Text Ingested: {res['status']}")
-    if res['status'] == 'COMPLETED':
-        typer.echo(f"Raw saved at: {res['raw_path']}")
-        typer.echo(f"Wiki note created at: {res['note_path']}")
+    note_content = content if content else text_or_title
+    note_title = title if title else (text_or_title if content else None)
+
+    res = pipeline.smart_ingest(note_content, title=note_title, domain=domain, direct=direct, append=append)
+    typer.echo(f"Smart Ingest [{res['action']}]: {res['title']}")
+    typer.echo(f"Domain: {res['domain']}")
+    typer.echo(f"Wiki Note: {res['note_path']}")
 
 @app.command("ask")
 def ask(
@@ -124,27 +133,29 @@ def watch():
 @app.callback(invoke_without_command=True)
 def main_callback(
     ctx: typer.Context,
+    text: Optional[str] = typer.Argument(None, help="Note text or prompt for auto-ingestion"),
     domain: Optional[str] = typer.Option(None, "--domain", "-d", help="Target domain"),
     title: Optional[str] = typer.Option(None, "--title", "-t", help="Title of note"),
-    content: Optional[str] = typer.Option(None, "--content", "-c", help="Text content")
+    content: Optional[str] = typer.Option(None, "--content", "-c", help="Text content"),
+    direct: bool = typer.Option(True, "--direct", help="Skip creating raw file copy"),
+    append: bool = typer.Option(False, "--append", help="Append to existing note/log")
 ):
     if ctx.invoked_subcommand is None:
-        if any([domain, title, content]):
-            actual_domain = domain or "research"
-            actual_title = title or "Untitled Note"
-            actual_content = content or f"# {actual_title}\n\nNote text."
+        raw_text = content or text
+        if raw_text or title or domain:
+            actual_text = raw_text or f"# {title}\n\nNote text."
             pipeline = LLMWikiPipeline()
-            res = pipeline.process_text(actual_content, title=actual_title, domain=actual_domain)
-            typer.echo(f"Ingestion result: {res['status']}")
-            if res['status'] == 'COMPLETED':
-                typer.echo(f"Raw source saved to: {res['raw_path']}")
-                typer.echo(f"Wiki note created at: {res['note_path']}")
+            res = pipeline.smart_ingest(actual_text, title=title, domain=domain, direct=direct, append=append)
+            typer.echo(f"Smart Ingest [{res['action']}]: {res['title']}")
+            typer.echo(f"Domain: {res['domain']}")
+            typer.echo(f"Wiki Note: {res['note_path']}")
         else:
             typer.echo(ctx.get_help())
 
 
 if __name__ == "__main__":
     app()
+
 
 
 

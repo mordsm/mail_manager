@@ -115,4 +115,73 @@ class LLMWikiPipeline:
             "note_path": str(note_path)
         }
 
+    def smart_ingest(
+        self,
+        content: str,
+        title: Optional[str] = None,
+        domain: Optional[str] = None,
+        direct: bool = True,
+        append: bool = False
+    ) -> Dict[str, Any]:
+        """
+        Zero-Cognitive-Load Ingestion:
+        1. Auto-classifies domain if not explicitly provided.
+        2. Auto-extracts title / topic if not explicitly provided.
+        3. Auto-searches existing vault for matching notes.
+        4. Appends to matching note or creates a clean atomic note directly.
+        """
+        extraction = self.llm.extract_entities_and_claims(content, domain=domain or "research")
+
+        target_domain = domain if (domain and domain != "unclassified") else extraction.get("domain", "research")
+        if target_domain not in ["personal", "research", "business", "competitive"]:
+            target_domain = "research"
+
+        if not title or title == "Untitled Note":
+            concepts = extraction.get("concepts", [])
+            if concepts:
+                target_title = concepts[0]
+            else:
+                words = content.strip().split()
+                target_title = " ".join(words[:5]).title() if words else "Quick Note"
+        else:
+            target_title = title
+
+        existing_note = self.atomic_service.find_matching_note(target_title, domain=target_domain)
+
+        if existing_note and (append or existing_note.exists()):
+            note_path = self.atomic_service.append_to_note(existing_note, content)
+            action = "APPENDED"
+        else:
+            concepts = extraction.get("concepts", [])
+            note_path = self.atomic_service.create_or_update_note(
+                title=target_title,
+                domain=target_domain,
+                note_type="concept",
+                content=content,
+                sources=[],
+                related=[f"[[{c}]]" for c in concepts],
+                tags=[target_domain]
+            )
+            action = "CREATED"
+
+        raw_path = None
+        if not direct:
+            job = self.inbox_service.ingest_text(content, title=target_title, domain=target_domain)
+            raw_path = job.target_raw_path
+
+        moc_title = f"{target_domain.capitalize()} Overview"
+        self.moc_service.update_moc(moc_title, "Recent Ingestions", f"{note_path.stem}")
+        self.moc_service.append_domain_log(target_domain, f"Smart ingest [{action}]: {target_title}")
+        self.git_service.commit(f"ingest({target_domain}): smart {action.lower()} '{target_title}'")
+
+        return {
+            "status": "COMPLETED",
+            "action": action,
+            "domain": target_domain,
+            "title": target_title,
+            "note_path": str(note_path),
+            "raw_path": str(raw_path) if raw_path else "Skipped (Direct Mode)"
+        }
+
+
 

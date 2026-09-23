@@ -108,3 +108,56 @@ class AtomicNoteService:
             "source_summary": "topics"
         }
         return mapping.get(note_type, "topics")
+
+    def find_matching_note(self, query: str, domain: Optional[str] = None) -> Optional[Path]:
+        query_slug = self._slugify(query)
+        if not query_slug:
+            return None
+        search_dirs = []
+        if domain and domain != "unclassified":
+            search_dirs.append(self.root_dir / "wiki" / domain)
+        else:
+            wiki_dir = self.root_dir / "wiki"
+            if wiki_dir.exists():
+                search_dirs = [d for d in wiki_dir.iterdir() if d.is_dir()]
+
+        for d in search_dirs:
+            for md_file in d.glob("**/*.md"):
+                if md_file.name == "log.md":
+                    continue
+                file_slug = md_file.stem.lower()
+                if query_slug == file_slug or (len(query_slug) > 3 and (query_slug in file_slug or file_slug in query_slug)):
+                    return md_file
+        return None
+
+    def append_to_note(self, target_path: Path, content: str) -> Path:
+        if not target_path.exists():
+            return target_path
+
+        post = frontmatter.load(target_path)
+
+        if post.metadata.get("ai_edit") is False:
+            print(f"Skipping AI update for user-protected note: {target_path}")
+            return target_path
+
+        post.metadata["updated"] = date.today().isoformat()
+        today_str = date.today().isoformat()
+        append_block = f"\n\n### Observation ({today_str})\n{content.strip()}\n"
+
+        body = post.content
+        if "## Provenance & Sources" in body:
+            parts = body.split("## Provenance & Sources", 1)
+            new_body = parts[0].rstrip() + append_block + "\n## Provenance & Sources" + parts[1]
+        elif "## Related Notes" in body:
+            parts = body.split("## Related Notes", 1)
+            new_body = parts[0].rstrip() + append_block + "\n## Related Notes" + parts[1]
+        else:
+            new_body = body.rstrip() + append_block
+
+        post.content = new_body
+
+        with open(target_path, "w", encoding="utf-8") as f:
+            frontmatter.dump(post, f)
+
+        return target_path
+

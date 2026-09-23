@@ -32,12 +32,15 @@ async def ingest_file(
 
 @router.post("/ingest/text")
 async def ingest_text(
-    title: str = Form(...),
     content: str = Form(...),
-    domain: str = Form("research")
+    title: Optional[str] = Form(None),
+    domain: Optional[str] = Form("research"),
+    direct: bool = Form(True),
+    append: bool = Form(False)
 ):
-    result = pipeline.process_text(content, title=title, domain=domain)
+    result = pipeline.smart_ingest(content, title=title, domain=domain, direct=direct, append=append)
     return result
+
 
 
 @router.post("/query")

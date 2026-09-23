@@ -3,12 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Wiki — Drag & Drop Ingestion</title>
+    <title>LLM Wiki — Knowledge Ingestion Portal</title>
     <title>LLM Wiki Ingestion Interface — Knowledge Portal</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 2rem; }
+        .container { max-width: 700px; margin: 0 auto; background: #1e293b; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         .container { max-width: 750px; margin: 0 auto; background: #1e293b; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         h1 { margin-top: 0; color: #38bdf8; font-size: 1.75rem; text-align: center; }
+        .dropzone { border: 2px dashed #38bdf8; border-radius: 8px; padding: 3rem 1.5rem; text-align: center; background: #0f172a; cursor: pointer; transition: 0.2s; margin-bottom: 1.5rem; }
         .tabs { display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 2px solid #334155; }
+        .tab { padding: 0.75rem 1.25rem; cursor: pointer; color: #94a3b8; font-weight: 600; border-bottom: 3px solid transparent; }
         .tab { padding: 0.75rem 1.25rem; cursor: pointer; color: #94a3b8; font-weight: 600; border-bottom: 3px solid transparent; user-select: none; }
         .tab.active { color: #38bdf8; border-color: #38bdf8; }
         .tab-content { display: none; }
@@ -17,22 +22,49 @@
         .dropzone:hover { background: #1e293b; border-color: #818cf8; }
         .form-group { margin-bottom: 1.25rem; }
         label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: #cbd5e1; }
+        select, button { width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 1rem; }
+        button { background: #4f46e5; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
         input[type="text"], textarea, select, button { width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 1rem; box-sizing: border-box; }
         textarea { height: 160px; font-family: monospace; resize: vertical; }
         button { background: #4f46e5; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 0.5rem; }
         button:hover { background: #6366f1; }
+        #status { margin-top: 1.5rem; padding: 1rem; border-radius: 6px; display: none; background: #065f46; color: #a7f3d0; }
         #status { margin-top: 1.5rem; padding: 1rem; border-radius: 6px; display: none; background: #065f46; color: #a7f3d0; white-space: pre-wrap; font-family: monospace; }
     </style>
 </head>
 <body>
     <div class="container">
+        <h1>🧠 LLM Wiki Ingestion Interface</h1>
+        <form id="uploadForm">
+            <div class="dropzone" id="dropzone">
+                <p>📂 Drag & Drop Files Here or Click to Select</p>
+                <input type="file" id="fileInput" style="display:none">
+                <span id="fileName" style="color: #94a3b8;">No file selected</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="domainSelect">Target Domain</label>
+                <select id="domainSelect">
+                    <option value="unclassified">Auto classify</option>
+                    <option value="personal">Personal</option>
+                    <option value="research">Research & Technology</option>
+                    <option value="business">Business & Operations</option>
+                    <option value="competitive">Competitive Analysis</option>
+                </select>
+            </div>
         <h1>🧠 LLM Wiki Knowledge Portal</h1>
         
         <div class="tabs">
+            <div class="tab active" onclick="switchTab('fileTab')">📁 Ingest File</div>
+            <div class="tab" onclick="switchTab('textTab')">📝 Ingest Note / Text</div>
+            <div class="tab active" id="tab1Header" onclick="switchTab('fileTab')">📁 Ingest File</div>
+            <div class="tab" id="tab2Header" onclick="switchTab('textTab')">📝 Ingest Note / Text</div>
             <div class="tab active" id="tabHeaderFile" onclick="switchTab('fileTab')">📁 Ingest File</div>
             <div class="tab" id="tabHeaderText" onclick="switchTab('textTab')">📝 Ingest Note / Text</div>
         </div>
 
+            <button type="submit">PROCESS INGESTION</button>
+        </form>
         <!-- TAB 1: FILE INGESTION -->
         <div id="fileTab" class="tab-content active">
             <form id="uploadForm">
@@ -89,29 +121,40 @@
 
     <script>
         function switchTab(tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById('tabHeaderFile').classList.remove('active');
             document.getElementById('tabHeaderText').classList.remove('active');
             document.getElementById('fileTab').classList.remove('active');
             document.getElementById('textTab').classList.remove('active');
 
             if (tabId === 'fileTab') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('tab1Header').classList.add('active');
                 document.getElementById('tabHeaderFile').classList.add('active');
                 document.getElementById('fileTab').classList.add('active');
             } else {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('tab2Header').classList.add('active');
                 document.getElementById('tabHeaderText').classList.add('active');
                 document.getElementById('textTab').classList.add('active');
             }
+            document.getElementById(tabId).classList.add('active');
         }
 
         const dropzone = document.getElementById('dropzone');
         const fileInput = document.getElementById('fileInput');
         const fileName = document.getElementById('fileName');
+        const form = document.getElementById('uploadForm');
         const uploadForm = document.getElementById('uploadForm');
         const textForm = document.getElementById('textForm');
         const status = document.getElementById('status');
 
         dropzone.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                fileName.textContent = fileInput.files[0].name;
+            }
             if (fileInput.files.length > 0) fileName.textContent = fileInput.files[0].name;
         });
 
@@ -126,20 +169,27 @@
             }
         });
 
+        form.addEventListener('submit', async (e) => {
         uploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!fileInput.files.length) { alert('Please select a file'); return; }
 
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
+            formData.append('domain', document.getElementById('domainSelect').value);
             formData.append('domain', document.getElementById('domainSelectFile').value);
+
+            status.style.display = 'block';
+            status.textContent = 'PROCESSING INGESTION...';
 
             showStatus('PROCESSING FILE INGESTION...');
             try {
                 const res = await fetch('/api/v1/ingest/file', { method: 'POST', body: formData });
                 const data = await res.json();
+                status.textContent = 'COMPLETED: ' + JSON.stringify(data, null, 2);
                 showStatus('COMPLETED FILE INGESTION:\n' + JSON.stringify(data, null, 2));
             } catch (err) {
+                status.textContent = 'ERROR: ' + err.message;
                 showStatus('ERROR: ' + err.message);
             }
         });
@@ -168,3 +218,4 @@
     </script>
 </body>
 </html>
+
