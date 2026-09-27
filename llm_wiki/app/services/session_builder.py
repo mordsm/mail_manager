@@ -1,74 +1,92 @@
 import uuid
 from typing import List, Dict, Any, Optional
 from datetime import datetime
-from app.schemas.memory import CaptureEvent, SessionRecord
-from app.services.classifier import RelevanceClassifier
+from app.schemas.memory import SessionRecord
 
 class SessionBuilder:
     """
-    Groups raw capture events into coherent temporal Sessions (Research Sessions, Dev Sessions).
+    Session Builder: Aggregates raw, transient capture events into structured research/development/browsing sessions.
+    Groups events by window (e.g. 30 minutes) and domain, generating high-level session summaries.
     """
-    def __init__(self, classifier: Optional[RelevanceClassifier] = None):
-        self.classifier = classifier or RelevanceClassifier()
+    def __init__(self, time_window_minutes: int = 30):
+        self.time_window_minutes = time_window_minutes
 
-    def build_sessions_from_events(self, events: List[Dict[str, Any]]) -> List[SessionRecord]:
+    def build_sessions(self, events: List[Dict[str, Any]]) -> List[SessionRecord]:
         if not events:
             return []
 
+        # Sort events by timestamp
+        sorted_events = sorted(events, key=lambda e: e.get("timestamp", ""))
+        grouped = self.group_events_by_window(sorted_events, window_minutes=self.time_window_minutes)
+
         sessions = []
-        current_cluster = []
-
-        for evt in events:
-            capture_obj = CaptureEvent(
-                event_id=evt["id"],
-                source_type=evt["source_type"],
-                domain=evt["domain"],
-                title=evt["title"],
-                url_or_path=evt.get("url_or_path"),
-                content=evt["content"],
-                timestamp=evt["timestamp"],
-                time_spent_seconds=evt.get("time_spent_seconds", 0),
-                project_hint=evt.get("project_hint")
-            )
-
-            score, domain = self.classifier.score_event(capture_obj)
-            if score < 30.0:
+        for group in grouped:
+            if not group:
                 continue
 
-            capture_obj.domain = domain
-            current_cluster.append((capture_obj, score))
+            session_id = f"sess_{uuid.uuid4().hex[:12]}"
+            first_event = group[0]
+            last_event = group[-1]
 
-        if not current_cluster:
+            domain = first_event.get("domain", "research")
+            source_type = first_event.get("source_type", "browser")
+            project = first_event.get("project_hint")
+
+            if source_type in ["dev", "terminal"]:
+                sess_type = "development"
+            elif source_type == "llm_chat":
+                sess_type = "llm_dialogue"
+            else:
+                sess_type = "research"
+
+            titles = [e.get("title", "") for e in group if e.get("title")]
+            session_title = f"{sess_type.replace('_', ' ').title()} Session: {titles[0] if titles else 'Captured Activity'}"
+
+            sources = list(set([e.get("url_or_path") for e in group if e.get("url_or_path")]))
+            contents_summary = " ".join([e.get("content", "")[:100] for e in group])
+
+            record = SessionRecord(
+                session_id=session_id,
+                session_type=sess_type,
+                title=session_title,
+                domain=domain,
+                project=project,
+                start_time=first_event.get("timestamp", datetime.now().isoformat()),
+                end_time=last_event.get("timestamp", datetime.now().isoformat()),
+                importance_score=80.0 if project else 60.0,
+                events_count=len(group),
+                sources_reviewed=sources,
+                summary=f"Synthesized session with {len(group)} events. Highlights: {contents_summary[:300]}...",
+                decisions=[],
+                key_findings=[f"Reviewed source: {s}" for s in sources[:5]],
+                open_questions=[]
+            )
+            sessions.append(record)
+
+        return sessions
+
+    def group_events_by_window(self, events: List[Dict[str, Any]], window_minutes: int = 30) -> List[List[Dict[str, Any]]]:
+        if not events:
             return []
 
-        # Group cluster into single session
-        start_time = current_cluster[0][0].timestamp
-        end_time = current_cluster[-1][0].timestamp
-        avg_score = sum(s for _, s in current_cluster) / len(current_cluster)
-        dominant_domain = current_cluster[0][0].domain
-        project = current_cluster[0][0].project_hint
+        groups = []
+        current_group = [events[0]]
 
-        titles = [e.title for e, _ in current_cluster]
-        sources = [e.url_or_path for e, _ in current_cluster if e.url_or_path]
+        for e in events[1:]:
+            # Parse timestamp if available
+            try:
+                prev_ts = datetime.fromisoformat(current_group[-1].get("timestamp", ""))
+                curr_ts = datetime.fromisoformat(e.get("timestamp", ""))
+                diff_minutes = (curr_ts - prev_ts).total_seconds() / 60.0
+                if diff_minutes <= window_minutes:
+                    current_group.append(e)
+                else:
+                    groups.append(current_group)
+                    current_group = [e]
+            except Exception:
+                current_group.append(e)
 
-        session_type = "development" if dominant_domain == "development" else "research"
-        session_title = f"{session_type.capitalize()} Session: {titles[0]}"
+        if current_group:
+            groups.append(current_group)
 
-        session = SessionRecord(
-            session_id=f"sess_{uuid.uuid4().hex[:12]}",
-            session_type=session_type,
-            title=session_title,
-            domain=dominant_domain,
-            project=project,
-            start_time=start_time,
-            end_time=end_time,
-            importance_score=avg_score,
-            events_count=len(current_cluster),
-            sources_reviewed=sources,
-            summary=f"Activity session covering: {', '.join(titles[:5])}",
-            decisions=[],
-            key_findings=[e.content[:200] for e, _ in current_cluster[:3]],
-            open_questions=[]
-        )
-
-        return [session]
+        return groups

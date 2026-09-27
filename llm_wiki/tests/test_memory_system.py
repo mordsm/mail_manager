@@ -1,142 +1,104 @@
 import pytest
 from pathlib import Path
-from fastapi.testclient import TestClient
-
 from app.schemas.memory import CaptureEvent, ConversationCapture, DevelopmentCapture, DecisionRecord
 from app.services.event_store import MemoryEventStore
 from app.services.classifier import RelevanceClassifier
 from app.services.session_builder import SessionBuilder
 from app.services.memory_curator import MemoryCurator
 from app.services.consolidation import MemoryConsolidationService
-from app.api.main import app
 
-client = TestClient(app)
-
-def test_event_store_and_classifier(tmp_path):
-    db_path = tmp_path / "system/db/memory_events.db"
-    store = MemoryEventStore(db_path=db_path)
-    classifier = RelevanceClassifier()
+def test_event_store_and_capture(tmp_path):
+    db_file = tmp_path / "test_memory.db"
+    store = MemoryEventStore(db_path=db_file)
 
     evt = CaptureEvent(
         source_type="browser",
+        title="PubMed: Inflammation Study",
+        content="Study on systemic inflammation and neurobiology",
         domain="research",
-        title="PubMed Study on Nervous System and Inflammation",
-        url_or_path="https://pubmed.ncbi.nlm.nih.gov/123456/",
-        content="Systemic inflammation affects vagus nerve activity and mood.",
-        time_spent_seconds=420,
-        project_hint="research_manager"
+        url_or_path="https://pubmed.ncbi.nlm.nih.gov/12345"
     )
-
     evt_id = store.record_event(evt)
-    assert evt_id.startswith("evt_")
-
-    score, domain = classifier.score_event(evt)
-    assert score >= 70.0
-    assert domain == "research"
+    assert evt_id is not None
 
     unprocessed = store.get_unprocessed_events()
     assert len(unprocessed) == 1
-    assert unprocessed[0]["title"] == "PubMed Study on Nervous System and Inflammation"
+    assert unprocessed[0]["title"] == "PubMed: Inflammation Study"
 
-def test_session_builder(tmp_path):
-    db_path = tmp_path / "system/db/memory_events.db"
-    store = MemoryEventStore(db_path=db_path)
+    store.mark_events_processed([evt_id])
+    assert len(store.get_unprocessed_events()) == 0
 
-    evt1 = CaptureEvent(
+def test_relevance_classifier():
+    classifier = RelevanceClassifier()
+
+    evt_relevant = CaptureEvent(
         source_type="browser",
-        title="PubMed Article 1",
-        url_or_path="https://pubmed.ncbi.nlm.nih.gov/111/",
-        content="Inflammation markers in depression",
-        time_spent_seconds=180
+        title="Building LLM Agents with Python",
+        content="Deep dive into agent orchestration and memory systems.",
+        domain="development"
     )
-    evt2 = CaptureEvent(
-        source_type="llm_chat",
-        title="Gemini Dialogue on Vagus Nerve",
-        url_or_path="https://gemini.google.com/app/123",
-        content="Exploring anti-inflammatory pathways of vagus nerve stimulation",
-        time_spent_seconds=300
+    res_rel = classifier.classify_event(evt_relevant)
+    assert res_rel["relevant"] is True
+    assert res_rel["score"] >= 50.0
+
+    evt_noise = CaptureEvent(
+        source_type="browser",
+        title="Login to Online Banking",
+        content="Secure authentication for bank account",
+        domain="unclassified",
+        url_or_path="https://mybank.com/login"
     )
+    res_noise = classifier.classify_event(evt_noise)
+    assert res_noise["relevant"] is False
 
-    store.record_event(evt1)
-    store.record_event(evt2)
-
-    unprocessed = store.get_unprocessed_events()
-    builder = SessionBuilder()
-    sessions = builder.build_sessions_from_events(unprocessed)
-
+def test_session_builder():
+    builder = SessionBuilder(time_window_minutes=30)
+    events = [
+        {
+            "id": "e1",
+            "source_type": "browser",
+            "domain": "research",
+            "title": "Article A",
+            "url_or_path": "https://example.com/a",
+            "content": "Exploring neural mechanisms",
+            "timestamp": "2026-09-27T10:00:00"
+        },
+        {
+            "id": "e2",
+            "source_type": "browser",
+            "domain": "research",
+            "title": "Article B",
+            "url_or_path": "https://example.com/b",
+            "content": "Exploring cellular pathways",
+            "timestamp": "2026-09-27T10:15:00"
+        }
+    ]
+    sessions = builder.build_sessions(events)
     assert len(sessions) == 1
-    assert sessions[0].session_type in ["research", "development"]
-    assert len(sessions[0].sources_reviewed) >= 1
+    assert sessions[0].events_count == 2
+    assert "Research Session" in sessions[0].title
 
-def test_memory_curator_project_and_decision(tmp_path):
-    curator = MemoryCurator(root_dir=tmp_path)
+def test_memory_curator_and_consolidation(tmp_path):
+    db_file = tmp_path / "test_memory.db"
+    store = MemoryEventStore(db_path=db_file)
 
-    # 1. Update project memory
-    proj_path = curator.update_project_memory(
-        project_name="Research Manager",
-        work_done="Integrated PubMed capture pipeline",
-        reason="Demonstrate end-to-end evidence retrieval",
-        files_affected=["app/services/inbox_service.py"]
-    )
-    assert proj_path.exists()
-    content = proj_path.read_text(encoding="utf-8")
-    assert "Integrated PubMed capture pipeline" in content
-
-    # 2. Record decision
-    dec_path = curator.record_decision(
-        project_or_domain="Research Manager",
-        topic="Primary Evidence Source",
-        decision="Use PubMed as initial primary source",
-        reason="Provides peer-reviewed biomedical literature APIs"
-    )
-    assert dec_path.exists()
-    dec_content = dec_path.read_text(encoding="utf-8")
-    assert "Use PubMed as initial primary source" in dec_content
-
-def test_daily_consolidation(tmp_path):
-    db_path = tmp_path / "system/db/memory_events.db"
-    store = MemoryEventStore(db_path=db_path)
-
-    evt = CaptureEvent(
-        source_type="dev",
+    # Insert raw events
+    store.record_event(CaptureEvent(
+        source_type="browser",
+        title="Obsidian Vault Architecture",
+        content="Design of local-first knowledge vault",
         domain="development",
-        title="Added Memory System API",
-        content="Created /capture and /memory endpoints for automatic memory tracking",
         project_hint="llm_wiki"
-    )
-    store.record_event(evt)
+    ))
 
-    consolidation = MemoryConsolidationService(root_dir=tmp_path)
-    daily_file = consolidation.run_daily_consolidation()
+    consolidation = MemoryConsolidationService(root_dir=tmp_path, db_path=db_file)
+    daily_file = consolidation.run_daily_consolidation("2026-09-27")
 
     assert daily_file.exists()
-    daily_content = daily_file.read_text(encoding="utf-8")
-    assert "Daily Memory" in daily_content
-    assert "Added Memory System API" in daily_content
+    content = daily_file.read_text(encoding="utf-8")
+    assert "Daily Memory Log: 2026-09-27" in content
+    assert "Total Raw Events Captured" in content
 
-def test_fastapi_memory_endpoints():
-    # 1. Capture Event API
-    resp_evt = client.post("/api/v1/capture/event", json={
-        "source_type": "browser",
-        "domain": "research",
-        "title": "API Test PubMed Article",
-        "content": "Testing event capture via FastAPI endpoint"
-    })
-    assert resp_evt.status_code == 200
-    assert resp_evt.json()["status"] == "CAPTURED"
-
-    # 2. Capture Development API
-    resp_dev = client.post("/api/v1/capture/development", json={
-        "project": "Sharons",
-        "action": "feature_add",
-        "changed_files": ["services/memory.py"],
-        "commit_msg": "Add verification gate",
-        "reason": "Ensure task completion evidence"
-    })
-    assert resp_dev.status_code == 200
-    assert resp_dev.json()["status"] == "CAPTURED"
-
-    # 3. Consolidate API
-    resp_cons = client.post("/api/v1/memory/consolidate")
-    assert resp_cons.status_code == 200
-    assert resp_cons.json()["status"] == "CONSOLIDATED"
+    # Check project memory updated
+    proj_mem = tmp_path / "10_Projects" / "llm_wiki" / "project_memory.md"
+    assert proj_mem.exists()

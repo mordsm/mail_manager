@@ -129,51 +129,6 @@ def watch():
     watcher = InboxWatcherService()
     watcher.start()
 
-@app.command("capture")
-def capture_cmd(
-    title: str = typer.Argument(..., help="Event title"),
-    content: str = typer.Argument(..., help="Captured content/text"),
-    source: str = typer.Option("manual", "--source", "-s", help="Source type (browser, llm_chat, dev, manual)"),
-    domain: str = typer.Option("unclassified", "--domain", "-d", help="Domain"),
-    project: Optional[str] = typer.Option(None, "--project", "-p", help="Project hint")
-):
-    """
-    Captures an activity event into the transient event store for automatic memory processing.
-    """
-    from app.schemas.memory import CaptureEvent
-    from app.services.event_store import MemoryEventStore
-
-    store = MemoryEventStore()
-    evt = CaptureEvent(source_type=source, domain=domain, title=title, content=content, project_hint=project)
-    evt_id = store.record_event(evt)
-    typer.echo(f"Captured Event Recorded: {evt_id}")
-
-@app.command("decision")
-def decision_cmd(
-    project_or_domain: str = typer.Argument(..., help="Project or domain name"),
-    topic: str = typer.Argument(..., help="Decision topic"),
-    decision: str = typer.Argument(..., help="Decision made"),
-    reason: str = typer.Argument(..., help="Rationale/reason for decision")
-):
-    """
-    Records an architectural or project decision into 40_Decisions/ and updates Project Memory.
-    """
-    from app.services.memory_curator import MemoryCurator
-    curator = MemoryCurator()
-    path = curator.record_decision(project_or_domain=project_or_domain, topic=topic, decision=decision, reason=reason)
-    typer.echo(f"Decision Recorded at: {path}")
-
-@app.command("consolidate")
-def consolidate_cmd():
-    """
-    Runs Daily Consolidation, updating daily memory indexes, project states, and domain logs.
-    """
-    from app.services.consolidation import MemoryConsolidationService
-    svc = MemoryConsolidationService()
-    daily_file = svc.run_daily_consolidation()
-    typer.echo(f"Daily Memory Consolidation Complete: {daily_file}")
-
-
 @app.callback(invoke_without_command=True)
 def main_callback(
     ctx: typer.Context,

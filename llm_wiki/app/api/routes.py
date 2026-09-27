@@ -8,11 +8,18 @@ import shutil
 from app.services.pipeline import LLMWikiPipeline
 from app.services.auditor import WikiAuditorService
 from app.domain.promotion import KnowledgePromotionService
+from app.schemas.memory import CaptureEvent, ConversationCapture, DevelopmentCapture
+from app.services.event_store import MemoryEventStore
+from app.services.memory_curator import MemoryCurator
+from app.services.consolidation import MemoryConsolidationService
 
 router = APIRouter(prefix="/api/v1")
 pipeline = LLMWikiPipeline()
 auditor = WikiAuditorService()
 promoter = KnowledgePromotionService()
+event_store = MemoryEventStore()
+curator = MemoryCurator()
+consolidation_service = MemoryConsolidationService()
 
 @router.post("/ingest/file")
 async def ingest_file(
@@ -41,8 +48,6 @@ async def ingest_text(
     result = pipeline.smart_ingest(content, title=title, domain=domain, direct=direct, append=append)
     return result
 
-
-
 @router.post("/query")
 async def query_wiki(
     query: str = Form(...),
@@ -68,17 +73,7 @@ async def promote_knowledge(
     path = promoter.promote(concept_title, category, source_domain, targets, content, sources=[])
     return {"status": "PROMOTED", "path": str(path)}
 
-
 # --- AUTOMATIC MEMORY SYSTEM ENDPOINTS ---
-
-from app.schemas.memory import CaptureEvent, ConversationCapture, DevelopmentCapture
-from app.services.event_store import MemoryEventStore
-from app.services.memory_curator import MemoryCurator
-from app.services.consolidation import MemoryConsolidationService
-
-event_store = MemoryEventStore()
-curator = MemoryCurator()
-consolidation_service = MemoryConsolidationService()
 
 @router.post("/capture/event")
 async def capture_event(event: CaptureEvent):
@@ -128,4 +123,26 @@ async def get_decisions(project: Optional[str] = None):
     decisions = event_store.get_recent_decisions(project_or_domain=project)
     return {"decisions": decisions}
 
+@router.get("/memory/overview")
+async def get_memory_overview():
+    unprocessed = event_store.get_unprocessed_events()
+    decisions = event_store.get_recent_decisions(limit=10)
 
+    proj_dir = Path("10_Projects")
+    projects = []
+    if proj_dir.exists():
+        for p in proj_dir.iterdir():
+            if p.is_dir():
+                mem_file = p / "project_memory.md"
+                projects.append({
+                    "name": p.name.replace("_", " ").title(),
+                    "has_memory": mem_file.exists(),
+                    "path": str(mem_file) if mem_file.exists() else None
+                })
+
+    return {
+        "recent_captures_count": len(unprocessed),
+        "recent_captures": unprocessed[:10],
+        "recent_decisions": decisions,
+        "projects": projects
+    }

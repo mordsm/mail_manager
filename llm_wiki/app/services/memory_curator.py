@@ -2,8 +2,6 @@ import frontmatter
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Union
 from datetime import date, datetime
-import json
-import frontmatter
 
 from app.schemas.memory import ProjectMemoryState, DecisionRecord, SessionRecord, CaptureEvent
 from app.services.atomic_note import AtomicNoteService
@@ -33,9 +31,6 @@ class MemoryCurator:
         files_affected: Optional[List[str]] = None,
         next_actions: Optional[List[str]] = None
     ) -> Path:
-        """
-        Updates 10_Projects/{project}/project_memory.md with recent work, decisions, and current state.
-        """
         project_slug = project_name.lower().replace(" ", "_").replace("-", "_")
         proj_dir = self.root_dir / "10_Projects" / project_slug
         proj_dir.mkdir(parents=True, exist_ok=True)
@@ -95,9 +90,6 @@ class MemoryCurator:
         previous_state: Optional[str] = None,
         open_questions: Optional[List[str]] = None
     ) -> Path:
-        """
-        Records architectural or project decisions in 40_Decisions/ and updates project memory.
-        """
         dec_dir = self.root_dir / "40_Decisions"
         dec_dir.mkdir(parents=True, exist_ok=True)
 
@@ -128,7 +120,6 @@ class MemoryCurator:
         with open(dec_file, "w", encoding="utf-8") as f:
             frontmatter.dump(post, f)
 
-        # Also reflect in Project Memory if applicable
         self.update_project_memory(
             project_name=project_or_domain,
             work_done=f"Decision recorded: {topic} -> {decision}",
@@ -138,10 +129,9 @@ class MemoryCurator:
         return dec_file
 
     def record_research_session(self, session: SessionRecord) -> Path:
-        """
-        Synthesizes a multi-source Research Session into 20_Research/{topic}/overview.md.
-        """
-        topic_slug = session.title.lower().replace("research session:", "").strip().replace(" ", "_")
+        clean_title = session.title.lower().replace(":", "").replace("/", "_").replace("\\", "_")
+        topic_slug = clean_title.replace("research session", "").replace("development session", "").replace("llm dialogue session", "").strip().replace(" ", "_")
+        topic_slug = topic_slug.strip("_") or "session"
         res_dir = self.root_dir / "20_Research" / topic_slug
         res_dir.mkdir(parents=True, exist_ok=True)
 
@@ -161,7 +151,6 @@ class MemoryCurator:
 
         overview_file.write_text(content, encoding="utf-8")
 
-        # Create or update atomic wiki note
         self.atomic_service.create_or_update_note(
             title=session.title,
             domain=session.domain if session.domain in ["personal", "research", "business", "competitive", "development"] else "research",

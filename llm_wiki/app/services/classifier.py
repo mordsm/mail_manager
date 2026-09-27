@@ -1,68 +1,70 @@
 import re
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Union
 from app.schemas.memory import CaptureEvent
-
-NOISE_DOMAINS = {"facebook.com", "instagram.com", "twitter.com", "x.com", "bank", "shopping", "amazon.com", "youtube.com/shorts"}
-HIGH_VALUE_DOMAINS = {"pubmed.ncbi.nlm.nih.gov", "scholar.google.com", "arxiv.org", "github.com", "chatgpt.com", "gemini.google.com", "claude.ai", "perplexity.ai", "notebooklm.google.com"}
 
 class RelevanceClassifier:
     """
-    Classifies capture activity into domains (personal, research, business, competitive, development)
-    and scores importance from 0 to 100.
+    Relevance Classifier: Filters out noise (banking, general news, social media, shopping)
+    and scores incoming events (0-100) based on target intellectual domains:
+    AI, Agents, Software Architecture, Programming, Obsidian, Research, Health, Psychology, Body-Mind.
     """
-    def score_event(self, event: CaptureEvent) -> Tuple[float, str]:
-        url_or_path = (event.url_or_path or "").lower()
-        title = event.title.lower()
-        content = event.content.lower()
+    HIGH_RELEVANCE_KEYWORDS = [
+        "ai", "agent", "llm", "claude", "chatgpt", "gemini", "perplexity", "notebooklm",
+        "obsidian", "wiki", "python", "fastapi", "pytest", "git", "github", "architecture",
+        "research", "pubmed", "scholar", "health", "psychology", "body-mind", "inflammation",
+        "exercise", "sharons", "research_manager", "mental_trainer", "development", "code"
+    ]
 
-        # Check noise exclusions
-        if any(nd in url_or_path for nd in NOISE_DOMAINS):
-            return 10.0, "noise"
+    NOISE_KEYWORDS = [
+        "facebook", "instagram", "twitter", "x.com", "tiktok", "youtube.com/feed",
+        "bank", "banking", "paypal", "checkout", "amazon.com/cart", "ebay",
+        "weather", "sports", "news.google"
+    ]
 
-        score = 50.0
+    def classify_event(self, event: Union[CaptureEvent, Dict[str, Any]]) -> Dict[str, Any]:
+        if isinstance(event, dict):
+            title = (event.get("title") or "").lower()
+            content = (event.get("content") or "").lower()
+            url = (event.get("url_or_path") or "").lower()
+            domain = event.get("domain") or "unclassified"
+        else:
+            title = event.title.lower()
+            content = event.content.lower()
+            url = (event.url_or_path or "").lower()
+            domain = event.domain
 
-        # High-value source boost
-        if any(hvd in url_or_path for hvd in HIGH_VALUE_DOMAINS):
-            score += 20.0
+        text = f"{title} {content} {url}"
 
-        # Duration boost
-        if event.time_spent_seconds > 300:
-            score += 15.0
-        elif event.time_spent_seconds > 60:
-            score += 5.0
+        # Check noise
+        for noise in self.NOISE_KEYWORDS:
+            if noise in text:
+                return {
+                    "relevant": False,
+                    "score": 10.0,
+                    "domain": "noise",
+                    "reason": f"Matched noise keyword '{noise}'"
+                }
 
-        # Keywords / Content triggers
-        if any(kw in content or kw in title for kw in ["decided", "decision", "architecture", "bug fix", "refactor", "hypothesis", "claim"]):
-            score += 20.0
+        # Calculate relevance score based on keyword frequency and domain hints
+        score = 40.0 # Base score for unclassified capture
+        matched = []
+        for kw in self.HIGH_RELEVANCE_KEYWORDS:
+            if kw in text:
+                score += 15.0
+                matched.append(kw)
 
-        if any(kw in content or kw in title for kw in ["pubmed", "doi", "clinical", "inflammation", "agents", "pipeline"]):
-            score += 15.0
+        score = min(score, 100.0)
+        is_rel = score >= 50.0 or domain in ["research", "development", "personal", "business", "competitive"]
 
-        score = min(100.0, max(0.0, score))
+        inferred_domain = domain if domain != "unclassified" else ("research" if any(k in matched for k in ["pubmed", "scholar", "health", "ai"]) else "development")
 
-        # Domain classification
-        classified_domain = self.classify_domain(event)
-        return score, classified_domain
+        return {
+            "relevant": is_rel,
+            "score": score,
+            "domain": inferred_domain,
+            "reason": f"Matched keywords: {matched}" if matched else "Default evaluation"
+        }
 
-    def classify_domain(self, event: CaptureEvent) -> str:
-        if event.domain and event.domain not in ["unclassified", "auto"]:
-            return event.domain
-
-        text = f"{event.title} {event.content} {event.project_hint or ''}".lower()
-
-        if any(kw in text for kw in ["git", "code", "bug", "refactor", "fastapi", "python", "pytest", "endpoint", "architecture", "dev"]):
-            return "development"
-
-        if any(kw in text for kw in ["pubmed", "paper", "hypothesis", "claim", "study", "research", "agent", "llm", "ai"]):
-            return "research"
-
-        if any(kw in text for kw in ["business", "strategy", "client", "market", "pricing", "revenue", "finance"]):
-            return "business"
-
-        if any(kw in text for kw in ["competitor", "pricing model", "benchmark", "feature gap"]):
-            return "competitive"
-
-        if any(kw in text for kw in ["health", "sleep", "nutrition", "exercise", "habit", "mind", "mood"]):
-            return "personal"
-
-        return "research"
+    def is_relevant(self, event: Union[CaptureEvent, Dict[str, Any]]) -> bool:
+        res = self.classify_event(event)
+        return res["relevant"]

@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "LLM Wiki Auto-Capture Collector",
+  "version": "1.0.0",
+  "description": "Zero-click web research and LLM dialogue capture into local Obsidian LLM Wiki Vault.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://localhost:8050/*",
+    "http://127.0.0.1:8050/*",
+    "https://chatgpt.com/*",
+    "https://gemini.google.com/*",
+    "https://claude.ai/*",
+    "https://perplexity.ai/*",
+    "https://notebooklm.google.com/*",
+    "https://pubmed.ncbi.nlm.nih.gov/*",
+    "https://scholar.google.com/*",
+    "https://youtube.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  }
+}

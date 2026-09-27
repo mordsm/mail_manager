@@ -1,61 +1,101 @@
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Union
-from datetime import date
+from typing import Optional, Union, Dict, Any, List
+from datetime import date, datetime
+
 from app.services.event_store import MemoryEventStore
+from app.services.classifier import RelevanceClassifier
+from app.services.session_builder import SessionBuilder
 from app.services.memory_curator import MemoryCurator
-from app.services.moc_service import MOCService
 from app.services.git_service import GitService
 
 class MemoryConsolidationService:
     """
-    Performs End-of-Day and End-of-Week Consolidation across captured events, project memories,
-    decisions, and wiki domain logs.
+    Memory Consolidation Service: Scheduled / on-demand daemon service that processes
+    transient raw events from MemoryEventStore, classifies relevance, clusters them into sessions via SessionBuilder,
+    updates project and decision memories via MemoryCurator, and appends a consolidated daily memory note in wiki/daily/YYYY-MM-DD.md.
     """
-    def __init__(self, root_dir: Union[str, Path] = "."):
+    def __init__(
+        self,
+        root_dir: Union[str, Path] = ".",
+        db_path: Union[str, Path] = "system/db/memory_events.db"
+    ):
         self.root_dir = Path(root_dir)
-        self.event_store = MemoryEventStore(db_path=self.root_dir / "system/db/memory_events.db")
+        self.event_store = MemoryEventStore(db_path=db_path)
+        self.classifier = RelevanceClassifier()
+        self.session_builder = SessionBuilder()
         self.curator = MemoryCurator(root_dir=self.root_dir)
-        self.moc_service = MOCService(root_dir=self.root_dir)
         self.git_service = GitService(root_dir=self.root_dir)
 
-    def run_daily_consolidation(self) -> Path:
-        today_str = date.today().isoformat()
-        daily_file = self.root_dir / "wiki" / "daily" / f"{today_str}.md"
-        daily_file.parent.mkdir(parents=True, exist_ok=True)
+    def run_daily_consolidation(self, date_str: Optional[str] = None) -> Path:
+        target_date = date_str or date.today().isoformat()
+        daily_dir = self.root_dir / "wiki" / "daily"
+        daily_dir.mkdir(parents=True, exist_ok=True)
 
-        unprocessed = self.event_store.get_unprocessed_events()
-        decisions = self.event_store.get_recent_decisions(limit=5)
+        daily_file = daily_dir / f"{target_date}.md"
 
-        proj_updates = []
-        research_updates = []
+        raw_events = self.event_store.get_unprocessed_events()
+        if not raw_events:
+            if not daily_file.exists():
+                daily_file.write_text(
+                    f"# Daily Memory Log: {target_date}\n\n"
+                    f"**Status**: Consolidated\n\n"
+                    f"## Summary\nNo new events recorded for consolidation.\n",
+                    encoding="utf-8"
+                )
+            return daily_file
 
-        for evt in unprocessed:
-            if evt["domain"] == "development":
-                proj_updates.append(f"- [{evt['source_type']}] **{evt['title']}**: {evt['content'][:150]}")
-            else:
-                research_updates.append(f"- [{evt['domain']}] **{evt['title']}**: {evt['content'][:150]}")
+        # Filter relevant events
+        relevant_events = [e for e in raw_events if self.classifier.is_relevant(e)]
+        processed_ids = [e["id"] for e in raw_events]
 
-        dec_str = "\n".join([f"- **{d['topic']}**: {d['decision']} (Reason: {d['reason']})" for d in decisions]) or "- No major decisions recorded today."
-        proj_str = "\n".join(proj_updates[:10]) or "- Continuous project development."
-        res_str = "\n".join(research_updates[:10]) or "- Research & reading sessions processed."
+        # Build sessions
+        sessions = self.session_builder.build_sessions(relevant_events)
+
+        # Record sessions via MemoryCurator
+        for session in sessions:
+            self.curator.record_research_session(session)
+            if session.project:
+                self.curator.update_project_memory(
+                    project_name=session.project,
+                    work_done=f"Session: {session.title}",
+                    reason=session.summary
+                )
+
+        # Retrieve recent decisions
+        decisions = self.event_store.get_recent_decisions(limit=10)
+
+        # Write daily synthesis markdown
+        session_summaries = []
+        for s in sessions:
+            session_summaries.append(
+                f"### {s.title}\n"
+                f"- **Domain**: {s.domain}\n"
+                f"- **Summary**: {s.summary}\n"
+                f"- **Sources**: {', '.join(s.sources_reviewed or ['N/A'])}\n"
+            )
+
+        dec_summaries = []
+        for d in decisions:
+            dec_summaries.append(f"- **{d['topic']}** ({d['project_or_domain']}): {d['decision']} (Reason: {d['reason']})")
 
         content = (
-            f"# Daily Memory – {today_str}\n\n"
-            f"## Projects & Development Activity\n{proj_str}\n\n"
-            f"## Research & Knowledge Ingestion\n{res_str}\n\n"
-            f"## Decisions Made\n{dec_str}\n\n"
-            f"## Open Questions & Next Actions\n"
-            f"- Review active project memory states in `10_Projects/`.\n"
-            f"- Continue execution of current development roadmap.\n"
+            f"# Daily Memory Log: {target_date}\n\n"
+            f"**Consolidated At**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+            f"**Total Raw Events Captured**: {len(raw_events)} | **Relevant Events**: {len(relevant_events)}\n\n"
+            f"## Research & Activity Sessions ({len(sessions)})\n"
+            f"{''.join(session_summaries) if session_summaries else 'No structured research sessions generated.\n'}\n"
+            f"## Key Decisions Recorded ({len(decisions)})\n"
+            f"{'\n'.join(dec_summaries) if dec_summaries else 'No new decisions recorded today.\n'}\n"
+            f"## Vault Knowledge Integrity\n"
+            f"- Project memories and research overview notes synced automatically.\n"
         )
 
         daily_file.write_text(content, encoding="utf-8")
 
-        # Mark processed
-        event_ids = [e["id"] for e in unprocessed]
-        self.event_store.mark_events_processed(event_ids)
+        # Mark raw events as processed in SQLite store
+        self.event_store.mark_events_processed(processed_ids)
 
-        self.moc_service.append_domain_log("research", f"Daily Memory Consolidation completed for {today_str}")
-        self.git_service.commit(f"memory(daily): consolidate memory for {today_str}")
+        # Commit changes to Git
+        self.git_service.commit(f"memory(daily): consolidate memory for {target_date}")
 
         return daily_file
