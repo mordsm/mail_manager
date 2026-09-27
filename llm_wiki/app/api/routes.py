@@ -68,3 +68,64 @@ async def promote_knowledge(
     path = promoter.promote(concept_title, category, source_domain, targets, content, sources=[])
     return {"status": "PROMOTED", "path": str(path)}
 
+
+# --- AUTOMATIC MEMORY SYSTEM ENDPOINTS ---
+
+from app.schemas.memory import CaptureEvent, ConversationCapture, DevelopmentCapture
+from app.services.event_store import MemoryEventStore
+from app.services.memory_curator import MemoryCurator
+from app.services.consolidation import MemoryConsolidationService
+
+event_store = MemoryEventStore()
+curator = MemoryCurator()
+consolidation_service = MemoryConsolidationService()
+
+@router.post("/capture/event")
+async def capture_event(event: CaptureEvent):
+    event_id = event_store.record_event(event)
+    return {"status": "CAPTURED", "event_id": event_id}
+
+@router.post("/capture/conversation")
+async def capture_conversation(conv: ConversationCapture):
+    conv_id = event_store.record_conversation(conv)
+    return {"status": "CAPTURED", "conversation_id": conv_id}
+
+@router.post("/capture/development")
+async def capture_development(dev: DevelopmentCapture):
+    dev_id = event_store.record_dev_activity(dev)
+    curator.update_project_memory(
+        project_name=dev.project,
+        work_done=f"Dev activity [{dev.action}]: {dev.commit_msg or 'Code edits'}",
+        reason=dev.reason,
+        files_affected=dev.changed_files
+    )
+    return {"status": "CAPTURED", "dev_id": dev_id}
+
+@router.post("/memory/decision")
+async def record_memory_decision(
+    project_or_domain: str = Form(...),
+    topic: str = Form(...),
+    decision: str = Form(...),
+    reason: str = Form(...),
+    previous_state: Optional[str] = Form(None)
+):
+    path = curator.record_decision(
+        project_or_domain=project_or_domain,
+        topic=topic,
+        decision=decision,
+        reason=reason,
+        previous_state=previous_state
+    )
+    return {"status": "RECORDED", "decision_path": str(path)}
+
+@router.post("/memory/consolidate")
+async def run_memory_consolidation():
+    daily_file = consolidation_service.run_daily_consolidation()
+    return {"status": "CONSOLIDATED", "daily_memory_file": str(daily_file)}
+
+@router.get("/memory/decisions")
+async def get_decisions(project: Optional[str] = None):
+    decisions = event_store.get_recent_decisions(project_or_domain=project)
+    return {"decisions": decisions}
+
+
