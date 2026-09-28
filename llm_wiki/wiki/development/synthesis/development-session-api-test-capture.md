@@ -21,6 +21,6 @@ updated: '2026-09-28'
 
 # Development Session: API Test Capture
 
-Synthesized session with 2 events. Highlights: Testing memory capture API endpoint Testing memory capture API endpoint...
+Synthesized session with 1 events. Highlights: Testing memory capture API endpoint...
 
 ## Provenance & Sources
