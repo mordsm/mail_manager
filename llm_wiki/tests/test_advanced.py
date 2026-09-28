@@ -69,6 +69,24 @@ def test_fastapi_web_ui():
     assert resp.status_code == 200
     assert "LLM Wiki Knowledge Portal" in resp.text
 
-    assert "LLM Wiki Knowledge Portal" in resp.text
+def test_memory_api_endpoints():
+    capture_resp = client.post("/api/v1/capture/event", json={
+        "source_type": "dev",
+        "title": "API Test Capture",
+        "content": "Testing memory capture API endpoint",
+        "domain": "development",
+        "project_hint": "llm_wiki"
+    })
+    assert capture_resp.status_code == 200
+    assert capture_resp.json()["status"] == "CAPTURED"
+
+    overview_resp = client.get("/api/v1/memory/overview")
+    assert overview_resp.status_code == 200
+    assert "recent_captures_count" in overview_resp.json()
+
+    consolidate_resp = client.post("/api/v1/memory/consolidate")
+    assert consolidate_resp.status_code == 200
+    assert consolidate_resp.json()["status"] == "CONSOLIDATED"
+
 
 
