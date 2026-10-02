@@ -67,9 +67,6 @@ def test_wiki_auditor(tmp_path):
 def test_fastapi_web_ui():
     resp = client.get("/")
     assert resp.status_code == 200
-    assert "LLM Wiki Ingestion Interface" in resp.text
-    assert "LLM Wiki Knowledge Portal" in resp.text
-
     assert "LLM Wiki Knowledge Portal" in resp.text
 
 

@@ -21,9 +21,30 @@ class LLMWikiPipeline:
         self.git_service = GitService(root_dir=self.root_dir)
         self.llm = llm_provider or OllamaProvider()
 
+    @staticmethod
+    def _extract_docx_text(docx_path: Path) -> str:
+        import zipfile
+        import xml.etree.ElementTree as ET
+        try:
+            with zipfile.ZipFile(docx_path) as z:
+                xml_content = z.read("word/document.xml")
+                tree = ET.fromstring(xml_content)
+                texts = []
+                for elem in tree.iter():
+                    if elem.tag.endswith("}t"):
+                        if elem.text:
+                            texts.append(elem.text)
+                return "\n".join(texts)
+        except Exception as e:
+            return f"Error extracting DOCX text: {e}"
+
     def process_file(self, source_path: Union[str, Path], domain: str = "unclassified") -> Dict[str, Any]:
+        target_domain = self.inbox_service._normalize_domain(domain)
+        if target_domain not in ["personal", "research", "business", "competitive", "development"]:
+            target_domain = "research"
+
         # 1. Receive & Save Raw Immutable Copy
-        job = self.inbox_service.ingest_file(source_path, domain=domain)
+        job = self.inbox_service.ingest_file(source_path, domain=target_domain)
         if job.status == "DUPLICATE":
             return {"status": "DUPLICATE", "job": job.model_dump()}
 
@@ -34,11 +55,13 @@ class LLMWikiPipeline:
         if raw_path.suffix.lower() in [".md", ".txt"]:
             parsed_data = self.parser.parse_file(raw_path)
             content = parsed_data.get("content", "")
+        elif raw_path.suffix.lower() == ".docx":
+            content = self._extract_docx_text(raw_path)
         else:
             content = f"Source binary asset preserved at {raw_path.name}"
 
         # 3. AI Extraction
-        extraction = self.llm.extract_entities_and_claims(content, domain=domain)
+        extraction = self.llm.extract_entities_and_claims(content, domain=target_domain)
 
         # 4. Synthesize Atomic Note
         title = raw_path.stem.replace("_", " ").replace("-", " ").title()
@@ -47,12 +70,12 @@ class LLMWikiPipeline:
 
         note_path = self.atomic_service.create_or_update_note(
             title=title,
-            domain=domain if domain != "unclassified" else "research",
+            domain=target_domain,
             note_type="source_summary",
             content=summary,
             sources=[str(raw_path.relative_to(self.root_dir))],
             related=[f"[[{c}]]" for c in concepts],
-            tags=[domain]
+            tags=[target_domain]
         )
 
         # 5. Update MOC and Domain Log

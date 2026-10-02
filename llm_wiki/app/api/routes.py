@@ -1,5 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from typing import Optional
 from pathlib import Path
 import tempfile
@@ -19,16 +19,20 @@ async def ingest_file(
     file: UploadFile = File(...),
     domain: str = Form("unclassified")
 ):
-    with tempfile.NamedTemporaryFile(delete=False, suffix=Path(file.filename).suffix) as tmp:
-        shutil.copyfileobj(file.file, tmp)
-        tmp_path = Path(tmp.name)
+    orig_name = Path(file.filename).name if file.filename else "uploaded_file.txt"
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir) / orig_name
+        with open(tmp_path, "wb") as f:
+            shutil.copyfileobj(file.file, f)
 
-    try:
-        result = pipeline.process_file(tmp_path, domain=domain)
-        return result
-    finally:
-        if tmp_path.exists():
-            tmp_path.unlink()
+        try:
+            result = pipeline.process_file(tmp_path, domain=domain)
+            return result
+        except Exception as e:
+            return JSONResponse(
+                status_code=400,
+                content={"status": "ERROR", "error": str(e), "filename": orig_name}
+            )
 
 @router.post("/ingest/text")
 async def ingest_text(

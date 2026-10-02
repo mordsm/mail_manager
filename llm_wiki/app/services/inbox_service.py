@@ -17,13 +17,27 @@ class InboxIngestionService:
         self.root_dir = Path(root_dir)
         self.db = db or OperationalDatabase(self.root_dir / "system/db/operational.db")
 
+    @staticmethod
+    def _normalize_domain(domain_input: str) -> str:
+        d = (domain_input or "").strip().lower()
+        if "personal" in d:
+            return "personal"
+        if "research" in d or "tech" in d:
+            return "research"
+        if "business" in d or "op" in d:
+            return "business"
+        if "compet" in d:
+            return "competitive"
+        if "dev" in d:
+            return "development"
+        return "unclassified"
+
     def ingest_file(self, source_path: Union[str, Path], domain: str = "unclassified") -> IngestionJob:
         source = Path(source_path)
         if not source.exists():
             raise FileNotFoundError(f"Source file does not exist: {source_path}")
 
-        if domain not in ALLOWED_DOMAINS:
-            raise ValueError(f"Invalid domain: {domain}. Allowed: {ALLOWED_DOMAINS}")
+        domain = self._normalize_domain(domain)
 
         content_hash = Hasher.compute_file_hash(source)
         job_id = f"job_{uuid.uuid4().hex[:12]}"
@@ -71,8 +85,7 @@ class InboxIngestionService:
         return job
 
     def ingest_text(self, text_content: str, title: str, domain: str = "unclassified") -> IngestionJob:
-        if domain not in ALLOWED_DOMAINS:
-            raise ValueError(f"Invalid domain: {domain}. Allowed: {ALLOWED_DOMAINS}")
+        domain = self._normalize_domain(domain)
 
         content_hash = Hasher.compute_text_hash(text_content)
         job_id = f"job_{uuid.uuid4().hex[:12]}"

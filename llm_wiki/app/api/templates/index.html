@@ -3,98 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LLM Wiki - Knowledge & Memory Portal</title>
+    <title>LLM Wiki — Knowledge & Memory Portal</title>
     <style>
+        * { box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 2rem; }
         .container { max-width: 800px; margin: 0 auto; background: #1e293b; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         h1 { margin-top: 0; color: #38bdf8; font-size: 1.75rem; text-align: center; margin-bottom: 1.5rem; }
         
         .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid #334155; }
-        .tab { padding: 0.75rem 1.25rem; cursor: pointer; color: #94a3b8; font-weight: 600; border-bottom: 3px solid transparent; user-select: none; border-radius: 6px 6px 0 0; transition: 0.2s; }
+        .tab { padding: 0.85rem 1.5rem; cursor: pointer; color: #94a3b8; font-weight: 700; border-bottom: 3px solid transparent; user-select: none; border-radius: 6px 6px 0 0; transition: all 0.2s ease; }
         .tab:hover { background: #334155; color: #f1f5f9; }
         .tab.active { color: #38bdf8; border-color: #38bdf8; background: #0f172a; }
         
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
-        .dropzone { border: 2px dashed #38bdf8; border-radius: 8px; padding: 2.5rem 1.5rem; text-align: center; background: #0f172a; cursor: pointer; transition: 0.2s; margin-bottom: 1.25rem; }
-        .dropzone:hover { background: #1e293b; border-color: #818cf8; }
+        .dropzone { border: 2px dashed #38bdf8; border-radius: 10px; padding: 3rem 1.5rem; text-align: center; background: #0f172a; cursor: pointer; transition: all 0.2s ease; margin-bottom: 1.25rem; }
+        .dropzone:hover, .dropzone.dragover { background: #1e293b; border-color: #22c55e; box-shadow: 0 0 15px rgba(34, 197, 94, 0.3); }
+        .dropzone.has-file { border-color: #22c55e; background: #064e3b; }
         
         .form-group { margin-bottom: 1.25rem; }
         label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: #cbd5e1; }
-        input[type="text"], textarea, select, button { width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 1rem; box-sizing: border-box; }
-        textarea { height: 140px; font-family: monospace; resize: vertical; }
+        input[type="text"], textarea, select, button { width: 100%; padding: 0.85rem; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 1rem; }
+        textarea { height: 160px; font-family: monospace; resize: vertical; }
         
-        button { background: #4f46e5; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 0.5rem; }
+        button { background: #4f46e5; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 0.5rem; font-size: 1.05rem; }
         button:hover { background: #6366f1; }
         
-        #status { margin-top: 1.5rem; padding: 1rem; border-radius: 6px; display: none; background: #065f46; color: #a7f3d0; white-space: pre-wrap; font-family: monospace; }
+        #status { margin-top: 1.5rem; padding: 1.25rem; border-radius: 8px; display: none; background: #065f46; color: #a7f3d0; white-space: pre-wrap; font-family: monospace; border: 1px solid #10b981; }
         
-        .card { background: #0f172a; padding: 1rem; border-radius: 8px; border: 1px solid #334155; margin-bottom: 1rem; }
-        .card h3 { margin-top: 0; color: #38bdf8; font-size: 1.1rem; }
-        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; background: #3b82f6; color: #fff; }
+        .card { background: #0f172a; padding: 1.25rem; border-radius: 8px; border: 1px solid #334155; margin-bottom: 1rem; }
+        .card h3 { margin-top: 0; color: #38bdf8; font-size: 1.15rem; }
+        .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; background: #3b82f6; color: #fff; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>LLM Wiki Knowledge Portal</h1>
+        <h1>🧠 LLM Wiki Knowledge Portal</h1>
         
         <div class="tabs">
-            <div class="tab active" id="tabHeaderFile" onclick="switchTab('fileTab')">Ingest File</div>
-            <div class="tab" id="tabHeaderText" onclick="switchTab('textTab')">Ingest Note / Text</div>
-            <div class="tab" id="tabHeaderMemory" onclick="switchTab('memoryTab')">Memory Dashboard</div>
+            <div class="tab active" id="tabHeaderFile" onclick="activateTab('fileTab')">📁 Ingest File</div>
+            <div class="tab" id="tabHeaderText" onclick="activateTab('textTab')">📝 Ingest Note / Text</div>
+            <div class="tab" id="tabHeaderMemory" onclick="activateTab('memoryTab')">🧠 Memory Dashboard</div>
         </div>
 
         <!-- TAB 1: FILE INGESTION -->
         <div id="fileTab" class="tab-content active">
             <form id="uploadForm">
-                <div class="dropzone" id="dropzone">
-                    <p>Drag & Drop PDF, Document, Audio, or Note File Here</p>
-                    <input type="file" id="fileInput" style="display:none">
-                    <span id="fileName" style="color: #94a3b8;">No file selected</span>
+                <input type="file" id="fileInput" style="display:none" onchange="handleFileChange(this.files)">
+                <div class="dropzone" id="dropzone" onclick="triggerFilePicker(event)">
+                    <p id="dropPrompt" style="font-size: 1.1rem; font-weight: 600; color: #e2e8f0; margin: 0 0 8px 0; pointer-events: none;">📂 Drag & Drop PDF, Document, Audio, or Note File Here</p>
+                    <p style="font-size: 0.9rem; color: #94a3b8; margin: 0; pointer-events: none;">or <span style="color: #38bdf8; text-decoration: underline;">click to browse files</span></p>
+                    <div id="fileStatus" style="margin-top: 12px; font-weight: bold; color: #38bdf8; font-size: 1rem; pointer-events: none;">No file selected</div>
                 </div>
                 
                 <div class="form-group">
                     <label for="domainSelectFile">Target Domain</label>
                     <select id="domainSelectFile">
-                        <option value="unclassified">Auto classify</option>
-                        <option value="personal">Personal</option>
-                        <option value="research">Research & Technology</option>
-                        <option value="business">Business & Operations</option>
-                        <option value="competitive">Competitive Analysis</option>
-                        <option value="development">Development & Engineering</option>
+                        <option value="auto">Auto classify</option>
+                        <option value="Personal">Personal</option>
+                        <option value="Research & Technology">Research & Technology</option>
+                        <option value="Business & Operations">Business & Operations</option>
+                        <option value="Competitive Analysis">Competitive Analysis</option>
                     </select>
                 </div>
-
+                
                 <button type="submit">INGEST FILE</button>
             </form>
         </div>
 
-        <!-- TAB 2: NOTE / TEXT INGESTION -->
+        <!-- TAB 2: TEXT INGESTION -->
         <div id="textTab" class="tab-content">
             <form id="textForm">
                 <div class="form-group">
-                    <label for="noteTitle">Note Title</label>
-                    <input type="text" id="noteTitle" placeholder="e.g. Gardening Booklet Architecture" required>
+                    <label for="noteTitle">Note / Document Title</label>
+                    <input type="text" id="noteTitle" placeholder="e.g. Gardening Hydroponics Research" required>
                 </div>
-
-                <div class="form-group">
-                    <label for="noteContent">Note Content / Markdown Text</label>
-                    <textarea id="noteContent" placeholder="Paste your markdown note or text here..." required></textarea>
-                </div>
-
+                
                 <div class="form-group">
                     <label for="domainSelectText">Target Domain</label>
                     <select id="domainSelectText">
-                        <option value="research">Research & Technology</option>
-                        <option value="personal">Personal</option>
-                        <option value="business">Business & Operations</option>
-                        <option value="competitive">Competitive Analysis</option>
-                        <option value="development">Development & Engineering</option>
+                        <option value="auto">Auto classify</option>
+                        <option value="Personal">Personal</option>
+                        <option value="Research & Technology">Research & Technology</option>
+                        <option value="Business & Operations">Business & Operations</option>
+                        <option value="Competitive Analysis">Competitive Analysis</option>
                     </select>
                 </div>
-
-                <button type="submit">INGEST NOTE</button>
+                
+                <div class="form-group">
+                    <label for="noteContent">Note Content (Markdown or Raw Text)</label>
+                    <textarea id="noteContent" placeholder="Enter notes, observations, or raw text here..." required></textarea>
+                </div>
+                
+                <button type="submit">INGEST NOTE / TEXT</button>
             </form>
         </div>
 
@@ -103,15 +105,16 @@
             <div id="memoryOverview">
                 <p style="color: #94a3b8;">Loading memory system state...</p>
             </div>
-            <button onclick="fetchMemoryOverview()" style="background: #0284c7; margin-top: 1rem;">Refresh Memory Overview</button>
-            <button onclick="triggerConsolidation()" style="background: #16a34a; margin-top: 0.5rem;">Trigger Daily Consolidation</button>
+            <button onclick="fetchMemoryOverview()" style="background: #0284c7; margin-top: 1rem;">🔄 Refresh Memory Overview</button>
+            <button onclick="triggerConsolidation()" style="background: #16a34a; margin-top: 0.5rem;">⚡ Trigger Daily Consolidation</button>
         </div>
 
         <div id="status"></div>
     </div>
 
     <script>
-        function switchTab(tabId) {
+        function activateTab(tabId) {
+            console.log("Activating tab:", tabId);
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
@@ -130,43 +133,75 @@
 
         const dropzone = document.getElementById('dropzone');
         const fileInput = document.getElementById('fileInput');
-        const fileName = document.getElementById('fileName');
+        const fileStatus = document.getElementById('fileStatus');
+        const dropPrompt = document.getElementById('dropPrompt');
         const uploadForm = document.getElementById('uploadForm');
         const textForm = document.getElementById('textForm');
         const status = document.getElementById('status');
 
-        dropzone.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', () => {
-            if (fileInput.files.length > 0) fileName.textContent = fileInput.files[0].name;
+        function triggerFilePicker(e) {
+            if (e) e.stopPropagation();
+            fileInput.click();
+        }
+
+        function updateFileDisplay(file) {
+            if (file) {
+                dropzone.classList.add('has-file');
+                const sizeKb = (file.size / 1024).toFixed(1);
+                fileStatus.innerHTML = `✅ Selected File: <span style="color:#22c55e;">${file.name}</span> (${sizeKb} KB)`;
+                dropPrompt.textContent = '📄 File Ready for Upload';
+            }
+        }
+
+        function handleFileChange(files) {
+            if (files && files.length > 0) {
+                updateFileDisplay(files[0]);
+            }
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.add('dragover');
+            });
         });
 
-        dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.style.borderColor = '#818cf8'; });
-        dropzone.addEventListener('dragleave', () => dropzone.style.borderColor = '#38bdf8');
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.remove('dragover');
+            });
+        });
+
         dropzone.addEventListener('drop', (e) => {
             e.preventDefault();
-            dropzone.style.borderColor = '#38bdf8';
-            if (e.dataTransfer.files.length > 0) {
+            e.stopPropagation();
+            if (e.dataTransfer && e.dataTransfer.files.length > 0) {
                 fileInput.files = e.dataTransfer.files;
-                fileName.textContent = fileInput.files[0].name;
+                updateFileDisplay(e.dataTransfer.files[0]);
             }
         });
 
         uploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!fileInput.files.length) { alert('Please select a file'); return; }
+            if (!fileInput.files || !fileInput.files.length) {
+                alert('Please select or drag a file first!');
+                return;
+            }
 
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
             formData.append('domain', document.getElementById('domainSelectFile').value);
 
-            showStatus('PROCESSING FILE INGESTION...');
+            showStatus('⏳ PROCESSING FILE INGESTION (Extracting & Synthesizing)...');
             try {
                 const res = await fetch('/api/v1/ingest/file', { method: 'POST', body: formData });
                 const data = await res.json();
-                showStatus('COMPLETED FILE INGESTION:
-' + JSON.stringify(data, null, 2));
+                showStatus('✅ COMPLETED FILE INGESTION:\n' + JSON.stringify(data, null, 2));
             } catch (err) {
-                showStatus('ERROR: ' + err.message);
+                showStatus('❌ ERROR: ' + err.message);
             }
         });
 
@@ -177,14 +212,13 @@
             formData.append('content', document.getElementById('noteContent').value);
             formData.append('domain', document.getElementById('domainSelectText').value);
 
-            showStatus('PROCESSING NOTE INGESTION...');
+            showStatus('⏳ PROCESSING NOTE INGESTION...');
             try {
                 const res = await fetch('/api/v1/ingest/text', { method: 'POST', body: formData });
                 const data = await res.json();
-                showStatus('COMPLETED NOTE INGESTION:
-' + JSON.stringify(data, null, 2));
+                showStatus('✅ COMPLETED NOTE INGESTION:\n' + JSON.stringify(data, null, 2));
             } catch (err) {
-                showStatus('ERROR: ' + err.message);
+                showStatus('❌ ERROR: ' + err.message);
             }
         });
 
@@ -195,20 +229,20 @@
                 const data = await res.json();
                 
                 let html = `<div class="card">
-                    <h3>System Memory Status</h3>
+                    <h3>📊 System Memory Status</h3>
                     <p>Unprocessed Captured Events: <span class="badge">${data.recent_captures_count || 0}</span></p>
                 </div>`;
 
                 if (data.projects && data.projects.length > 0) {
-                    html += `<div class="card"><h3>Tracked Project Memories</h3><ul>`;
+                    html += `<div class="card"><h3>📁 Tracked Project Memories</h3><ul>`;
                     data.projects.forEach(p => {
-                        html += `<li><strong>${p.name}</strong> ${p.has_memory ? 'Memory Active' : 'Pending Initial Memory'}</li>`;
+                        html += `<li><strong>${p.name}</strong> ${p.has_memory ? '✅ Memory Active' : '⏳ Pending Initial Memory'}</li>`;
                     });
                     html += `</ul></div>`;
                 }
 
                 if (data.recent_decisions && data.recent_decisions.length > 0) {
-                    html += `<div class="card"><h3>Recent Recorded Decisions</h3><ul>`;
+                    html += `<div class="card"><h3>⚖️ Recent Recorded Decisions</h3><ul>`;
                     data.recent_decisions.forEach(d => {
                         html += `<li><strong>${d.topic}</strong> (${d.project_or_domain}): ${d.decision}</li>`;
                     });
@@ -222,15 +256,14 @@
         }
 
         async function triggerConsolidation() {
-            showStatus('TRIGGERING DAILY MEMORY CONSOLIDATION...');
+            showStatus('⏳ TRIGGERING DAILY MEMORY CONSOLIDATION...');
             try {
                 const res = await fetch('/api/v1/memory/consolidate', { method: 'POST' });
                 const data = await res.json();
-                showStatus('CONSOLIDATION COMPLETED:
-' + JSON.stringify(data, null, 2));
+                showStatus('✅ CONSOLIDATION COMPLETED:\n' + JSON.stringify(data, null, 2));
                 fetchMemoryOverview();
             } catch (err) {
-                showStatus('ERROR: ' + err.message);
+                showStatus('❌ ERROR: ' + err.message);
             }
         }
 
@@ -238,6 +271,12 @@
             status.style.display = 'block';
             status.textContent = msg;
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('tabHeaderFile').onclick = () => activateTab('fileTab');
+            document.getElementById('tabHeaderText').onclick = () => activateTab('textTab');
+            document.getElementById('tabHeaderMemory').onclick = () => activateTab('memoryTab');
+        });
     </script>
 </body>
 </html>
