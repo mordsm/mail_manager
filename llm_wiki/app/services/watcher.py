@@ -20,7 +20,7 @@ class InboxFileEventHandler(FileSystemEventHandler):
         if source_path.name.startswith(".") or source_path.suffix.lower() == ".tmp":
             return
 
-        print(f"\n[Watchdog] Processing file from inbox: {source_path.name}")
+        print(f"\n[Watchdog] Processing file from inbox: {source_path.name}", flush=True)
         # Determine domain from parent directory name
         domain = source_path.parent.name
         if domain not in ALLOWED_DOMAINS:
@@ -30,16 +30,16 @@ class InboxFileEventHandler(FileSystemEventHandler):
         time.sleep(1.0)
         try:
             res = self.pipeline.process_file(source_path, domain=domain)
-            print(f"[Watchdog] Ingestion {res['status']}: {res.get('raw_path', '')}")
+            print(f"[Watchdog] Ingestion {res['status']}: {res.get('raw_path', '')}", flush=True)
             if res.get("status") == "COMPLETED":
-                print(f"[Watchdog] Synthesized note: {res.get('note_path', '')}")
+                print(f"[Watchdog] Synthesized note: {res.get('note_path', '')}", flush=True)
             elif res.get("status") == "DUPLICATE":
-                print(f"[Watchdog] Skipped duplicate file (SHA-256 matched existing content).")
+                print(f"[Watchdog] Skipped duplicate file (SHA-256 matched existing content).", flush=True)
             # Remove inbox copy after successful processing or duplicate detection
             if source_path.exists():
                 source_path.unlink()
         except Exception as e:
-            print(f"[Watchdog Error] Failed to process {source_path.name}: {e}")
+            print(f"[Watchdog Error] Failed to process {source_path.name}: {e}", flush=True)
 
     def on_created(self, event):
         if event.is_directory:
@@ -58,7 +58,7 @@ class InboxWatcherService:
 
     def scan_existing(self, inbox_dir: Path):
         """Processes any files already present in the inbox before watcher started."""
-        print(f"[InboxWatcher] Scanning existing files in {inbox_dir}...")
+        print(f"[InboxWatcher] Scanning existing files in {inbox_dir}...", flush=True)
         for file_path in inbox_dir.glob("**/*"):
             if file_path.is_file():
                 self.handler.handle_file(file_path)
@@ -75,7 +75,7 @@ class InboxWatcherService:
         # 2. Schedule live watchdog observer
         self.observer.schedule(self.handler, str(inbox_dir), recursive=True)
         self.observer.start()
-        print(f"[InboxWatcher] Monitoring {inbox_dir} for new incoming files...")
+        print(f"[InboxWatcher] Monitoring {inbox_dir} for new incoming files...", flush=True)
 
         try:
             while True:

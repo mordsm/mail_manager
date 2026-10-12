@@ -1,9 +1,17 @@
-import typer
+import sys
 from pathlib import Path
 from typing import Optional
+import typer
 from app.services.pipeline import LLMWikiPipeline
 
+# Ensure UTF-8 output on Windows terminals to support Hebrew, emojis, and symbols
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 app = typer.Typer(help="LLM Wiki CLI — Personal & Research Knowledge Assistant")
+
 
 @app.command("add")
 def add_file(

@@ -1,8 +1,10 @@
+import re
 from pathlib import Path
 from typing import Union, List, Dict, Any, Optional
 from app.services.parser import MarkdownParser
 from app.llm.base import LLMProvider
 from app.llm.ollama_provider import OllamaProvider
+
 
 class QueryPlannerService:
     """
@@ -17,8 +19,10 @@ class QueryPlannerService:
 
     def query(self, domain: str, question: str) -> Dict[str, Any]:
         # Collect relevant notes
-        target_domains = ["personal", "research", "business", "competitive"] if domain.lower() in ["all", "global"] else [domain]
+        target_domains = ["personal", "research", "business", "competitive", "development"] if domain.lower() in ["all", "global"] else [domain]
         
+        q_tokens = [w.lower() for w in re.findall(r'[\u0590-\u05FFa-zA-Z0-9_-]{3,}', question)]
+
         notes_context = []
         for d in target_domains:
             domain_dir = self.root_dir / "wiki" / d
@@ -29,12 +33,22 @@ class QueryPlannerService:
                         rel_path = md_path.relative_to(self.root_dir)
                         title = parsed.get("title", md_path.stem)
                         content = parsed.get("content", "")[:600]
+                        tags = parsed.get("tags", [])
+                        
+                        # Score relevance
+                        score = 0
+                        text_to_search = f"{title} {' '.join(tags)} {content}".lower()
+                        for tok in q_tokens:
+                            if tok in text_to_search:
+                                score += 2 if tok in title.lower() else 1
+
                         notes_context.append({
                             "path": str(rel_path),
                             "title": title,
                             "domain": d,
                             "content": content,
-                            "tags": parsed.get("tags", [])
+                            "tags": tags,
+                            "score": score
                         })
                     except Exception:
                         pass
@@ -44,17 +58,26 @@ class QueryPlannerService:
         if mocs_dir.exists():
             for moc_path in mocs_dir.glob("*.md"):
                 rel_path = moc_path.relative_to(self.root_dir)
+                moc_content = moc_path.read_text(encoding="utf-8")[:400]
+                score = sum(1 for tok in q_tokens if tok in moc_content.lower())
                 notes_context.append({
                     "path": str(rel_path),
                     "title": f"MOC: {moc_path.stem}",
                     "domain": "moc",
-                    "content": moc_path.read_text(encoding="utf-8")[:400],
-                    "tags": ["moc"]
+                    "content": moc_content,
+                    "tags": ["moc"],
+                    "score": score
                 })
+
+        # Rank by score, keeping the most relevant notes (or top recent if none match)
+        notes_context.sort(key=lambda n: n["score"], reverse=True)
+        top_notes = [n for n in notes_context if n["score"] > 0][:7]
+        if not top_notes:
+            top_notes = notes_context[:5]
 
         # Build context summary
         context_str = "Obsidian Vault Knowledge Base Notes:\n\n"
-        for idx, item in enumerate(notes_context, 1):
+        for idx, item in enumerate(top_notes, 1):
             context_str += f"[{idx}] Note Path: `{item['path']}` | Title: {item['title']}\nSummary:\n{item['content']}\n\n"
 
         prompt = (
