@@ -5,15 +5,39 @@ from typing import Dict, Any, Optional, Type
 from pydantic import BaseModel, ValidationError
 from app.llm.base import LLMProvider
 
+from app.config import OLLAMA_BASE_URL, OLLAMA_MODEL
+
 class OllamaProvider(LLMProvider):
     """
     Local Ollama LLM provider implementation for low-cost, local-first classification,
     summarization, entity extraction, and wiki note synthesis.
     """
-    def __init__(self, base_url: str = "http://localhost:11434", model: str = "llama3"):
-        self.base_url = base_url
+    def __init__(self, base_url: str = OLLAMA_BASE_URL, model: str = OLLAMA_MODEL):
+        self.base_url = base_url.rstrip("/")
         self.model = model
-        self.client = httpx.Client(timeout=30.0)
+        self.client = httpx.Client(timeout=60.0)
+        self._resolve_active_model()
+
+    def _resolve_active_model(self) -> None:
+        """
+        Queries Ollama to verify if the configured model is available;
+        if not, selects the best matching available model.
+        """
+        try:
+            resp = self.client.get(f"{self.base_url}/api/tags", timeout=3.0)
+            if resp.status_code == 200:
+                available_models = [m["name"] for m in resp.json().get("models", [])]
+                if self.model in available_models:
+                    return
+                # Check for prefix match, e.g. "llama3.2" matching "llama3.2:latest"
+                for m in available_models:
+                    if m.startswith(self.model) or self.model.startswith(m.split(":")[0]):
+                        self.model = m
+                        return
+                if available_models:
+                    self.model = available_models[0]
+        except Exception:
+            pass  # Keep default configured model if server offline
 
     def generate(self, prompt: str, system_prompt: Optional[str] = None) -> str:
         url = f"{self.base_url}/api/generate"
@@ -57,30 +81,59 @@ class OllamaProvider(LLMProvider):
             return self._heuristic_fallback(prompt, response_model)
 
     def extract_entities_and_claims(self, text_content: str, domain: str) -> Dict[str, Any]:
-        prompt = (
-            f"Domain: {domain}\n"
-            f"Content:\n{text_content[:3000]}\n\n"
-            "Extract entities (people, companies, technologies, concepts), key claims, and candidate wikilinks."
+        """
+        Uses Ollama to extract summary, entities, concepts, and claims in JSON format.
+        """
+        sys_prompt = (
+            "You are an expert knowledge synthesis agent for Obsidian LLM Wiki. "
+            "Extract structured information from the input text and return ONLY a valid JSON object with keys: "
+            "'summary' (string: concise 2-4 sentences), "
+            "'entities' (array of strings: important named entities/people/tools), "
+            "'concepts' (array of strings: 3-6 key concepts/topics suitable for [[wikilinks]]), "
+            "'claims' (array of strings: 1-3 factual claims or assertions made)."
         )
+        prompt = f"Domain: {domain}\nContent:\n{text_content[:4000]}"
+        url = f"{self.base_url}/api/generate"
+        payload = {
+            "model": self.model,
+            "prompt": f"{sys_prompt}\n\n{prompt}",
+            "format": "json",
+            "stream": False
+        }
         try:
-            res_text = self.generate(prompt, system_prompt="Extract structured knowledge units from document.")
-            # Fallback regex extraction if unstructured
-            entities = list(set(re.findall(r'\b[A-Z][a-zA-Z0-9\-_]{2,}\b', text_content)))[:10]
-            concepts = list(set(re.findall(r'\[\[([^\]\|]+)(?:\|[^\]]+)?\]\]', text_content)))
-            return {
-                "summary": res_text[:500],
-                "entities": entities,
-                "concepts": concepts,
-                "domain": domain
-            }
-        except Exception as e:
-            return {
-                "summary": text_content[:300] + "...",
-                "entities": [],
-                "concepts": [],
-                "domain": domain,
-                "error": str(e)
-            }
+            resp = self.client.post(url, json=payload, timeout=45.0)
+            if resp.status_code == 200:
+                raw_json = resp.json().get("response", "{}")
+                data = json.loads(raw_json)
+                summary = data.get("summary") or text_content[:300]
+                entities = data.get("entities") or []
+                concepts = data.get("concepts") or []
+                claims = data.get("claims") or []
+                return {
+                    "summary": summary,
+                    "entities": entities,
+                    "concepts": concepts,
+                    "claims": claims,
+                    "domain": domain
+                }
+        except Exception:
+            pass
+
+        # Fallback regex extraction if Ollama fails or format is invalid
+        entities = list(set(re.findall(r'\b[A-Z][a-zA-Z0-9\-_]{2,}\b', text_content)))[:10]
+        concepts = list(set(re.findall(r'\[\[([^\]\|]+)(?:\|[^\]]+)?\]\]', text_content)))
+        if not concepts:
+            # Extract common conceptual words
+            words = [w for w in re.findall(r'\b[a-zA-Z]{4,}\b', text_content) if w.lower() not in {"this", "that", "with", "from", "have"}]
+            concepts = list(dict.fromkeys(words))[:5]
+
+        return {
+            "summary": text_content[:350].strip() + ("..." if len(text_content) > 350 else ""),
+            "entities": entities,
+            "concepts": concepts,
+            "claims": [],
+            "domain": domain
+        }
 
     def _heuristic_fallback(self, prompt: str, response_model: Type[BaseModel]) -> BaseModel:
         # Fallback initializer for Pydantic models when Ollama is offline

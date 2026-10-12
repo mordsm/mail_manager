@@ -14,6 +14,7 @@ Requires-Dist: uvicorn>=0.22.0
 Requires-Dist: python-dotenv>=1.0.0
 Requires-Dist: python-multipart>=0.0.6
 Requires-Dist: pytest>=7.0.0
+Requires-Dist: python-docx>=1.2.0
 
 # LLM Wiki
 

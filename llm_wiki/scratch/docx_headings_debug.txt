@@ -1,0 +1,387 @@
+Index    2 | Style: Heading 1            | שער פנימי
+Index    5 | Style: Title                | המעי, האנרגיה והבריאות
+Index    6 | Style: Heading 2            | מדריך עברי מקיף למיקרוביום, לתזונה, לאנרגיה ולהרגלי חיים
+Index    7 | Style: Heading 3            | מהדורה משולבת ומעודכנת
+Index    8 | Style: Heading 2            | מאת: משה
+Index    9 | Style: Normal               | שילוב של ידע מדעי, פרקטיקה יומיומית וכלי מעקב אישיים.
+Index   11 | Style: Heading 1            | זכויות יוצרים והבהרה
+Index   15 | Style: Heading 2            | על המחבר
+Index   17 | Style: Heading 2            | תודות
+Index   20 | Style: Heading 1            | התחלה מהירה
+Index   21 | Style: Normal               | ‏• לקריאה מן היסוד: פרקים 1–5 מציגים את מערכת העיכול, המיקרוביום, התזונה והתסמינים המרכזיים.
+Index   22 | Style: Normal               | ‏• לשאלה רפואית ממוקדת: פרקים 6–8 עוסקים בבדיקות, בתרופות ובהתאמות למצבי חיים; לתוכנית מעשית ולמעקב ראו פרקים 16–17.
+Index   25 | Style: Heading 2            | איך לקרוא את דרגות הראיות
+Index   27 | Style: Heading 1            | תוכן העניינים
+Index   28 | Style: Normal               | לחצו על שם הפרק כדי לעבור אליו. מספרי העמודים מתייחסים לעימוד המהדורה הדיגיטלית הנוכחית; עריכה נוספת עשויה לשנות אותם.
+Index   29 | Style: Normal               | פרק 1 — מערכת העיכול: מפת הגוף והמסע של המזון	עמ׳ 7
+Index   30 | Style: Normal               | פרק 2 — הקהילה המיקרוביאלית	עמ׳ 10
+Index   31 | Style: Normal               | פרק 3 — תזונה להזנת הקהילה	עמ׳ 18
+Index   32 | Style: Normal               | פרק 4 — תזונה יומיומית: מהמדע לצלחת ולרשימת הקניות	עמ׳ 26
+Index   33 | Style: Normal               | פרק 5 — תסמינים נפוצים ומה עושים איתם	עמ׳ 31
+Index   34 | Style: Normal               | פרק 6 — בדיקות ואבחון: מן התסמין לשאלה הרפואית	עמ׳ 45
+Index   35 | Style: Normal               | פרק 7 — תרופות, תוספים ובריאות המעיים	עמ׳ 49
+Index   36 | Style: Normal               | פרק 8 — בריאות המעיים במצבי חיים ובאוכלוסיות מיוחדות	עמ׳ 53
+Index   37 | Style: Normal               | פרק 9 — ציר המעי–מוח, עייפות וניהול אנרגיה	עמ׳ 56
+Index   38 | Style: Normal               | פרק 10 — המדריך לכרונו־תזונה	עמ׳ 63
+Index   39 | Style: Normal               | פרק 11 — תזמון רכיבים תזונתיים, קפאין וביצועים ספורטיביים	עמ׳ 70
+Index   40 | Style: Normal               | פרק 12 — שינה, לחץ ובריאות המעיים	עמ׳ 77
+Index   41 | Style: Normal               | פרק 13 — תנועה, תנועתיות וניהול אנרגיה	עמ׳ 82
+Index   42 | Style: Normal               | פרק 14 — פסיכולוגיה של השינוי: מהרגל קטן לבריאות מעיים לאורך זמן	עמ׳ 86
+Index   43 | Style: Normal               | פרק 15 — כלים לשינוי דפוסים — ומה באמת מבוסס	עמ׳ 92
+Index   44 | Style: Normal               | פרק 16 — תוכנית שבעת הימים לבריאות המעיים	עמ׳ 99
+Index   45 | Style: Normal               | פרק 17 — ניטור, יומן מעקב אישי ומדדי אנרגיה	עמ׳ 106
+Index   46 | Style: Normal               | פרק 18 — מיתוסים, בדיקות ושיווק בבריאות המעיים	עמ׳ 112
+Index   47 | Style: Normal               | פרק 19 — חזון הבריאות לטווח הארוך	עמ׳ 116
+Index   52 | Style: Normal               | ◆  פרק 1  ◆
+Index   53 | Style: Heading 1            | מערכת העיכול: מפת הגוף והמסע של המזון
+Index   54 | Style: Heading 3            | מן הלעיסה ועד יצירת הצואה — התפקיד של כל איבר
+Index   56 | Style: Caption              | איור 1.1 | המחשה של דופן המעי ומחסום הרירית; מנגנון הספיגה וההגנה מוסבר בטקסט.
+Index   57 | Style: Heading 2            | ‏1.1‏ המסע מתחיל בפה — לא במעי
+Index   61 | Style: Heading 2            | ‏1.2‏ הקיבה — ערבוב, חומצה וקצב
+Index   64 | Style: Heading 2            | ‏1.3‏ המעי הדק — תחנת הספיגה העיקרית
+Index   67 | Style: Heading 2            | ‏1.4‏ המעי הגס — מים, תסיסה ויצירת הצואה
+Index   70 | Style: Heading 2            | ‏1.5‏ טבלת התמצאות: היכן מתרחש מה?
+Index   71 | Style: Heading 2            | ‏1.6‏ מה אפשר לעשות כבר השבוע?
+Index   73 | Style: Heading 2            | סיכום הפרק
+Index   75 | Style: Heading 2            | מקורות והערות
+Index   79 | Style: Normal               | ◆  פרק 2  ◆
+Index   80 | Style: Heading 1            | הקהילה המיקרוביאלית
+Index   81 | Style: Heading 3            | העולם הזעיר שבתוכנו והמדריך המעשי לפרוביוטיקה
+Index   86 | Style: Heading 2            | ‏2.1‏ נכנסים לתוך המעי: מאיברי הגוף אל הקהילה המיקרוביאלית החיה
+Index   92 | Style: Heading 2            | ‏2.2‏ שומרי הסף: מחסום המעי ומערכת החיסון
+Index   99 | Style: Heading 2            | ‏2.3‏ הדלק התאי: חומצות שומן קצרות שרשרת
+Index  105 | Style: Heading 2            | ‏2.4‏ מילון שימושי: פרוביוטיקה, פרה־ביוטיקה וסינביוטיקה
+Index  110 | Style: Heading 2            | ‏2.5‏ המדריך המעשי למזונות מותססים
+Index  114 | Style: Heading 3            | מה למדנו ממחקר המזונות המותססים?
+Index  116 | Style: Heading 3            | כרוב כבוש וקימצ׳י
+Index  119 | Style: Heading 3            | מתכון בטיחותי עקרוני: כרוב כבוש
+Index  123 | Style: Heading 3            | קפיר חלבי וקפיר מים
+Index  126 | Style: Heading 3            | יוגורט עם תרביות חיות
+Index  128 | Style: Heading 3            | קומבוצ׳ה
+Index  130 | Style: Heading 3            | מיסו וטמפה
+Index  132 | Style: Heading 2            | ‏2.6‏ תוכנית שילוב הדרגתית: מהמטבח אל שגרת היום
+Index  136 | Style: Heading 3            | איך בוחרים תוסף פרוביוטי?
+Index  138 | Style: Heading 2            | סיכום הפרק: חמש מסקנות לשימוש יומיומי
+Index  145 | Style: Heading 2            | מקורות והערות
+Index  152 | Style: Normal               | ◆  פרק 3  ◆
+Index  153 | Style: Heading 1            | תזונה להזנת הקהילה המיקרוביאלית
+Index  154 | Style: Heading 3            | מסיבים פרה־ביוטיים, דרך התזונה הים־תיכונית הירוקה ועד להתאוששות לאחר אנטיביוטיקה
+Index  159 | Style: Heading 2            | ‏3.1‏ פרה־ביוטיקה: הדלק של המיקרוביום וסוגי הסיבים
+Index  163 | Style: Heading 3            | הסיבים הבולטים במחקר
+Index  167 | Style: Heading 2            | ‏3.2‏ המקורות התזונתיים העשירים בסיבים והדרך להוסיף אותם
+Index  171 | Style: Heading 3            | מהו יעד סיבים סביר?
+Index  175 | Style: Heading 3            | השרייה, בישול וקירור — מה הם משנים?
+Index  178 | Style: Heading 2            | ‏3.3‏ התזונה הים־תיכונית הירוקה: מה נבדק במחקר הישראלי?
+Index  187 | Style: Heading 2            | ‏3.4‏ מזון אולטרה־מעובד ותוספים: להפריד בין חשד להוכחה
+Index  189 | Style: Heading 3            | מתחלבים: מה ידוע מן המחקרים בבני אדם?
+Index  192 | Style: Heading 3            | ממתיקים וצבעי מאכל
+Index  196 | Style: Heading 2            | ‏3.5‏ התאוששות המיקרוביום אחרי אנטיביוטיקה
+Index  199 | Style: Heading 3            | האם לקחת פרוביוטיקה בזמן הטיפול?
+Index  203 | Style: Heading 3            | מה אפשר לעשות בתזונה?
+Index  207 | Style: Heading 2            | ‏3.6‏ תוכנית יישום גמישה: שבועיים של שינוי אחד בכל פעם
+Index  212 | Style: Heading 2            | סיכום הפרק: שש מסקנות שאפשר לקחת למטבח
+Index  219 | Style: Normal               | בפרק הבא נעבור מן התזונה אל שאלות של קוראים המתמודדים עם נפיחות, עצירות, שלשול, צרבת או מעי רגיז.
+Index  220 | Style: Heading 2            | מקורות והערות
+Index  232 | Style: Normal               | ◆  פרק 4  ◆
+Index  233 | Style: Heading 1            | תזונה יומיומית: מהמדע לצלחת ולרשימת הקניות
+Index  234 | Style: Heading 3            | בניית ארוחות, סבילות אישית, קריאת תוויות והכנה מראש
+Index  236 | Style: Caption              | איור 4.1 | ירקות טריים הם חלק ממבחר אפשרויות; גיוון והתאמה אישית חשובים יותר מצלחת מושלמת.
+Index  237 | Style: Heading 2            | ‏4.1‏ צלחת מאוזנת היא מסגרת, לא מבחן
+Index  240 | Style: Heading 2            | ‏4.2‏ דגנים וקטניות: להתחיל מן הכמות שנוחה לעיכול
+Index  243 | Style: Heading 2            | ‏4.3‏ חלבון, שומן ומוצרי חלב
+Index  246 | Style: Heading 2            | ‏4.4‏ איך קוראים תווית מזון בלי ללכת לאיבוד?
+Index  249 | Style: Heading 2            | ‏4.5‏ תפריט יומי לדוגמה — ודרכים להחליף רכיבים
+Index  251 | Style: Heading 2            | ‏4.6‏ שלוש פעולות להיערכות לשבוע עמוס
+Index  253 | Style: Heading 2            | 4.7 רשימת קניות מודולרית לפי סבילות
+Index  255 | Style: Heading 2            | 4.8 התאמות מהירות לפי תסמינים נפוצים
+Index  260 | Style: Heading 2            | 4.9 הכנה לשבוע עמוס: Meal Prep ריאלי
+Index  265 | Style: Heading 2            | 4.10 שלוש תבניות לתפריט שבועי והחלפות לפי סבילות
+Index  267 | Style: Heading 3            | כמויות ועיקרון ההרכבה
+Index  269 | Style: Heading 3            | מה לבדוק בתווית: שלוש דוגמאות נפוצות
+Index  270 | Style: Heading 2            | סיכום הפרק
+Index  272 | Style: Heading 2            | מקורות והערות
+Index  276 | Style: Normal               | ◆  פרק 5  ◆
+Index  277 | Style: Heading 1            | תסמינים נפוצים ומה עושים איתם
+Index  278 | Style: Heading 3            | נפיחות, עצירות, שלשול, מעי רגיז, FODMAP, צליאק וצרבת
+Index  283 | Style: Heading 2            | ‏5.1‏ להתחיל נכון: מה שכיח ומה מצדיק בירור
+Index  287 | Style: Heading 2            | ‏5.2‏ נפיחות וגזים: לפני שמוציאים חצי מהמטבח
+Index  291 | Style: Heading 3            | נפיחות וגזים — שכבות פעולה ותוכנית 10 ימים
+Index  296 | Style: Heading 2            | ‏5.3‏ עצירות: מתי סיבים עוזרים ומתי צריך משהו נוסף
+Index  300 | Style: Heading 3            | מודול מעשי לעצירות: גישה רב־ממדית
+Index  307 | Style: Heading 3            | תוכנית 7–14 יום לעצירות
+Index  308 | Style: Heading 3            | תרגילים עדינים שיכולים להשתלב בקטע העצירות
+Index  316 | Style: Heading 3            | אימון מדורג בשליטה בסוגרים ובתחושת הדחיפות
+Index  320 | Style: Heading 3            | הנחיות התחלתיות, רק לאחר אישור מקצועי
+Index  328 | Style: Heading 2            | ‏5.4‏ שלשול: נוזלים קודם, אבחנה לפני הגבלות
+Index  331 | Style: Heading 3            | שלשול — תוכנית חירום קצרה ל־24–72 שעות
+Index  335 | Style: Heading 2            | ‏5.5‏ מעי רגיז: אבחנה חיובית, לא ״הכול בראש״
+Index  339 | Style: Heading 3            | IBS — מה עובד לפי רמת הראיות
+Index  343 | Style: Heading 3            | מעי רגיז: מדריך מקיף לאבחון, מנגנונים וטיפול משולב
+Index  345 | Style: Heading 3            | אבחון חיובי וסימני אזהרה
+Index  347 | Style: Heading 3            | ארבעת תתי־הסוגים ולמה הם חשובים
+Index  349 | Style: Heading 3            | מה קורה בגוף? שש מערכות שעשויות להשתלב
+Index  356 | Style: Heading 3            | תזונה: מה כדאי לנסות ובאיזה סדר
+Index  358 | Style: Heading 3            | טיפול תרופתי לפי הבעיה המרכזית
+Index  360 | Style: Heading 3            | טיפול מוכוון מעי–מוח, שינה ותפקוד יומיומי
+Index  362 | Style: Heading 3            | מה ידוע ומה עדיין לא מבוסס
+Index  363 | Style: Heading 3            | תוכנית אישית ל־14 יום: שינוי אחד בכל פעם
+Index  365 | Style: Heading 3            | טעויות שכדאי להימנע מהן
+Index  375 | Style: Heading 2            | ‏5.6‏ דיאטת FODMAP: כלי זמני, לא אורח חיים של הימנעות
+Index  380 | Style: Heading 3            | FODMAP וצרבת — דיוק חשוב
+Index  383 | Style: Heading 2            | ‏5.7‏ גלוטן, צליאק ולקטוז: שלושה מושגים שונים
+Index  386 | Style: Heading 2            | ‏5.8‏ צרבת ורפלוקס: מה תזונה יכולה לעשות — ומה לא
+Index  389 | Style: Heading 2            | ‏5.9‏ דף החלטה מעשי: שינוי אחד בכל פעם
+Index  390 | Style: Normal               | כאשר הדחף ליציאה מלווה באי־יכולת להתאפק, קראו גם את תרגול הסוגרים בסעיף העצירות ואת הבירור הרפואי בפרק 6
+Index  393 | Style: Heading 3            | יומן תסמינים מינימלי וקישורים צולבים
+Index  395 | Style: Normal               | • כאשר עולה שאלה אם נדרש בירור — עברו גם לפרק 6 על בדיקות ואבחון.
+Index  396 | Style: Normal               | • אם עולה חשד שתכשיר, משלשל, ברזל או פרוביוטיקה משפיעים עליכם — ראו גם פרק 7.
+Index  397 | Style: Normal               | • כאשר עצירות או IBS מוחמרים בעומס, בשינה לקויה או בהחמרה לאחר מאמץ — ראו גם פרקים 12–13.
+Index  398 | Style: Heading 2            | מקורות והערות
+Index  407 | Style: Normal               | ◆  פרק 6  ◆
+Index  408 | Style: Heading 1            | בדיקות ואבחון: מן התסמין לשאלה הרפואית
+Index  409 | Style: Heading 3            | בדיקות דם, צואה, נשיפה, אנדוסקופיה והכנה לפגישה עם רופא
+Index  412 | Style: Heading 2            | ‏6.1‏ לא מתחילים בבדיקה — מתחילים בשאלה
+Index  415 | Style: Heading 2            | ‏6.2‏ בדיקות דם — מה אפשר לבדוק?
+Index  418 | Style: Heading 2            | ‏6.3‏ בדיקות צואה — זיהום, דם ודלקת
+Index  421 | Style: Heading 2            | ‏6.4‏ בדיקות נשיפה, גסטרוסקופיה וקולונוסקופיה
+Index  424 | Style: Heading 2            | ‏6.5‏ טבלת החלטה: מה הבדיקה יכולה לתרום?
+Index  425 | Style: Heading 2            | ‏6.6‏ הכנה לפגישה רפואית: שישה פרטים שיחסכו זמן
+Index  426 | Style: Normal               | לתיעוד של דחיפות או דליפת צואה ראו את פרק התסמינים ואת תרגול הסוגרים
+Index  428 | Style: Heading 2            | 6.7 מה התוצאה אומרת — ומה היא לא אומרת
+Index  432 | Style: Heading 2            | 6.8 הכנה מעשית לבדיקות נפוצות ולפגישה עם גסטרואנטרולוג
+Index  436 | Style: Heading 2            | 6.9 מדריך החלטה: הבדיקה, התוצאה והצעד הבא
+Index  437 | Style: Heading 2            | 6.10 רשימת הכנה לפגישה ובדיקות
+Index  443 | Style: Heading 2            | 6.11 בדיקות מיקרוביום מסחריות: מגבלות מעשיות
+Index  445 | Style: Heading 2            | סיכום הפרק
+Index  447 | Style: Heading 2            | מקורות והערות
+Index  453 | Style: Normal               | ◆  פרק 7  ◆
+Index  454 | Style: Heading 1            | תרופות, תוספים ובריאות המעיים
+Index  455 | Style: Heading 3            | השפעות על תסמינים, התוויות, סיכונים ושיחה עם הרופא
+Index  458 | Style: Heading 2            | ‏7.1‏ שינוי בתסמינים אינו תמיד שינוי במיקרוביום
+Index  461 | Style: Heading 2            | ‏7.2‏ אנטיביוטיקה — טיפול חיוני עם השפעות אפשריות
+Index  464 | Style: Heading 2            | ‏7.3‏ תרופות להפחתת חומציות, נוגדי דלקת ומשלשלים
+Index  467 | Style: Heading 2            | ‏7.4‏ מטפורמין, ברזל ומגנזיום
+Index  470 | Style: Heading 2            | ‏7.5‏ מה צריך לדעת על תוספי סיבים, אנזימי עיכול ופרוביוטיקה?
+Index  473 | Style: Heading 2            | ‏7.6‏ חמש שאלות לפני שמתחילים תוסף
+Index  474 | Style: Normal               | שלשול או עצירות שהחלו לאחר תרופה? ראו את בירור התסמינים בפרק 5
+Index  475 | Style: Heading 2            | 7.7 תרופות שכדאי לחשוב עליהן כשיש שינוי בעיכול
+Index  476 | Style: Heading 2            | 7.8 איך לדבר עם הרופא או הרוקח על תוסף
+Index  480 | Style: Heading 2            | 7.9 פרוביוטיקה ואינטראקציות: דיוק לפני קנייה
+Index  483 | Style: Heading 2            | 7.10 פרוביוטיקה: הבחנה בין התוויה לתווית שיווקית
+Index  484 | Style: Heading 2            | 7.11 אינטראקציות שכדאי להכיר לפני שימוש בתוסף
+Index  485 | Style: Heading 3            | שיחת תרופות של שלוש דקות
+Index  487 | Style: Heading 2            | סיכום הפרק
+Index  489 | Style: Heading 2            | מקורות והערות
+Index  494 | Style: Normal               | ◆  פרק 8  ◆
+Index  495 | Style: Heading 1            | בריאות המעיים במצבי חיים ובאוכלוסיות מיוחדות
+Index  496 | Style: Heading 3            | גיל מבוגר, הריון, ילדים, סוכרת, מחלת כליות ורגישויות
+Index  499 | Style: Heading 2            | ‏8.1‏ מדוע המלצה טובה לאדם אחד אינה מתאימה לאחר?
+Index  502 | Style: Heading 2            | ‏8.2‏ הגיל המבוגר: סיבים כן, אבל גם תיאבון, חלבון ונוחות
+Index  505 | Style: Heading 2            | ‏8.3‏ הריון, הנקה, ילדים ומתבגרים
+Index  508 | Style: Heading 2            | ‏8.4‏ סוכרת, מחלת כליות ומחלות כבד
+Index  512 | Style: Heading 2            | ‏8.5‏ מחלות מעי דלקתיות, דיכוי חיסוני ולאחר ניתוח
+Index  515 | Style: Heading 2            | ‏8.6‏ תזונה צמחונית, טבעונית ואלרגיות
+Index  517 | Style: Heading 2            | ‏8.7‏ מפת התאמה לפני שינוי משמעותי
+Index  518 | Style: Heading 2            | סיכום הפרק
+Index  520 | Style: Heading 2            | מקורות והערות
+Index  525 | Style: Normal               | ◆  פרק 9  ◆
+Index  526 | Style: Heading 1            | ציר המעי–מוח, עייפות וניהול אנרגיה
+Index  527 | Style: Heading 3            | מערכת העצבים, איתותים כימיים ומה המחקר יודע — ומה עדיין אינו יודע
+Index  533 | Style: Heading 2            | ‏9.1‏ ציר המעי–מוח: התקשורת הדו־כיוונית
+Index  535 | Style: Heading 3            | ״המוח השני״ — מה הוא באמת יודע לעשות?
+Index  540 | Style: Heading 2            | ‏9.2‏ סרוטונין, דופמין ו־GABA: להבחין בין ייצור מקומי להשפעה מוחית
+Index  542 | Style: Heading 3            | סרוטונין: שני מאגרים שאינם אותו דבר
+Index  544 | Style: Heading 3            | דופמין ו־GABA: מנגנונים מעניינים, יישום קליני מוגבל
+Index  548 | Style: Heading 2            | ‏9.3‏ דלקת, מיקרוביום והקשר האפשרי לעייפות כרונית
+Index  550 | Style: Heading 3            | מחסום המעי: חדירות איננה אבחנה בפני עצמה
+Index  553 | Style: Heading 3            | מה התגלה במחקרי ME/CFS?
+Index  557 | Style: Heading 2            | ‏9.4‏ תת־ספיגה וחסרים תזונתיים: מתי העייפות קשורה למערכת העיכול?
+Index  562 | Style: Heading 2            | ‏9.5‏ מה ניתן לעשות בפועל — בלי להבטיח ״איפוס״ של עצב הוואגוס
+Index  564 | Style: Heading 3            | נשימה סרעפתית: תרגול קצר ונוח
+Index  566 | Style: Heading 3            | ארוחה שמאפשרת הקשבה לגוף
+Index  568 | Style: Heading 3            | תזונה ושינה: בסיס שאינו תלוי בתוסף
+Index  570 | Style: Heading 3            | ומה לגבי גלוטמין, צמחי מרפא ורעמת האריה?
+Index  573 | Style: Heading 2            | ‏9.6‏ תוכנית מעשית: שבעה ימים של התבוננות וניהול אנרגיה
+Index  577 | Style: Heading 3            | החמרה אחרי מאמץ: לא ״להתגבר״ על הגוף
+Index  579 | Style: Heading 2            | סיכום הפרק: להבין את הקשר בלי לצמצם את הגוף למעי
+Index  587 | Style: Heading 2            | מקורות והערות
+Index  599 | Style: Normal               | ◆  פרק 10  ◆
+Index  600 | Style: Heading 1            | המדריך לכרונו־תזונה
+Index  601 | Style: Heading 3            | השעון הביולוגי, ההורמונים ומתי הצלחת הולכת לישון
+Index  607 | Style: Heading 2            | ‏10.1‏ השעון הצירקדי: מי מכוון את הגוף?
+Index  612 | Style: Heading 3            | מה קורה במערכת העיכול?
+Index  615 | Style: Heading 2            | ‏10.2‏ כרונוטיפ: לא כולם קמים עם התרנגול
+Index  618 | Style: Heading 3            | מה מלמדים גני השעון?
+Index  621 | Style: Heading 2            | ‏10.3‏ לוח הזמנים ההורמונלי: דפוסים, לא שעון רכבת
+Index  623 | Style: Heading 3            | מלטונין, אינסולין וגלוקוז
+Index  626 | Style: Heading 3            | קורטיזול, גרלין ולפטין
+Index  629 | Style: Heading 2            | ‏10.4‏ אכילה לילית, חסך שינה ומערכת התגמול
+Index  634 | Style: Heading 2            | ‏10.5‏ אכילה מוגבלת בזמן (TRE): מה ידוע מעבר לכותרות?
+Index  636 | Style: Heading 3            | משקל והרכב גוף: הפרדה בין שעות לכמות האכילה
+Index  640 | Style: Heading 3            | ומה לגבי שריר, מוח והמיקרוביום?
+Index  644 | Style: Heading 2            | ‏10.6‏ פרוטוקול כרונו־תזונה אישי: ארבעה שבועות בלי קיצוניות
+Index  647 | Style: Heading 3            | דוגמאות למסגרת שעות — לא לוח זמנים רפואי
+Index  651 | Style: Heading 3            | איך נדע שהניסוי אינו מתאים?
+Index  653 | Style: Heading 2            | סיכום הפרק: השעון הוא מצפן, לא שוטר תנועה
+Index  661 | Style: Heading 2            | מקורות והערות
+Index  670 | Style: Normal               | ◆  פרק 11  ◆
+Index  671 | Style: Heading 1            | תזמון רכיבים תזונתיים, קפאין וביצועים ספורטיביים
+Index  672 | Style: Heading 3            | החלון האנאבולי, התאוששות השריר והמיקרוביום
+Index  674 | Style: Caption              | איור 11.1 | תזמון אכילה, קפאין והתאוששות סביב אימונים.
+Index  678 | Style: Heading 2            | ‏11.1‏ תזמון רכיבים תזונתיים: קודם הבסיס
+Index  680 | Style: Caption              | איור 11.2 | עקרונות תזמון סביב אימון: חלבון, פחמימות, נוזלים ושינה.
+Index  685 | Style: Heading 2            | ‏11.2‏ קפאין: ערנות, ביצועים וגם שינה
+Index  687 | Style: Heading 3            | מינון ועיתוי — מה המחקרים בדקו?
+Index  691 | Style: Heading 3            | המחיר האפשרי: שינה ומערכת העיכול
+Index  695 | Style: Heading 2            | ‏11.3‏ החלון האנאבולי: פחות מרוץ נגד השעון
+Index  698 | Style: Heading 3            | לוצין וחלוקה לאורך היום
+Index  703 | Style: Heading 2            | ‏11.4‏ חלבון, פחמימות וחידוש מאגרי האנרגיה
+Index  704 | Style: Heading 3            | כמה חלבון צריך?
+Index  707 | Style: Heading 3            | מתי פחמימות חשובות במיוחד?
+Index  710 | Style: Heading 3            | מי גבינה, קזאין וחלבון מן הצומח
+Index  713 | Style: Heading 2            | ‏11.5‏ אימונים עצימים, שינה והמיקרוביום
+Index  716 | Style: Heading 3            | מה עושים כשהבטן מתנגדת לאימון?
+Index  720 | Style: Heading 2            | ‏11.6‏ מדריך מעשי: שלוש תוכניות לפי סוג היום
+Index  723 | Style: Heading 3            | מדריך החלטה קצר
+Index  730 | Style: Heading 2            | סיכום הפרק: תזמון הוא כלי, לא תחליף לתזונה
+Index  737 | Style: Normal               | בפרק הבא נבחן כיצד שינה ולחץ משפיעים על תחושת הגוף ועל יכולת ההתאוששות.
+Index  738 | Style: Heading 2            | מקורות והערות
+Index  749 | Style: Normal               | ◆  פרק 12  ◆
+Index  750 | Style: Heading 1            | שינה, לחץ ובריאות המעיים
+Index  751 | Style: Heading 3            | איך משפרים התאוששות, מתמודדים עם עומס ובונים שגרת ערב מציאותית
+Index  756 | Style: Heading 2            | ‏12.1‏ שינה טובה מתחילה בתזמון, אך אינה מסתיימת בו
+Index  759 | Style: Heading 2            | ‏12.2‏ כשמערכת העיכול מפריעה לישון
+Index  762 | Style: Heading 2            | ‏12.3‏ לחץ, מערכת העצבים והתחושה בבטן
+Index  765 | Style: Heading 2            | ‏12.4‏ שגרת ערב שאפשר להתמיד בה
+Index  766 | Style: Normal               | כאשר התסמינים מפריעים לשינה, השלימו את המעקב לצד בירור התסמינים בפרק 5
+Index  770 | Style: Heading 2            | ‏12.5‏ תרגול קצר להפחתת עוררות
+Index  773 | Style: Heading 2            | ‏12.6‏ כשהעייפות אינה רק בעיה של הרגלים
+Index  777 | Style: Heading 2            | ‏12.7‏ תוכנית שבעה ימים: תצפית, שינוי אחד והערכה
+Index  779 | Style: Heading 2            | 12.8 תוכנית 14 יום לשינה, לחץ ומערכת העיכול
+Index  784 | Style: Heading 2            | 12.9 כלים קצרים של 4–5 דקות
+Index  789 | Style: Heading 2            | 12.10 שגרת ערב מודולרית לפי אילוצי החיים
+Index  790 | Style: Heading 2            | 12.11 כיצד למדוד שינוי ב־14 יום בלי לייצר עומס
+Index  793 | Style: Heading 2            | מקורות והערות
+Index  798 | Style: Normal               | ◆  פרק 13  ◆
+Index  799 | Style: Heading 1            | תנועה, תנועתיות וניהול אנרגיה
+Index  800 | Style: Heading 3            | פעילות מתונה, התמודדות עם עצירות והתאוששות בלי להעמיס על הגוף
+Index  803 | Style: Heading 2            | ‏13.1‏ למה תנועה שייכת לספר על המעיים?
+Index  806 | Style: Heading 2            | ‏13.2‏ הליכה וסדירות יציאות
+Index  810 | Style: Heading 2            | ‏13.3‏ פעילות כללית: איך נראית מסגרת סבירה?
+Index  813 | Style: Heading 2            | ‏13.4‏ מה עושים אם האימון עצמו גורם לתסמיני עיכול?
+Index  816 | Style: Heading 2            | ‏13.5‏ עייפות מתמשכת והחמרה אחרי מאמץ
+Index  818 | Style: Heading 2            | ‏13.6‏ תוכנית גמישה לשבוע ראשון
+Index  820 | Style: Heading 2            | 13.7 תנועה עדינה לעצירות ולתנועתיות
+Index  825 | Style: Heading 2            | 13.8 Pacing והחמרה אחרי מאמץ
+Index  828 | Style: Normal               | • החמרה ממושכת אחרי מאמץ מחייבת התאמה מיוחדת ולעיתים ייעוץ מקצועי; פרק זה אינו מחליף תוכנית שיקום אישית.
+Index  829 | Style: Heading 2            | 13.9 רמות פעילות לפי מצב אנרגיה ותוכנית 4 שבועות
+Index  830 | Style: Heading 2            | 13.10 תזמון אכילה סביב תנועה
+Index  834 | Style: Heading 2            | 13.11 תוכנית תנועה בת ארבעה שבועות לפי יכולת
+Index  836 | Style: Heading 3            | דף התאמה מהיר סביב ארוחה
+Index  840 | Style: Heading 2            | סיכום הפרק
+Index  842 | Style: Heading 2            | מקורות והערות
+Index  847 | Style: Normal               | ◆  פרק 14  ◆
+Index  848 | Style: Heading 1            | פסיכולוגיה של השינוי: מהרגל קטן לבריאות מעיים לאורך זמן
+Index  849 | Style: Heading 3            | הרגלים אטומיים, Tiny Habits וחיבור הרגלים לשגרה
+Index  851 | Style: Caption              | איור 14.1 | שינוי הרגלים קטן, עקבי ובר־קיימא לאורך זמן.
+Index  855 | Style: Heading 2            | ‏14.1‏ כיצד נוצר הרגל: הקשר, חזרה ואוטומטיות
+Index  858 | Style: Heading 3            | מה קורה במוח כשפעולה נעשית מוכרת?
+Index  861 | Style: Heading 2            | ‏14.2‏ הרגלים אטומיים: ארבע שאלות לפני שמשנים תפריט
+Index  866 | Style: Heading 2            | ‏14.3‏ Tiny Habits: שינוי זעיר שמצליח להיכנס ליום עמוס
+Index  869 | Style: Heading 3            | כיצד בוחרים פעולה קטנה מספיק?
+Index  873 | Style: Heading 2            | ‏14.4‏ חיבור הרגלים ותוכנית ״אם–אז״: פחות לזכור, יותר לבצע
+Index  878 | Style: Heading 2            | ‏14.5‏ סביבה, מעקב ויכולת התאוששות מכישלון
+Index  881 | Style: Heading 3            | מעקב בלי להפוך את האכילה למבחן
+Index  884 | Style: Heading 3            | כשמחמיצים יום — תוכנית חזרה
+Index  887 | Style: Heading 2            | ‏14.6‏ תוכנית בת 28 ימים: הרגל אחד שמחזיק מעמד
+Index  890 | Style: Heading 3            | מדריך קצר לבחירת הרגל בתחום התזונה
+Index  893 | Style: Heading 3            | דף עבודה — למילוי אישי
+Index  896 | Style: Heading 2            | סיכום הפרק: קל להתחיל, אפשר לחזור, מותר להתאים
+Index  897 | Style: Normal               | ‏• הרגל צומח מחזרה בהקשר מוכר; אין פרק זמן אחיד שבו כל פעולה הופכת אוטומטית.
+Index  904 | Style: Heading 2            | מקורות והערות
+Index  912 | Style: Normal               | ◆  פרק 15  ◆
+Index  913 | Style: Heading 1            | כלים לשינוי דפוסים — ומה באמת מבוסס
+Index  914 | Style: Heading 3            | חשיפת הצורך שמאחורי ההרגל, מיפוי טריגרים ועבודת חלקים
+Index  920 | Style: Heading 2            | ‏15.1‏ בין הרגל נקודתי לדפוס חוזר
+Index  925 | Style: Heading 2            | ‏15.2‏ הרווח המשני: איזו תועלת ההתנהגות מספקת?
+Index  928 | Style: Heading 3            | שלוש שאלות שמקדמות בירור
+Index  934 | Style: Heading 2            | ‏15.3‏ יומן טריגרים בחמישה ממדים
+Index  938 | Style: Heading 3            | מיפוי מהיר: רצף שאפשר לשנות
+Index  940 | Style: Heading 2            | ‏15.4‏ שלוש טכניקות NLP: עיגון, סוויש ומסגור מחדש
+Index  942 | Style: Heading 3            | עיגון (Anchoring): תזכורת גופנית לעצירה
+Index  945 | Style: Heading 3            | סוויש (Swish): החלפת דימוי, בלי הבטחת ״תכנות מחדש״
+Index  948 | Style: Heading 3            | מסגור מחדש (Reframing): מפרשנות נוקשה לתיאור מדויק
+Index  951 | Style: Heading 2            | ‏15.5‏ עבודת חלקים: להקשיב לצרכים מתנגשים
+Index  956 | Style: Heading 2            | ‏15.6‏ תמונת עתיד ותכנון ״אם–אז״
+Index  960 | Style: Heading 2            | ‏15.7‏ תוכנית יישום לשבעה ימים
+Index  964 | Style: Heading 2            | סיכום הפרק: פחות מאבק, יותר בדיקה
+Index  972 | Style: Heading 2            | מקורות והערות
+Index  974 | Style: Normal               | [2] Wood W, Rünger D. Psychology of Habit. Annu Rev Psychol. 2016;67:289–314. doi:10.1146/annurev-psych-122414-033417.
+Index  978 | Style: Normal               | ◆  פרק 16  ◆
+Index  979 | Style: Heading 1            | תוכנית שבעת הימים לבריאות המעיים
+Index  980 | Style: Heading 3            | תזונה מגוונת, התאמה אישית ותפריט מעשי — בלי הבטחות לאיפוס קסם
+Index  986 | Style: Heading 2            | ‏16.1‏ ארבעת עמודי התווך: מה ננסה לשנות?
+Index  992 | Style: Heading 2            | ‏16.2‏ תוספי תזונה: מתי יש הצדקה — ומתי אין
+Index  996 | Style: Heading 2            | ‏16.3‏ התפריט המלא: שבעה ימים שאפשר להכין בבית
+Index  998 | Style: Heading 3            | יום 1: נקודת פתיחה נוחה
+Index 1004 | Style: Heading 3            | יום 2: הרחבת מגוון ללא עומס
+Index 1010 | Style: Heading 3            | יום 3: דגנים וקטניות במידה
+Index 1016 | Style: Heading 3            | יום 4: שגרה שאפשר לשחזר
+Index 1022 | Style: Heading 3            | יום 5: חלבון צמחי וגמישות
+Index 1028 | Style: Heading 3            | יום 6: הכנה מראש ליום עמוס
+Index 1034 | Style: Heading 3            | יום 7: בחירת הרגלים להמשך
+Index 1041 | Style: Heading 2            | 16.3א הכנה מעשית: שלושה מתכוני בסיס
+Index 1042 | Style: Heading 3            | מרק עדשים כתומות ובטטה — כ־4 מנות
+Index 1044 | Style: Heading 3            | קערה ים־תיכונית מוכנה מראש — מנה אחת
+Index 1046 | Style: Heading 3            | שייק משביע — מנה אחת
+Index 1048 | Style: Heading 2            | ‏16.4‏ רשימת קניות והיערכות קצרה
+Index 1050 | Style: Heading 2            | ‏16.5‏ מה עושים ביום השמיני? תחזוקה ולא ״חזרה למצב הקודם״
+Index 1054 | Style: Heading 3            | מדדים פשוטים לסיכום השבוע
+Index 1057 | Style: Heading 2            | סיכום הפרק
+Index 1064 | Style: Normal               | בפרק הבא נתמקד במעקב אישי: כיצד לתעד תסמינים, להבחין בין שינוי אמיתי לתנודות טבעיות ולזהות מתי כדאי לפנות לאיש מקצוע.
+Index 1065 | Style: Heading 2            | מקורות והערות
+Index 1075 | Style: Normal               | ◆  פרק 17  ◆
+Index 1076 | Style: Heading 1            | ניטור, יומן מעקב אישי ומדדי אנרגיה
+Index 1077 | Style: Heading 3            | להפוך תחושות לנתונים שימושיים — בלי להפוך את הבית למרפאת אבחון
+Index 1083 | Style: Heading 2            | ‏17.1‏ למה מעקב אישי עדיף על ניחוש
+Index 1087 | Style: Heading 2            | ‏17.2‏ יומן 14 הימים: קודם תצפית, אחר כך שינוי
+Index 1090 | Style: Heading 3            | אילו נתונים ראוי לתעד — ואילו לא?
+Index 1094 | Style: Heading 2            | ‏17.3‏ CEO Code — מודל אישי לניהול אנרגיה, לא בדיקה רפואית
+Index 1099 | Style: Heading 2            | ‏17.4‏ יציאות, נפיחות והמשמעות של סולם בריסטול
+Index 1105 | Style: Heading 3            | מתי לא מחכים לסיום 14 הימים?
+Index 1108 | Style: Heading 2            | ‏17.5‏ שבלונת מעקב מוכנה לשימוש
+Index 1113 | Style: Heading 3            | סקירה שבועית קצרה
+Index 1116 | Style: Heading 2            | סיכום הפרק
+Index 1122 | Style: Normal               | בפרק הבא נלמד לבחון ביקורתית בדיקות מסחריות, תוספים והבטחות שיווקיות לפני שנבנה תוכנית ארוכת טווח.
+Index 1123 | Style: Heading 2            | מקורות והערות
+Index 1130 | Style: Normal               | ◆  פרק 18  ◆
+Index 1131 | Style: Heading 1            | מיתוסים, בדיקות ושיווק בבריאות המעיים
+Index 1132 | Style: Heading 3            | כיצד להעריך הבטחות על דיטוקס, בדיקות מיקרוביום ותוספי תזונה
+Index 1136 | Style: Heading 2            | ‏18.1‏ שבע שאלות לפני שמאמינים לטענה
+Index 1139 | Style: Heading 2            | ‏18.2‏ בדיקות מיקרוביום מסחריות: מפת חיים או תמונת מצב חלקית?
+Index 1143 | Style: Heading 2            | ‏18.3‏ דיטוקס ו״ניקוי מעיים״: לשאול מה מנקים
+Index 1147 | Style: Heading 2            | ‏18.4‏ תוספים שמבטיחים לשקם את המעי
+Index 1151 | Style: Heading 2            | ‏18.5‏ ״טבעי״ אינו שם נרדף לבטוח
+Index 1153 | Style: Heading 2            | ‏18.6‏ מיתוס ה״מדד היחיד״: מגוון חיידקים אינו תעודת בריאות
+Index 1156 | Style: Heading 2            | ‏18.7‏ דף החלטה לפני רכישה או שינוי תזונתי
+Index 1160 | Style: Heading 2            | מקורות והערות
+Index 1165 | Style: Normal               | ◆  פרק 19  ◆
+Index 1166 | Style: Heading 1            | חזון הבריאות לטווח הארוך
+Index 1167 | Style: Heading 3            | התאוששות ממעידות, קיימות תזונתית ואורח חיים שאפשר להתמיד בו
+Index 1173 | Style: Heading 2            | ‏19.1‏ מדיאטה זמנית לאורח חיים של חיוניות
+Index 1177 | Style: Heading 3            | קיימות תזונתית: שלושה מבחנים שימושיים
+Index 1180 | Style: Heading 2            | ‏19.2‏ פרוטוקול התאוששות ממעידה
+Index 1190 | Style: Heading 2            | ‏19.3‏ תוחלת חיים ותוחלת בריאות — מה ידוע על המיקרוביום
+Index 1195 | Style: Heading 3            | שלושה דברים שלא צריך לרדוף אחריהם
+Index 1199 | Style: Heading 2            | ‏19.4‏ מנגנון החיוניות השלם: ארבעה עוגנים
+Index 1205 | Style: Heading 2            | ‏19.5‏ אמנת החיוניות האישית — תוכנית שאפשר לקחת הביתה
+Index 1207 | Style: Heading 3            | בוקר: כניסה מתונה ליום
+Index 1211 | Style: Heading 3            | יום: מזון, תנועה ומקום לנשום
+Index 1216 | Style: Heading 3            | ערב: לאפשר למערכת להירגע
+Index 1221 | Style: Heading 3            | איך נראית תחזוקה חודשית?
+Index 1224 | Style: Heading 2            | סיכום הפרק
+Index 1227 | Style: Heading 2            | מקורות והערות
+Index 1233 | Style: Heading 1            | מילון מונחים
+Index 1260 | Style: Heading 1            | מתי לא להסתפק בשינוי תזונתי
+Index 1261 | Style: Normal               | להרחבה על נפיחות, עצירות, שלשול, מעי רגיז, FODMAP, צליאק וצרבת ראו פרק 5.
+Index 1267 | Style: Heading 1            | על הספר

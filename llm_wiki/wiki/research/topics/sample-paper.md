@@ -7,8 +7,12 @@ domain:
 id: sample-paper
 mocs: []
 related:
-- '[[agent-verification]]'
 - '[[agent-memory]]'
+- '[[Planning]]'
+- '[[Agent-Memory]]'
+- '[[agent-verification]]'
+- '[[Verification]]'
+- '[[Agent-Verification]]'
 share_policy: allowed
 source_domain:
 - research
@@ -18,16 +22,20 @@ status: active
 tags:
 - research
 type: source_summary
-updated: '2026-09-22'
+updated: '2026-10-12'
 ---
 
 # Sample Paper
 
-[Ollama Provider Fallback] Unable to reach local model: [WinError 10061] No connection could be made because the target machine actively refused it
+Autonomous agents use hierarchical planning, memory stores, and verification gates.
 
 ## Provenance & Sources
 - `raw\research\documents\sample_paper.md`
 
 ## Related Notes
-- [[agent-verification]]
 - [[agent-memory]]
+- [[Planning]]
+- [[Agent-Memory]]
+- [[agent-verification]]
+- [[Verification]]
+- [[Agent-Verification]]

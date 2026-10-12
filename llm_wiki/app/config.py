@@ -10,7 +10,8 @@ USE_POSTGRES = os.getenv("USE_POSTGRES", "false").lower() == "true"
 
 # LLM Config
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:latest")
+
 
 # Privacy Policies
 PERSONAL_SENSITIVE_LOCAL_ONLY = os.getenv("PERSONAL_SENSITIVE_LOCAL_ONLY", "true").lower() == "true"
