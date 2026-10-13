@@ -326,6 +326,26 @@ def watch():
     watcher = InboxWatcherService()
     watcher.start()
 
+@app.command("schedule")
+def schedule_cmd(
+    interval: int = typer.Option(300, "--interval", "-i", help="Maintenance cycle interval in seconds (default: 300s = 5m)")
+):
+    """
+    Launches automated background maintenance loop (Memory consolidation, Research sync, Vault audits).
+    """
+    import time
+    from app.services.scheduler import VaultMaintenanceScheduler
+    typer.echo(f"🔄 Starting Automated Vault Maintenance Scheduler (Every {interval}s)...")
+    typer.echo("Press Ctrl+C to terminate.")
+    scheduler = VaultMaintenanceScheduler(interval_seconds=interval)
+    scheduler.run_cycle()
+    try:
+        while True:
+            time.sleep(interval)
+            scheduler.run_cycle()
+    except KeyboardInterrupt:
+        typer.echo("\n🛑 Scheduler stopped.")
+
 @app.callback(invoke_without_command=True)
 def main_callback(
     ctx: typer.Context,
