@@ -6,26 +6,26 @@
     <title>LLM Wiki — Knowledge & Memory Portal</title>
     <style>
         * { box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 2rem; }
-        .container { max-width: 800px; margin: 0 auto; background: #1e293b; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 1.5rem; }
+        .container { max-width: 1050px; margin: 0 auto; background: #1e293b; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         h1 { margin-top: 0; color: #38bdf8; font-size: 1.75rem; text-align: center; margin-bottom: 1.5rem; }
         
-        .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid #334155; }
-        .tab { padding: 0.85rem 1.5rem; cursor: pointer; color: #94a3b8; font-weight: 700; border-bottom: 3px solid transparent; user-select: none; border-radius: 6px 6px 0 0; transition: all 0.2s ease; }
+        .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid #334155; flex-wrap: wrap; }
+        .tab { padding: 0.85rem 1.25rem; cursor: pointer; color: #94a3b8; font-weight: 700; border-bottom: 3px solid transparent; user-select: none; border-radius: 6px 6px 0 0; transition: all 0.2s ease; }
         .tab:hover { background: #334155; color: #f1f5f9; }
         .tab.active { color: #38bdf8; border-color: #38bdf8; background: #0f172a; }
         
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
-        .dropzone { border: 2px dashed #38bdf8; border-radius: 10px; padding: 3rem 1.5rem; text-align: center; background: #0f172a; cursor: pointer; transition: all 0.2s ease; margin-bottom: 1.25rem; }
+        .dropzone { border: 2px dashed #38bdf8; border-radius: 10px; padding: 2.5rem 1.5rem; text-align: center; background: #0f172a; cursor: pointer; transition: all 0.2s ease; margin-bottom: 1.25rem; }
         .dropzone:hover, .dropzone.dragover { background: #1e293b; border-color: #22c55e; box-shadow: 0 0 15px rgba(34, 197, 94, 0.3); }
         .dropzone.has-file { border-color: #22c55e; background: #064e3b; }
         
         .form-group { margin-bottom: 1.25rem; }
         label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: #cbd5e1; }
         input[type="text"], textarea, select, button { width: 100%; padding: 0.85rem; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 1rem; }
-        textarea { height: 160px; font-family: monospace; resize: vertical; }
+        textarea { height: 140px; font-family: monospace; resize: vertical; }
         
         button { background: #4f46e5; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 0.5rem; font-size: 1.05rem; }
         button:hover { background: #6366f1; }
@@ -35,16 +35,30 @@
         .card { background: #0f172a; padding: 1.25rem; border-radius: 8px; border: 1px solid #334155; margin-bottom: 1rem; }
         .card h3 { margin-top: 0; color: #38bdf8; font-size: 1.15rem; }
         .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; background: #3b82f6; color: #fff; }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+        
+        /* Graph View Styles */
+        #graphContainer { width: 100%; height: 550px; background: #090d16; border-radius: 8px; border: 1px solid #334155; position: relative; overflow: hidden; }
+        #graphCanvas { width: 100%; height: 100%; display: block; cursor: grab; }
+        #graphCanvas:active { cursor: grabbing; }
+        .graph-controls { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; align-items: center; flex-wrap: wrap; }
+        .graph-controls input { flex: 1; min-width: 180px; }
+        .graph-legend { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.5rem; font-size: 0.85rem; color: #94a3b8; }
+        .legend-item { display: flex; align-items: center; gap: 0.35rem; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🧠 LLM Wiki Knowledge Portal</h1>
+        <h1>🧠 LLM Wiki Knowledge & Memory Portal</h1>
         
         <div class="tabs">
             <div class="tab active" id="tabHeaderFile" onclick="activateTab('fileTab')">📁 Ingest File</div>
             <div class="tab" id="tabHeaderText" onclick="activateTab('textTab')">📝 Ingest Note / Text</div>
             <div class="tab" id="tabHeaderMemory" onclick="activateTab('memoryTab')">🧠 Memory Dashboard</div>
+            <div class="tab" id="tabHeaderGraph" onclick="activateTab('graphTab')">🕸️ Knowledge Graph</div>
         </div>
 
         <!-- TAB 1: FILE INGESTION -->
@@ -105,8 +119,82 @@
             <div id="memoryOverview">
                 <p style="color: #94a3b8;">Loading memory system state...</p>
             </div>
-            <button onclick="fetchMemoryOverview()" style="background: #0284c7; margin-top: 1rem;">🔄 Refresh Memory Overview</button>
-            <button onclick="triggerConsolidation()" style="background: #16a34a; margin-top: 0.5rem;">⚡ Trigger Daily Consolidation</button>
+            
+            <div class="grid-2">
+                <div>
+                    <button onclick="fetchMemoryOverview()" style="background: #0284c7; margin-top: 0.5rem;">🔄 Refresh Memory Overview</button>
+                </div>
+                <div>
+                    <button onclick="triggerConsolidation()" style="background: #16a34a; margin-top: 0.5rem;">⚡ Trigger Daily Consolidation</button>
+                </div>
+            </div>
+
+            <!-- Context Inspector -->
+            <div class="card" style="margin-top: 1.5rem;">
+                <h3>🔍 Inspect Project Context for LLM</h3>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="contextProjectInput" placeholder="Project name, e.g. llm_wiki" value="llm_wiki">
+                    <button onclick="inspectContext()" style="width: auto; padding: 0.85rem 1.5rem; margin-top: 0; background: #6366f1;">Inspect</button>
+                </div>
+                <div id="contextDisplay" style="margin-top: 1rem; display: none;">
+                    <textarea id="contextTextarea" readonly style="height: 180px; font-size: 0.9rem;"></textarea>
+                </div>
+            </div>
+
+            <!-- Quick Memory Capture Form -->
+            <div class="card" style="margin-top: 1rem;">
+                <h3>📝 Quick Event / Decision Capture</h3>
+                <form id="quickCaptureForm">
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Capture Type</label>
+                            <select id="quickCaptureType" onchange="toggleCaptureFields()">
+                                <option value="event">Activity / Thought Event</option>
+                                <option value="decision">Explicit Decision</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Project / Domain Hint</label>
+                            <input type="text" id="quickProject" placeholder="e.g. llm_wiki, research_manager" value="llm_wiki">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Title / Topic</label>
+                        <input type="text" id="quickTitle" placeholder="e.g. SQLite Index Optimization" required>
+                    </div>
+                    <div class="form-group" id="decisionReasonGroup" style="display: none;">
+                        <label>Decision Rationale / Reason</label>
+                        <input type="text" id="quickReason" placeholder="e.g. Improves query latency by 80%">
+                    </div>
+                    <div class="form-group">
+                        <label id="quickContentLabel">Content / Decision Details</label>
+                        <textarea id="quickContent" placeholder="Enter captured details..." required style="height: 100px;"></textarea>
+                    </div>
+                    <button type="submit" style="background: #8b5cf6;">SUBMIT CAPTURE TO MEMORY</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB 4: KNOWLEDGE GRAPH -->
+        <div id="graphTab" class="tab-content">
+            <div class="graph-controls">
+                <input type="text" id="graphSearchInput" placeholder="🔍 Search note by title or domain..." oninput="filterGraph()">
+                <button onclick="loadGraphData()" style="width: auto; padding: 0.75rem 1.25rem; margin-top: 0; background: #0284c7;">🔄 Reset Graph</button>
+            </div>
+            
+            <div class="graph-legend">
+                <div class="legend-item"><span class="legend-dot" style="background: #38bdf8;"></span> Projects (10_Projects)</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #a855f7;"></span> Research (20_Research)</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #eab308;"></span> Decisions (40_Decisions)</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #22c55e;"></span> MOCs / Synthesis</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #f43f5e;"></span> Wiki Concepts</div>
+                <div class="legend-item"><span class="legend-dot" style="background: #64748b;"></span> External / Ghost</div>
+            </div>
+
+            <div id="graphContainer" style="margin-top: 0.75rem;">
+                <canvas id="graphCanvas"></canvas>
+            </div>
+            <p id="graphStats" style="color: #94a3b8; font-size: 0.9rem; margin-top: 0.5rem;">Loading graph...</p>
         </div>
 
         <div id="status"></div>
@@ -114,7 +202,6 @@
 
     <script>
         function activateTab(tabId) {
-            console.log("Activating tab:", tabId);
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
@@ -128,6 +215,10 @@
                 document.getElementById('tabHeaderMemory').classList.add('active');
                 document.getElementById('memoryTab').classList.add('active');
                 fetchMemoryOverview();
+            } else if (tabId === 'graphTab') {
+                document.getElementById('tabHeaderGraph').classList.add('active');
+                document.getElementById('graphTab').classList.add('active');
+                initGraph();
             }
         }
 
@@ -267,16 +358,318 @@
             }
         }
 
+        async function inspectContext() {
+            const proj = document.getElementById('contextProjectInput').value.trim();
+            if (!proj) return;
+            try {
+                const res = await fetch(`/api/v1/memory/context/${encodeURIComponent(proj)}`);
+                const data = await res.json();
+                document.getElementById('contextDisplay').style.display = 'block';
+                document.getElementById('contextTextarea').value = data.context_prompt || JSON.stringify(data, null, 2);
+            } catch (err) {
+                alert('Failed to fetch context: ' + err.message);
+            }
+        }
+
+        function toggleCaptureFields() {
+            const type = document.getElementById('quickCaptureType').value;
+            const reasonGroup = document.getElementById('decisionReasonGroup');
+            const contentLabel = document.getElementById('quickContentLabel');
+            if (type === 'decision') {
+                reasonGroup.style.display = 'block';
+                contentLabel.textContent = 'Decision Made';
+            } else {
+                reasonGroup.style.display = 'none';
+                contentLabel.textContent = 'Content / Observation';
+            }
+        }
+
+        document.getElementById('quickCaptureForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const type = document.getElementById('quickCaptureType').value;
+            const project = document.getElementById('quickProject').value;
+            const title = document.getElementById('quickTitle').value;
+            const content = document.getElementById('quickContent').value;
+            const reason = document.getElementById('quickReason').value;
+
+            try {
+                if (type === 'decision') {
+                    const formData = new FormData();
+                    formData.append('project_or_domain', project);
+                    formData.append('topic', title);
+                    formData.append('decision', content);
+                    formData.append('reason', reason || 'Quick capture');
+                    const res = await fetch('/api/v1/memory/decision', { method: 'POST', body: formData });
+                    const data = await res.json();
+                    showStatus('✅ DECISION RECORDED:\n' + JSON.stringify(data, null, 2));
+                } else {
+                    const res = await fetch('/api/v1/capture/event', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            source_type: 'dev',
+                            title: title,
+                            content: content,
+                            domain: 'development',
+                            project_hint: project
+                        })
+                    });
+                    const data = await res.json();
+                    showStatus('✅ EVENT CAPTURED:\n' + JSON.stringify(data, null, 2));
+                }
+                fetchMemoryOverview();
+                document.getElementById('quickTitle').value = '';
+                document.getElementById('quickContent').value = '';
+            } catch (err) {
+                showStatus('❌ ERROR: ' + err.message);
+            }
+        });
+
         function showStatus(msg) {
             status.style.display = 'block';
             status.textContent = msg;
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('tabHeaderFile').onclick = () => activateTab('fileTab');
-            document.getElementById('tabHeaderText').onclick = () => activateTab('textTab');
-            document.getElementById('tabHeaderMemory').onclick = () => activateTab('memoryTab');
-        });
+        /* --- INTERACTIVE KNOWLEDGE GRAPH SIMULATOR --- */
+        let graphData = { nodes: [], links: [] };
+        let nodes = [];
+        let links = [];
+        let canvas, ctx;
+        let animationFrameId;
+        let hoveredNode = null;
+        let draggedNode = null;
+        let transform = { x: 0, y: 0, k: 1 };
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
+
+        function getGroupColor(group) {
+            if (!group) return '#64748b';
+            if (group.includes('10_Projects')) return '#38bdf8';
+            if (group.includes('20_Research')) return '#a855f7';
+            if (group.includes('40_Decisions')) return '#eab308';
+            if (group.includes('mocs')) return '#22c55e';
+            if (group.includes('wiki')) return '#f43f5e';
+            return '#94a3b8';
+        }
+
+        function initGraph() {
+            canvas = document.getElementById('graphCanvas');
+            const container = document.getElementById('graphContainer');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            ctx = canvas.getContext('2d');
+
+            setupGraphEvents();
+            loadGraphData();
+        }
+
+        async function loadGraphData() {
+            try {
+                document.getElementById('graphStats').textContent = 'Loading graph data from vault...';
+                const res = await fetch('/api/v1/wiki/graph');
+                graphData = await res.json();
+                
+                document.getElementById('graphStats').textContent = 
+                    `Vault Graph: ${graphData.total_nodes} Notes & Entities | ${graphData.total_links} Links & Provenance Connections`;
+
+                const width = canvas.width;
+                const height = canvas.height;
+
+                const nodeMap = {};
+                nodes = graphData.nodes.map(n => {
+                    const node = {
+                        ...n,
+                        x: width / 2 + (Math.random() - 0.5) * (width * 0.7),
+                        y: height / 2 + (Math.random() - 0.5) * (height * 0.7),
+                        vx: 0,
+                        vy: 0,
+                        radius: Math.max(5, Math.min(18, 5 + (n.degree || 0) * 1.5)),
+                        color: getGroupColor(n.group)
+                    };
+                    nodeMap[node.id] = node;
+                    return node;
+                });
+
+                links = graphData.links.map(l => ({
+                    source: nodeMap[l.source] || null,
+                    target: nodeMap[l.target] || null
+                })).filter(l => l.source && l.target);
+
+                transform = { x: 0, y: 0, k: 1 };
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                simulateGraph();
+            } catch (err) {
+                document.getElementById('graphStats').textContent = 'Failed to load graph: ' + err.message;
+            }
+        }
+
+        function simulateGraph() {
+            // Simple force-directed step
+            const repulsion = 120;
+            const springLen = 60;
+            const springK = 0.05;
+            const centerGravity = 0.01;
+            const damping = 0.88;
+
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            for (let i = 0; i < nodes.length; i++) {
+                const n1 = nodes[i];
+                // Center gravity
+                n1.vx += (cx - n1.x) * centerGravity;
+                n1.vy += (cy - n1.y) * centerGravity;
+
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const n2 = nodes[j];
+                    const dx = n2.x - n1.x;
+                    const dy = n2.y - n1.y;
+                    const distSq = dx * dx + dy * dy + 10;
+                    const dist = Math.sqrt(distSq);
+                    const force = repulsion / distSq;
+                    const fx = (dx / dist) * force;
+                    const fy = (dy / dist) * force;
+                    n1.vx -= fx;
+                    n1.vy -= fy;
+                    n2.vx += fx;
+                    n2.vy += fy;
+                }
+            }
+
+            for (const link of links) {
+                const dx = link.target.x - link.source.x;
+                const dy = link.target.y - link.source.y;
+                const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                const force = (dist - springLen) * springK;
+                const fx = (dx / dist) * force;
+                const fy = (dy / dist) * force;
+                link.source.vx += fx;
+                link.source.vy += fy;
+                link.target.vx -= fx;
+                link.target.vy -= fy;
+            }
+
+            for (const n of nodes) {
+                if (n === draggedNode) continue;
+                n.vx *= damping;
+                n.vy *= damping;
+                n.x += n.vx;
+                n.y += n.vy;
+            }
+
+            renderGraph();
+            animationFrameId = requestAnimationFrame(simulateGraph);
+        }
+
+        function renderGraph() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.translate(transform.x, transform.y);
+            ctx.scale(transform.k, transform.k);
+
+            // Draw links
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1;
+            for (const link of links) {
+                ctx.beginPath();
+                ctx.moveTo(link.source.x, link.source.y);
+                ctx.lineTo(link.target.x, link.target.y);
+                ctx.stroke();
+            }
+
+            // Draw nodes
+            for (const n of nodes) {
+                ctx.beginPath();
+                ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2);
+                ctx.fillStyle = n.color;
+                ctx.fill();
+                ctx.strokeStyle = (hoveredNode === n) ? '#ffffff' : '#0f172a';
+                ctx.lineWidth = (hoveredNode === n) ? 2.5 : 1;
+                ctx.stroke();
+
+                // Draw label if connected or hovered
+                if (n.radius >= 8 || hoveredNode === n) {
+                    ctx.fillStyle = (hoveredNode === n) ? '#38bdf8' : '#cbd5e1';
+                    ctx.font = (hoveredNode === n) ? 'bold 12px sans-serif' : '10px sans-serif';
+                    ctx.fillText(n.label, n.x + n.radius + 3, n.y + 3);
+                }
+            }
+
+            ctx.restore();
+        }
+
+        function setupGraphEvents() {
+            canvas.addEventListener('mousedown', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = (e.clientX - rect.left - transform.x) / transform.k;
+                const mouseY = (e.clientY - rect.top - transform.y) / transform.k;
+
+                let clicked = null;
+                for (const n of nodes) {
+                    const dist = Math.hypot(n.x - mouseX, n.y - mouseY);
+                    if (dist <= n.radius) {
+                        clicked = n;
+                        break;
+                    }
+                }
+
+                if (clicked) {
+                    draggedNode = clicked;
+                } else {
+                    isDragging = true;
+                    dragStart = { x: e.clientX - transform.x, y: e.clientY - transform.y };
+                }
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = (e.clientX - rect.left - transform.x) / transform.k;
+                const mouseY = (e.clientY - rect.top - transform.y) / transform.k;
+
+                if (draggedNode) {
+                    draggedNode.x = mouseX;
+                    draggedNode.y = mouseY;
+                    draggedNode.vx = 0;
+                    draggedNode.vy = 0;
+                } else if (isDragging) {
+                    transform.x = e.clientX - dragStart.x;
+                    transform.y = e.clientY - dragStart.y;
+                } else {
+                    hoveredNode = null;
+                    for (const n of nodes) {
+                        const dist = Math.hypot(n.x - mouseX, n.y - mouseY);
+                        if (dist <= n.radius + 2) {
+                            hoveredNode = n;
+                            break;
+                        }
+                    }
+                }
+            });
+
+            window.addEventListener('mouseup', () => {
+                draggedNode = null;
+                isDragging = false;
+            });
+
+            canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
+                transform.k = Math.max(0.2, Math.min(4, transform.k * zoomFactor));
+            });
+        }
+
+        function filterGraph() {
+            const query = document.getElementById('graphSearchInput').value.toLowerCase().trim();
+            for (const n of nodes) {
+                if (!query) {
+                    n.color = getGroupColor(n.group);
+                } else if (n.label.toLowerCase().includes(query) || (n.group && n.group.toLowerCase().includes(query))) {
+                    n.color = '#38bdf8';
+                } else {
+                    n.color = '#1e293b';
+                }
+            }
+        }
     </script>
 </body>
 </html>

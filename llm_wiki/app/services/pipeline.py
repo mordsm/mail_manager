@@ -5,6 +5,7 @@ from app.services.parser import MarkdownParser
 from app.services.atomic_note import AtomicNoteService
 from app.services.moc_service import MOCService
 from app.services.git_service import GitService
+from app.services.contradiction import ContradictionService
 from app.llm.base import LLMProvider
 from app.llm.ollama_provider import OllamaProvider
 
@@ -20,6 +21,7 @@ class LLMWikiPipeline:
         self.moc_service = MOCService(root_dir=self.root_dir)
         self.git_service = GitService(root_dir=self.root_dir)
         self.llm = llm_provider or OllamaProvider()
+        self.contradiction_service = ContradictionService(root_dir=self.root_dir, llm_provider=self.llm)
 
     def process_file(self, source_path: Union[str, Path], domain: str = "unclassified") -> Dict[str, Any]:
         # 1. Receive & Save Raw Immutable Copy
@@ -37,22 +39,33 @@ class LLMWikiPipeline:
         else:
             content = f"Source binary asset preserved at {raw_path.name}"
 
+        target_domain = domain if domain != "unclassified" else "research"
+
         # 3. AI Extraction
-        extraction = self.llm.extract_entities_and_claims(content, domain=domain)
+        extraction = self.llm.extract_entities_and_claims(content, domain=target_domain)
+
+        # 3b. Automated Contradiction Detection against existing knowledge
+        contradictions = self.contradiction_service.detect_contradictions(
+            extraction.get("claims", []),
+            target_domain,
+            raw_path.name
+        )
 
         # 4. Synthesize Atomic Note
         title = raw_path.stem.replace("_", " ").replace("-", " ").title()
         summary = extraction.get("summary", content[:500])
         concepts = extraction.get("concepts", [])
+        for cp in contradictions:
+            concepts.append(f"contradiction-{cp.stem}")
 
         note_path = self.atomic_service.create_or_update_note(
             title=title,
-            domain=domain if domain != "unclassified" else "research",
+            domain=target_domain,
             note_type="source_summary",
             content=summary,
             sources=[str(raw_path.relative_to(self.root_dir))],
             related=[f"[[{c}]]" for c in concepts],
-            tags=[domain]
+            tags=[target_domain]
         )
 
         # 5. Update MOC and Domain Log

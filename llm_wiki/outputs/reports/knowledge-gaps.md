@@ -1,8 +1,8 @@
 # LLM Wiki Knowledge Gap & Integrity Report
 
-- **Total Wiki Notes Analyzed**: 41
-- **Broken Links Detected**: 112
-- **Orphan Notes**: 12
+- **Total Wiki Notes Analyzed**: 43
+- **Broken Links Detected**: 86
+- **Orphan Notes**: 14
 - **Missing Frontmatter**: 12
 
 ## Broken Links
@@ -11,42 +11,15 @@
 - Note `wiki\index\topic_index.md` links to missing target `[[real_test_book#^head2-f3769cc4]]`
 - Note `wiki\index\topic_index.md` links to missing target `[[real_test_book#^block-6dd1036b]]`
 - Note `wiki\index\topic_index.md` links to missing target `[[real_test_book#^table-c24ee8a0]]`
-- Note `wiki\research\topics\sample-paper.md` links to missing target `[[agent-verification]]`
 - Note `wiki\research\topics\sample-paper.md` links to missing target `[[agent-memory]]`
-- Note `wiki\research\books\inner_gate\chapter_01.md` links to missing target `[[מערכת העיכול]]`
-- Note `wiki\research\books\inner_gate\chapter_01.md` links to missing target `[[חומצות שומן קצרות שרשרת]]`
-- Note `wiki\research\books\inner_gate\chapter_02.md` links to missing target `[[פרוביוטיקה]]`
-- Note `wiki\research\books\inner_gate\chapter_02.md` links to missing target `[[מיקרוביום]]`
-- Note `wiki\research\books\inner_gate\chapter_02.md` links to missing target `[[חומצות שומן קצרות שרשרת]]`
-- Note `wiki\research\books\inner_gate\chapter_02.md` links to missing target `[[חומצות שומן קצרות שרשרת]]`
-- Note `wiki\research\books\inner_gate\chapter_02.md` links to missing target `[[בוטיראט]]`
-- Note `wiki\research\books\inner_gate\chapter_02.md` links to missing target `[[פרוביוטיקה]]`
-- Note `wiki\research\books\inner_gate\chapter_02.md` links to missing target `[[פרה־ביוטיקה]]`
-- Note `wiki\research\books\inner_gate\chapter_02.md` links to missing target `[[פרוביוטיקה]]`
-- Note `wiki\research\books\inner_gate\chapter_02.md` links to missing target `[[פרה־ביוטיקה]]`
-- Note `wiki\research\books\inner_gate\chapter_03.md` links to missing target `[[פרה־ביוטיקה]]`
-- Note `wiki\research\books\inner_gate\chapter_03.md` links to missing target `[[מיקרוביום]]`
-- Note `wiki\research\books\inner_gate\chapter_03.md` links to missing target `[[מיקרוביום]]`
-- Note `wiki\research\books\inner_gate\chapter_05.md` links to missing target `[[מעי רגיז]]`
-- Note `wiki\research\books\inner_gate\chapter_05.md` links to missing target `[[FODMAP]]`
-- Note `wiki\research\books\inner_gate\chapter_05.md` links to missing target `[[צליאק]]`
-- Note `wiki\research\books\inner_gate\chapter_05.md` links to missing target `[[מעי רגיז]]`
-- Note `wiki\research\books\inner_gate\chapter_05.md` links to missing target `[[FODMAP]]`
-- Note `wiki\research\books\inner_gate\chapter_05.md` links to missing target `[[צליאק]]`
-- Note `wiki\research\books\inner_gate\chapter_07.md` links to missing target `[[מיקרוביום]]`
-- Note `wiki\research\books\inner_gate\chapter_09.md` links to missing target `[[ציר המעי–מוח]]`
-- Note `wiki\research\books\inner_gate\chapter_09.md` links to missing target `[[ציר המעי–מוח]]`
-- Note `wiki\research\books\inner_gate\chapter_09.md` links to missing target `[[סרוטונין]]`
-- Note `wiki\research\books\inner_gate\chapter_09.md` links to missing target `[[מיקרוביום]]`
-- Note `wiki\research\books\inner_gate\chapter_10.md` links to missing target `[[כרונו־תזונה]]`
-- Note `wiki\research\books\inner_gate\chapter_10.md` links to missing target `[[אכילה מוגבלת בזמן]]`
-- Note `wiki\research\books\inner_gate\chapter_11.md` links to missing target `[[קפאין]]`
-- Note `wiki\research\books\inner_gate\chapter_11.md` links to missing target `[[קפאין]]`
-- Note `wiki\research\books\inner_gate\chapter_14.md` links to missing target `[[הרגלים אטומיים]]`
-- Note `wiki\research\books\inner_gate\chapter_14.md` links to missing target `[[Tiny Habits]]`
-- Note `wiki\research\books\inner_gate\chapter_15.md` links to missing target `[[NLP]]`
-- Note `wiki\research\books\inner_gate\chapter_17.md` links to missing target `[[סולם בריסטול]]`
-- Note `wiki\research\books\inner_gate\chapter_18.md` links to missing target `[[מיקרוביום]]`
+- Note `wiki\research\topics\sample-paper.md` links to missing target `[[Planning]]`
+- Note `wiki\research\topics\sample-paper.md` links to missing target `[[Agent-Memory]]`
+- Note `wiki\research\topics\sample-paper.md` links to missing target `[[agent-verification]]`
+- Note `wiki\research\topics\sample-paper.md` links to missing target `[[Verification]]`
+- Note `wiki\research\topics\sample-paper.md` links to missing target `[[Agent-Verification]]`
+- Note `wiki\research\topics\test-agent-cognition.md` links to missing target `[[Semantic-Routing]]`
+- Note `wiki\research\topics\test-agent-cognition.md` links to missing target `[[Reflection-Loops]]`
+- Note `wiki\research\topics\test-agent-cognition.md` links to missing target `[[Provenance-Tracking]]`
 - Note `wiki\research\books\inner_gate\master_network_moc.md` links to missing target `[[מיקרוביום]]`
 - Note `wiki\research\books\inner_gate\master_network_moc.md` links to missing target `[[מערכת העיכול]]`
 - Note `wiki\research\books\inner_gate\master_network_moc.md` links to missing target `[[מיקרוביום]]`
@@ -118,6 +91,7 @@
 - Note `wiki\research\books\inner_gate\master_network_moc.md` links to missing target `[[אכילה מוגבלת בזמן]]`
 - Note `wiki\research\books\inner_gate\master_network_moc.md` links to missing target `[[הרגלים אטומיים]]`
 - Note `wiki\research\books\inner_gate\master_network_moc.md` links to missing target `[[Tiny Habits]]`
+- Note `shared\index.md` links to missing target `[[shared/concepts/hierarchical-planning]]`
 
 ## Orphan Notes
 - Note `[[2026-09-27]]` has 0 incoming links.
@@ -130,5 +104,7 @@
 - Note `[[ollama-provides-local-llm-inference]]` has 0 incoming links.
 - Note `[[short-cli-note-test]]` has 0 incoming links.
 - Note `[[sample-paper]]` has 0 incoming links.
+- Note `[[test-agent-cognition]]` has 0 incoming links.
 - Note `[[פרומפט-לספר]]` has 0 incoming links.
 - Note `[[master_network_moc]]` has 0 incoming links.
+- Note `[[hierarchical-planning]]` has 0 incoming links.

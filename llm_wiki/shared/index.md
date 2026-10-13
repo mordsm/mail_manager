@@ -10,3 +10,5 @@ Reusable concepts, entities, methods, and claims cross-referenced across multipl
 - Markets & Claims
 - Questions
 
+
+- [[shared/concepts/hierarchical-planning|Hierarchical Planning]] (Source: research)
