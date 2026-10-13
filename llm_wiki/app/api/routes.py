@@ -2,6 +2,7 @@ from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from fastapi.responses import HTMLResponse, FileResponse
 from typing import Optional, List, Dict, Any
 from pathlib import Path
+from datetime import datetime
 import tempfile
 import shutil
 
@@ -17,6 +18,8 @@ from app.services.session_builder import SessionBuilder
 from app.services.graph_service import VaultGraphService
 from app.services.hybrid_rag import HybridRAGService
 from app.services.docx_exporter import DocxExporterService
+from app.services.contradiction import ContradictionService
+from app.services.evidence_critic import EvidenceCriticService
 
 router = APIRouter(prefix="/api/v1")
 pipeline = LLMWikiPipeline()
@@ -30,6 +33,8 @@ session_builder = SessionBuilder()
 graph_service = VaultGraphService()
 rag_service = HybridRAGService()
 docx_service = DocxExporterService()
+contradiction_service = ContradictionService()
+critic_service = EvidenceCriticService()
 
 def normalize_domain(domain: str) -> str:
     domain_clean = (domain or "unclassified").strip().lower()
@@ -227,3 +232,159 @@ async def export_to_docx(
         filename=f"{target.stem}.docx",
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
+
+# --- CONTRADICTIONS & DECISIONS MATRIX ENDPOINTS ---
+
+@router.get("/contradictions")
+async def get_contradictions():
+    """
+    Returns all tracked contradictions across the vault (Section 22 of AGENTS.md).
+    """
+    items = contradiction_service.list_contradictions()
+    return {"total": len(items), "contradictions": items}
+
+@router.post("/contradictions/resolve")
+async def resolve_contradiction_endpoint(
+    contradiction_id: str = Form(...),
+    resolution: str = Form(...),
+    rationale: str = Form(...),
+    resolved_by: str = Form("human")
+):
+    """
+    Explicitly resolves a contradiction with human rationale per AGENTS.md verbatim rule:
+    'Never silently resolve contradictory evidence. Human owns judgment.'
+    """
+    res = contradiction_service.resolve_contradiction(
+        contradiction_id=contradiction_id,
+        resolution=resolution,
+        rationale=rationale,
+        resolved_by=resolved_by
+    )
+    return res
+
+# --- INTERACTIVE LIVE RESEARCH RUNNER ENDPOINTS ---
+
+@router.post("/research/start")
+async def start_live_research(
+    query: str = Form(...),
+    domain: str = Form("research"),
+    run_critic: bool = Form(True)
+):
+    """
+    Conducts an interactive, on-demand research cycle:
+    1. Hybrid RAG multi-block evidence discovery across local vault and web context.
+    2. Optional adversarial critique detecting causal overreach, preclinical-clinical leaps, and sample size biases.
+    3. Persists structured note to 20_Research/ and updates vector embeddings.
+    """
+    # 1. Evidence Discovery
+    rag_res = rag_service.query(question=query, domain=domain, allow_web_fallback=True)
+    answer = rag_res.get("answer", "")
+    citations = rag_res.get("citations", [])
+
+    # 2. Slug and Directory
+    slug = "".join(c.lower() if c.isalnum() or c in " -_" else "" for c in query).strip().replace(" ", "_")[:50] or "research_session"
+    res_dir = Path("20_Research") / slug
+    res_dir.mkdir(parents=True, exist_ok=True)
+    res_file = res_dir / "overview.md"
+
+    # 3. Critic Pass
+    heuristic_risks = []
+    critique_text = ""
+    if run_critic:
+        causal_words = ["proves", "causes", "cures", "prevents", "eradicates", "מוכיח", "מרפא", "גורם באופן מוחלט"]
+        for w in causal_words:
+            if w in answer.lower():
+                heuristic_risks.append(f"Potential Causal Overreach: Found causal term '{w}'.")
+        if ("animal" in answer.lower() or "mouse" in answer.lower() or "עכבר" in answer.lower()) and ("clinical" in answer.lower() or "human" in answer.lower()):
+            heuristic_risks.append("Preclinical to Clinical Leap: Animal or in-vitro findings cited alongside clinical claims.")
+        if len(citations) <= 1:
+            heuristic_risks.append(f"Small Evidence Base: Supported by only {len(citations)} citation(s).")
+
+        try:
+            critic_prompt = (
+                f"Research Topic: {query}\n"
+                f"Synthesized Findings:\n{answer[:2500]}\n\n"
+                "As an adversarial Research Critic following strict scientific methodology:\n"
+                "1. Attack potential invalid assumptions, confounders, or alternative explanations.\n"
+                "2. Identify bias risks (publication bias, industry bias, small samples).\n"
+                "3. Propose a concrete falsification test or required clinical follow-up."
+            )
+            critique_text = rag_service.llm.generate(
+                critic_prompt,
+                system_prompt="You are an uncompromising Scientific Research Critic. Actively challenge claims and look for reasons the conclusion might be invalid."
+            )
+        except Exception as e:
+            critique_text = f"Critic pass skipped ({e})."
+
+    # 4. Save Structured Note to Vault
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    confidence_level = "HIGH" if (len(citations) >= 3 and not heuristic_risks) else ("MODERATE" if citations else "PRELIMINARY")
+    note_content = (
+        f"# Research Exploration: {query}\n\n"
+        f"**Date**: {now_str}  \n"
+        f"**Domain**: {domain}  \n"
+        f"**Confidence Level**: {confidence_level}  \n\n"
+        f"## Evidence Synthesis\n{answer}\n\n"
+        f"## Granular Citations ({len(citations)})\n"
+    )
+    for c in citations:
+        note_content += f"- **[{c.get('block_id', 'ref')}]**: {c.get('title', 'Source')} (`{c.get('note_path', '')}`)\n"
+
+    if run_critic and critique_text:
+        note_content += (
+            f"\n## Adversarial Critique & Risk Evaluation\n"
+            f"### Heuristic Risks ({len(heuristic_risks)})\n"
+        )
+        for r in heuristic_risks:
+            note_content += f"- ⚠️ {r}\n"
+        if not heuristic_risks:
+            note_content += "- No obvious heuristic biases detected in primary text.\n"
+        note_content += f"\n### Methodological Attack\n{critique_text}\n"
+
+    res_file.write_text(note_content, encoding="utf-8")
+
+    # 5. Index into Vector Database
+    try:
+        rag_service.vector_service.index_block(
+            block_id=slug,
+            content=answer[:1200],
+            note_path=str(res_file),
+            note_title=query,
+            domain=domain
+        )
+    except Exception:
+        pass
+
+    return {
+        "status": "COMPLETED",
+        "query": query,
+        "answer": answer,
+        "citations": citations,
+        "critic_applied": run_critic,
+        "heuristic_risks": heuristic_risks,
+        "critique": critique_text,
+        "saved_path": str(res_file),
+        "confidence": confidence_level
+    }
+
+@router.get("/research/list")
+async def list_research_sessions():
+    """
+    Lists recent active research sessions in 20_Research/
+    """
+    sessions = []
+    res_dir = Path("20_Research")
+    if res_dir.exists():
+        dirs = [d for d in res_dir.iterdir() if d.is_dir() and (d / "overview.md").exists()]
+        dirs.sort(key=lambda x: (x / "overview.md").stat().st_mtime, reverse=True)
+        for d in dirs[:15]:
+            ov = d / "overview.md"
+            txt = ov.read_text(encoding="utf-8", errors="replace")[:400]
+            title = d.name.replace("_", " ").title()
+            sessions.append({
+                "slug": d.name,
+                "title": title,
+                "path": str(ov),
+                "snippet": txt.replace("#", "").strip()[:180] + "..."
+            })
+    return {"total": len(sessions), "sessions": sessions}

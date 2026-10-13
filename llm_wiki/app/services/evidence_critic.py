@@ -113,3 +113,4 @@ class EvidenceCriticService:
                 results.append(res)
 
         return results
+

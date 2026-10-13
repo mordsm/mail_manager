@@ -3,7 +3,7 @@ import re
 import uuid
 import frontmatter
 from pathlib import Path
-from typing import Union, Optional, List
+from typing import Union, Optional, List, Dict, Any
 from datetime import date
 from app.schemas.claim import ContradictionModel, ClaimModel
 from app.llm.base import LLMProvider
@@ -140,4 +140,102 @@ class ContradictionService:
                     continue
 
         return recorded_paths
+
+    def list_contradictions(self) -> List[Dict[str, Any]]:
+        """
+        Scans vault for contradiction notes and returns structured list.
+        """
+        contradictions = []
+        for path in self.root_dir.glob("wiki/**/contradictions/*.md"):
+            try:
+                post = frontmatter.load(path)
+                content = post.content
+                
+                # Extract claims from markdown body
+                claim_a_match = re.search(r"## Claim A\s*\n- \*\*Statement\*\*:\s*(.*?)\n- \*\*Source\*\*:\s*`(.*?)`", content, re.DOTALL)
+                claim_b_match = re.search(r"## Claim B\s*\n- \*\*Statement\*\*:\s*(.*?)\n- \*\*Source\*\*:\s*`(.*?)`", content, re.DOTALL)
+                
+                synthesis_match = re.search(r"## Current Synthesis\s*\n(.*?)(?=\n##|\Z)", content, re.DOTALL)
+                uncertainty_match = re.search(r"## Remaining Uncertainty\s*\n(.*?)(?=\n##|\Z)", content, re.DOTALL)
+
+                domain = post.get("domain", ["research"])
+                if isinstance(domain, list):
+                    domain_val = domain[0] if domain else "research"
+                else:
+                    domain_val = str(domain)
+
+                contradictions.append({
+                    "id": post.get("id") or path.stem,
+                    "topic": post.get("topic") or path.stem.replace("-", " ").title(),
+                    "domain": domain_val,
+                    "status": post.get("status", "unresolved"),
+                    "created": str(post.get("created", "")),
+                    "updated": str(post.get("updated", "")),
+                    "claim_a": {
+                        "text": claim_a_match.group(1).strip() if claim_a_match else "Claim A details recorded in file.",
+                        "source": claim_a_match.group(2).strip() if claim_a_match else ""
+                    },
+                    "claim_b": {
+                        "text": claim_b_match.group(1).strip() if claim_b_match else "Claim B details recorded in file.",
+                        "source": claim_b_match.group(2).strip() if claim_b_match else ""
+                    },
+                    "current_synthesis": synthesis_match.group(1).strip() if synthesis_match else "",
+                    "remaining_uncertainty": uncertainty_match.group(1).strip() if uncertainty_match else "",
+                    "resolution": post.get("resolution"),
+                    "rationale": post.get("rationale"),
+                    "resolved_by": post.get("resolved_by"),
+                    "path": str(path.relative_to(self.root_dir))
+                })
+            except Exception:
+                continue
+
+        return contradictions
+
+    def resolve_contradiction(
+        self,
+        contradiction_id: str,
+        resolution: str,
+        rationale: str,
+        resolved_by: str = "human"
+    ) -> Dict[str, Any]:
+        """
+        Resolves a contradiction explicitly per AGENTS.md rule:
+        'Never silently resolve contradictory evidence. Human owns judgment.'
+        """
+        target_path = None
+        for path in self.root_dir.glob("wiki/**/contradictions/*.md"):
+            if path.stem == contradiction_id or f"{contradiction_id}.md" == path.name:
+                target_path = path
+                break
+
+        if not target_path or not target_path.exists():
+            return {"status": "ERROR", "message": f"Contradiction {contradiction_id} not found."}
+
+        post = frontmatter.load(target_path)
+        post["status"] = "resolved"
+        post["resolution"] = resolution
+        post["rationale"] = rationale
+        post["resolved_by"] = resolved_by
+        post["updated"] = date.today().isoformat()
+
+        resolution_block = (
+            f"\n\n## Resolution Decision\n"
+            f"- **Status**: Resolved\n"
+            f"- **Resolution**: {resolution}\n"
+            f"- **Rationale**: {rationale}\n"
+            f"- **Resolved By**: `{resolved_by}`\n"
+            f"- **Resolved Date**: {date.today().isoformat()}\n"
+        )
+        post.content += resolution_block
+
+        with open(target_path, "w", encoding="utf-8") as f:
+            frontmatter.dump(post, f)
+
+        return {
+            "status": "RESOLVED",
+            "id": contradiction_id,
+            "path": str(target_path.relative_to(self.root_dir)),
+            "resolution": resolution,
+            "rationale": rationale
+        }
 

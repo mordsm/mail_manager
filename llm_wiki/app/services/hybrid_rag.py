@@ -6,6 +6,7 @@ import httpx
 from app.services.parser import MarkdownParser
 from app.llm.base import LLMProvider
 from app.llm.ollama_provider import OllamaProvider
+from app.services.vector_service import VectorIndexService
 
 
 class MicroBlock:
@@ -43,6 +44,7 @@ class HybridRAGService:
         self.root_dir = Path(root_dir)
         self.parser = MarkdownParser()
         self.llm = llm_provider or OllamaProvider()
+        self.vector_service = VectorIndexService(root_dir=self.root_dir)
 
     def extract_blocks(self, note_path: Path, domain: str) -> List[MicroBlock]:
         """
@@ -92,12 +94,13 @@ class HybridRAGService:
 
     def search_local_vault(self, query: str, domain: str = "all") -> List[Dict[str, Any]]:
         """
-        Searches all micro-blocks in the vault matching query keywords across all domains and vault folders.
+        Searches all micro-blocks in the vault matching query keywords across all domains and vault folders,
+        fusing lexical keyword scoring with dense semantic vector embedding similarity.
         """
         target_domains = ["personal", "research", "business", "competitive", "development"] if domain.lower() in ["all", "global"] else [domain]
         query_terms = [t.lower() for t in re.findall(r"\w+", query) if len(t) > 1]
 
-        matched_blocks = []
+        fused_map: Dict[tuple, Dict[str, Any]] = {}
 
         # 1. Search wiki domains
         for d in target_domains:
@@ -117,15 +120,16 @@ class HybridRAGService:
                                 score += 5
 
                         if score > 0:
-                            matched_blocks.append({
+                            key = (str(b.note_path), b.block_id)
+                            fused_map[key] = {
                                 "block": b,
-                                "score": score
-                            })
+                                "score": float(score)
+                            }
 
         # 2. If global/all, also search projects, research sessions, decisions, and MOCs
         if domain.lower() in ["all", "global"]:
             extra_folders = [
-                ("10_Projects", "projects"),
+                ("10_Projects", "development"),
                 ("20_Research", "research"),
                 ("40_Decisions", "decisions"),
                 ("mocs", "mocs")
@@ -147,14 +151,43 @@ class HybridRAGService:
                                     score += 5
 
                             if score > 0:
-                                matched_blocks.append({
+                                key = (str(b.note_path), b.block_id)
+                                fused_map[key] = {
                                     "block": b,
-                                    "score": score
-                                })
+                                    "score": float(score)
+                                }
+
+        # 3. Dense Semantic Vector Search Fusion
+        try:
+            semantic_matches = self.vector_service.search_similar(
+                query=query,
+                top_k=8,
+                domain_filter=domain if domain.lower() not in ["all", "global"] else None
+            )
+            for sm in semantic_matches:
+                key = (sm["note_path"], sm["block_id"])
+                sem_boost = sm.get("semantic_score", 0.0) * 10.0
+                if key in fused_map:
+                    fused_map[key]["score"] += sem_boost
+                else:
+                    nb = MicroBlock(
+                        block_id=sm["block_id"],
+                        content=sm["content"],
+                        note_path=Path(sm["note_path"]),
+                        note_title=sm["note_title"],
+                        domain=sm["domain"]
+                    )
+                    fused_map[key] = {
+                        "block": nb,
+                        "score": sem_boost
+                    }
+        except Exception:
+            pass
 
         # Sort by relevance score descending
-        matched_blocks.sort(key=lambda x: x["score"], reverse=True)
-        return matched_blocks[:8]
+        ranked_blocks = list(fused_map.values())
+        ranked_blocks.sort(key=lambda x: x["score"], reverse=True)
+        return ranked_blocks[:8]
 
     def search_web_fallback(self, query: str) -> Optional[str]:
         """
