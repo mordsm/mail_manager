@@ -292,6 +292,20 @@ def context_cmd(
     typer.echo(f"\n--- Context Prompt for: {project} ---")
     typer.echo(ctx_data["context_prompt"])
 
+@app.command("sync-research")
+def sync_research_cmd():
+    """
+    Imports and synchronizes all multi-agent research runs from Research Manager into 20_Research/ and wiki/.
+    """
+    from app.services.research_bridge import ResearchBridgeService
+    typer.echo("🔬 Synchronizing research syntheses from Research Manager...")
+    bridge = ResearchBridgeService()
+    res = bridge.sync_all_research()
+    if res["status"] == "COMPLETED":
+        typer.echo(f"✅ Successfully synced {res['synced_count']} research syntheses into 20_Research/!")
+    else:
+        typer.echo(f"⚠️ {res.get('message', 'Sync skipped')}")
+
 @app.command("serve")
 def serve(
     port: int = typer.Option(8050, "--port", "-p", help="Port for web server (default: 8050)")

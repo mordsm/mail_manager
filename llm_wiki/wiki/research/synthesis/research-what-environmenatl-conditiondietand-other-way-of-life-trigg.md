@@ -11,8 +11,8 @@ share_policy: allowed
 source_domain:
 - research
 sources:
-- research_manager/research_cab772d8f9f2
 - research_manager/research_1a50af75c2aa
+- research_manager/research_cab772d8f9f2
 status: active
 tags:
 - research_manager
@@ -80,5 +80,5 @@ RESOURCE_LIMIT
 - study_e7ab3145825a: NCCIH Mock Integrative Health Evidence 2 (nccih_mock_2_integrative)
 
 ## Provenance & Sources
-- `research_manager/research_cab772d8f9f2`
 - `research_manager/research_1a50af75c2aa`
+- `research_manager/research_cab772d8f9f2`

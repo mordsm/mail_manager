@@ -12,8 +12,8 @@ source_domain:
 - research
 sources:
 - research_manager/research_f74512adece3
-- research_manager/research_06b677de5849
 - research_manager/research_4863753dc638
+- research_manager/research_06b677de5849
 status: active
 tags:
 - research_manager
@@ -51,5 +51,5 @@ what are the possible outside triggers for sjogren and can we treat it using sto
 
 ## Provenance & Sources
 - `research_manager/research_f74512adece3`
-- `research_manager/research_06b677de5849`
 - `research_manager/research_4863753dc638`
+- `research_manager/research_06b677de5849`
