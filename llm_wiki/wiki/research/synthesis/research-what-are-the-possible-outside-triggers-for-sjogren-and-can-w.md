@@ -11,9 +11,9 @@ share_policy: allowed
 source_domain:
 - research
 sources:
-- research_manager/research_f74512adece3
-- research_manager/research_4863753dc638
 - research_manager/research_06b677de5849
+- research_manager/research_4863753dc638
+- research_manager/research_f74512adece3
 status: active
 tags:
 - research_manager
@@ -50,6 +50,6 @@ what are the possible outside triggers for sjogren and can we treat it using sto
 - Severe Acute Radiation Dermatitis Following Ultra-Hypofractionated Whole Breast Radiation Therapy in a Patient With Systemic Lupus Erythematosus: This is background about autoimmune/inflammatory disease, but it is not specifically about Sjogren's. I would not use it as a main answer.
 
 ## Provenance & Sources
-- `research_manager/research_f74512adece3`
-- `research_manager/research_4863753dc638`
 - `research_manager/research_06b677de5849`
+- `research_manager/research_4863753dc638`
+- `research_manager/research_f74512adece3`

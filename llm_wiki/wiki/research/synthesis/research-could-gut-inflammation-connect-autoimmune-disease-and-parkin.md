@@ -12,9 +12,9 @@ source_domain:
 - research
 sources:
 - research_manager/research_2653b200208e
-- research_manager/research_faad84ceb025
 - research_manager/research_7444f5c04857
 - research_manager/research_67474af1e417
+- research_manager/research_faad84ceb025
 status: active
 tags:
 - research_manager
@@ -53,6 +53,6 @@ RESOURCE_LIMIT
 
 ## Provenance & Sources
 - `research_manager/research_2653b200208e`
-- `research_manager/research_faad84ceb025`
 - `research_manager/research_7444f5c04857`
 - `research_manager/research_67474af1e417`
+- `research_manager/research_faad84ceb025`
