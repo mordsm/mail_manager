@@ -1,9 +1,9 @@
 # LLM Wiki Knowledge Gap & Integrity Report
 
-- **Total Wiki Notes Analyzed**: 43
+- **Total Wiki Notes Analyzed**: 58
 - **Broken Links Detected**: 86
-- **Orphan Notes**: 14
-- **Missing Frontmatter**: 12
+- **Orphan Notes**: 29
+- **Missing Frontmatter**: 13
 
 ## Broken Links
 - Note `wiki\index\topic_index.md` links to missing target `[[real_test_book#^head1-5191ec2a]]`
@@ -96,13 +96,28 @@
 ## Orphan Notes
 - Note `[[2026-09-27]]` has 0 incoming links.
 - Note `[[2026-09-28]]` has 0 incoming links.
+- Note `[[2026-10-13]]` has 0 incoming links.
 - Note `[[topic_index]]` has 0 incoming links.
 - Note `[[fastapi-routing]]` has 0 incoming links.
 - Note `[[development-session-api-test-capture]]` has 0 incoming links.
+- Note `[[development-session-cli-capture-investigating-force-directed-graph-rende]]` has 0 incoming links.
 - Note `[[morning-routine]]` has 0 incoming links.
 - Note `[[my-second-note]]` has 0 incoming links.
 - Note `[[ollama-provides-local-llm-inference]]` has 0 incoming links.
 - Note `[[short-cli-note-test]]` has 0 incoming links.
+- Note `[[llm-dialogue-session-chatgpt-research-on-butyrate]]` has 0 incoming links.
+- Note `[[research-can-we-treat-it-using-stoping-the-inflamanation]]` has 0 incoming links.
+- Note `[[research-could-gut-inflammation-connect-autoimmune-disease-and-parkin]]` has 0 incoming links.
+- Note `[[research-parkinson-disease-gut-inflammation-treatment]]` has 0 incoming links.
+- Note `[[research-stopping-inflammation-as-a-way-to-fight-cancer]]` has 0 incoming links.
+- Note `[[research-stopping-inflammation-as-a-way-to-fight-sjögrens-syndrome]]` has 0 incoming links.
+- Note `[[research-what-are-the-best-current-approaches-for-building-an-ai-rese]]` has 0 incoming links.
+- Note `[[research-what-are-the-possible-outside-triggers-for-sjogren-and-can-w]]` has 0 incoming links.
+- Note `[[research-what-are-the-sources-tested-and-confirmed-for-autoimmune-dis]]` has 0 incoming links.
+- Note `[[research-what-environmenatl-conditiondietand-other-way-of-life-trigg]]` has 0 incoming links.
+- Note `[[research-what-environmental-conditiondietand-other-way-of-life-trigg]]` has 0 incoming links.
+- Note `[[research-מה-לפי-המחקרים-הסיבות-למחלות-אוטואימוניות-ובמיוחד-תסמונת-סיו]]` has 0 incoming links.
+- Note `[[research-סיבות-אפריות-להתפרצות-מחלות-אוטואימוניות-בכלל-ותסמונת-סיוגרן]]` has 0 incoming links.
 - Note `[[sample-paper]]` has 0 incoming links.
 - Note `[[test-agent-cognition]]` has 0 incoming links.
 - Note `[[פרומפט-לספר]]` has 0 incoming links.
