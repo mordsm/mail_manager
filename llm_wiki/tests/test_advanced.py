@@ -96,5 +96,32 @@ def test_wiki_graph_endpoint():
     assert "links" in data
     assert data["total_nodes"] > 0
 
+def test_contradictions_endpoints():
+    # 1. Test listing contradictions
+    resp = client.get("/api/v1/contradictions")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "total" in data
+    assert "contradictions" in data
+
+def test_vector_service_and_hybrid_rag(tmp_path):
+    from app.services.vector_service import VectorIndexService
+    from app.services.hybrid_rag import HybridRAGService
+    
+    vec_svc = VectorIndexService(root_dir=tmp_path)
+    vec_svc.index_block("test_b1", "Neuroinflammation and gut microbiome signaling", "wiki/research/test.md", "Microbiome Test", "research")
+    
+    stats = vec_svc.get_stats()
+    assert stats["total_vectors"] >= 1
+    
+    results = vec_svc.search_similar("microbiome signaling", top_k=3)
+    assert len(results) >= 1
+    assert results[0]["block_id"] == "test_b1"
+
+def test_docx_export_endpoint():
+    resp = client.get("/api/v1/export/docx?path=wiki/research/books/inner_gate")
+    assert resp.status_code == 200
+    assert "application/vnd.openxmlformats-officedocument" in resp.headers["content-type"]
+
 
 
