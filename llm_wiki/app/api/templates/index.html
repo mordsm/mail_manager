@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LLM Wiki — Knowledge & Memory Portal</title>
+    <title>LLM Wiki — Knowledge Portal</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 1.5rem; }
@@ -57,6 +57,7 @@
         <div class="tabs">
             <div class="tab active" id="tabHeaderFile" onclick="activateTab('fileTab')">📁 Ingest File</div>
             <div class="tab" id="tabHeaderText" onclick="activateTab('textTab')">📝 Ingest Note / Text</div>
+            <div class="tab" id="tabHeaderAsk" onclick="activateTab('askTab')">💬 Ask Wiki (RAG)</div>
             <div class="tab" id="tabHeaderMemory" onclick="activateTab('memoryTab')">🧠 Memory Dashboard</div>
             <div class="tab" id="tabHeaderGraph" onclick="activateTab('graphTab')">🕸️ Knowledge Graph</div>
         </div>
@@ -114,7 +115,55 @@
             </form>
         </div>
 
-        <!-- TAB 3: MEMORY DASHBOARD -->
+        <!-- TAB 3: ASK WIKI (HYBRID RAG CHAT) -->
+        <div id="askTab" class="tab-content">
+            <form id="ragQueryForm">
+                <div class="form-group">
+                    <label for="ragQuestion">Your Question / Research Query (Hebrew or English)</label>
+                    <input type="text" id="ragQuestion" placeholder="e.g. מה הממצאים על בוטיראט וחיידקי מעי? או What are the active projects?" required>
+                </div>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="ragDomain">Search Scope</label>
+                        <select id="ragDomain">
+                            <option value="all">All Domains & Projects (Global Vault)</option>
+                            <option value="research">Research & Technology (20_Research, books, papers)</option>
+                            <option value="development">Development (10_Projects, code, tasks)</option>
+                            <option value="personal">Personal</option>
+                            <option value="business">Business & Operations</option>
+                            <option value="competitive">Competitive Analysis</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ragWebFallback">External Web Fallback</label>
+                        <select id="ragWebFallback">
+                            <option value="false">Local Vault Only (Strict Provenance)</option>
+                            <option value="true">Allow Web Fallback if Local Evidence Incomplete</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="submit" style="background: #0284c7;">🔍 ASK WIKI & SYNTHESIZE ANSWER</button>
+            </form>
+
+            <div id="ragResults" style="margin-top: 1.5rem; display: none;">
+                <div class="card" style="border-color: #38bdf8; background: #0c182c;">
+                    <h3 style="color: #38bdf8; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <span>💡 Synthesized Answer</span>
+                        <span id="ragSourcesBadge" class="badge">0 Citations</span>
+                    </h3>
+                    <div id="ragAnswer" style="white-space: pre-wrap; line-height: 1.6; font-size: 1.05rem; color: #f1f5f9;"></div>
+                </div>
+
+                <div class="card" id="ragCitationsCard" style="display: none;">
+                    <h3>📚 Granular Evidence & Citations</h3>
+                    <ul id="ragCitationsList" style="padding-left: 1.25rem; color: #94a3b8; font-size: 0.95rem; line-height: 1.6;"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: MEMORY DASHBOARD -->
         <div id="memoryTab" class="tab-content">
             <div id="memoryOverview">
                 <p style="color: #94a3b8;">Loading memory system state...</p>
@@ -175,7 +224,7 @@
             </div>
         </div>
 
-        <!-- TAB 4: KNOWLEDGE GRAPH -->
+        <!-- TAB 5: KNOWLEDGE GRAPH -->
         <div id="graphTab" class="tab-content">
             <div class="graph-controls">
                 <input type="text" id="graphSearchInput" placeholder="🔍 Search note by title or domain..." oninput="filterGraph()">
@@ -211,6 +260,9 @@
             } else if (tabId === 'textTab') {
                 document.getElementById('tabHeaderText').classList.add('active');
                 document.getElementById('textTab').classList.add('active');
+            } else if (tabId === 'askTab') {
+                document.getElementById('tabHeaderAsk').classList.add('active');
+                document.getElementById('askTab').classList.add('active');
             } else if (tabId === 'memoryTab') {
                 document.getElementById('tabHeaderMemory').classList.add('active');
                 document.getElementById('memoryTab').classList.add('active');
@@ -310,6 +362,54 @@
                 showStatus('✅ COMPLETED NOTE INGESTION:\n' + JSON.stringify(data, null, 2));
             } catch (err) {
                 showStatus('❌ ERROR: ' + err.message);
+            }
+        });
+
+        /* --- ASK WIKI (RAG) FORM --- */
+        document.getElementById('ragQueryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const question = document.getElementById('ragQuestion').value.trim();
+            const domain = document.getElementById('ragDomain').value;
+            const allowWeb = document.getElementById('ragWebFallback').value;
+
+            if (!question) return;
+
+            const resultsDiv = document.getElementById('ragResults');
+            const answerDiv = document.getElementById('ragAnswer');
+            const badge = document.getElementById('ragSourcesBadge');
+            const citationsCard = document.getElementById('ragCitationsCard');
+            const citationsList = document.getElementById('ragCitationsList');
+
+            resultsDiv.style.display = 'block';
+            answerDiv.textContent = '⏳ Searching local vault micro-blocks & synthesizing answer with Ollama...';
+            badge.textContent = 'Searching...';
+            citationsCard.style.display = 'none';
+            citationsList.innerHTML = '';
+
+            try {
+                const formData = new FormData();
+                formData.append('query', question);
+                formData.append('domain', domain);
+                formData.append('mode', 'hybrid');
+                formData.append('allow_web', allowWeb);
+
+                const res = await fetch('/api/v1/query', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                answerDiv.textContent = data.answer || 'No answer generated.';
+                const foundCount = data.local_blocks_found || (data.citations ? data.citations.length : 0);
+                badge.textContent = `${foundCount} Local Sources`;
+
+                if (data.citations && data.citations.length > 0) {
+                    citationsCard.style.display = 'block';
+                    data.citations.forEach(c => {
+                        const li = document.createElement('li');
+                        li.textContent = c;
+                        citationsList.appendChild(li);
+                    });
+                }
+            } catch (err) {
+                answerDiv.textContent = '❌ Failed to query: ' + err.message;
             }
         });
 
@@ -504,7 +604,6 @@
         }
 
         function simulateGraph() {
-            // Simple force-directed step
             const repulsion = 120;
             const springLen = 60;
             const springK = 0.05;
@@ -516,7 +615,6 @@
 
             for (let i = 0; i < nodes.length; i++) {
                 const n1 = nodes[i];
-                // Center gravity
                 n1.vx += (cx - n1.x) * centerGravity;
                 n1.vy += (cy - n1.y) * centerGravity;
 
@@ -567,7 +665,6 @@
             ctx.translate(transform.x, transform.y);
             ctx.scale(transform.k, transform.k);
 
-            // Draw links
             ctx.strokeStyle = '#334155';
             ctx.lineWidth = 1;
             for (const link of links) {
@@ -577,7 +674,6 @@
                 ctx.stroke();
             }
 
-            // Draw nodes
             for (const n of nodes) {
                 ctx.beginPath();
                 ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2);
@@ -587,7 +683,6 @@
                 ctx.lineWidth = (hoveredNode === n) ? 2.5 : 1;
                 ctx.stroke();
 
-                // Draw label if connected or hovered
                 if (n.radius >= 8 || hoveredNode === n) {
                     ctx.fillStyle = (hoveredNode === n) ? '#38bdf8' : '#cbd5e1';
                     ctx.font = (hoveredNode === n) ? 'bold 12px sans-serif' : '10px sans-serif';

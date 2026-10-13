@@ -15,6 +15,7 @@ from app.services.memory_curator import MemoryCurator
 from app.services.consolidation import MemoryConsolidationService
 from app.services.session_builder import SessionBuilder
 from app.services.graph_service import VaultGraphService
+from app.services.hybrid_rag import HybridRAGService
 
 router = APIRouter(prefix="/api/v1")
 pipeline = LLMWikiPipeline()
@@ -26,6 +27,7 @@ curator = MemoryCurator()
 consolidation_service = MemoryConsolidationService()
 session_builder = SessionBuilder()
 graph_service = VaultGraphService()
+rag_service = HybridRAGService()
 
 def normalize_domain(domain: str) -> str:
     domain_clean = (domain or "unclassified").strip().lower()
@@ -73,13 +75,20 @@ async def ingest_text(
     return result
 
 @router.post("/query")
+@router.post("/rag/query")
 async def query_wiki(
     query: str = Form(...),
-    domain: str = Form("research")
+    domain: str = Form("all"),
+    mode: str = Form("hybrid"),
+    allow_web: bool = Form(False)
 ):
-    target_domain = normalize_domain(domain)
-    res = planner.query(domain=target_domain, question=query)
-    return res
+    target_domain = "all" if domain.lower() in ["all", "global"] else normalize_domain(domain)
+    if mode == "hybrid":
+        res = rag_service.query(question=query, domain=target_domain, allow_web_fallback=allow_web)
+        return res
+    else:
+        res = planner.query(domain=target_domain, question=query)
+        return res
 
 @router.get("/wiki/lint")
 @router.post("/wiki/lint")

@@ -98,3 +98,4 @@ class VaultGraphService:
             "total_nodes": len(nodes_dict),
             "total_links": len(links)
         }
+

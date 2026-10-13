@@ -92,13 +92,14 @@ class HybridRAGService:
 
     def search_local_vault(self, query: str, domain: str = "all") -> List[Dict[str, Any]]:
         """
-        Searches all micro-blocks in the vault matching query keywords.
+        Searches all micro-blocks in the vault matching query keywords across all domains and vault folders.
         """
-        target_domains = ["personal", "research", "business", "competitive"] if domain.lower() in ["all", "global"] else [domain]
+        target_domains = ["personal", "research", "business", "competitive", "development"] if domain.lower() in ["all", "global"] else [domain]
         query_terms = [t.lower() for t in re.findall(r"\w+", query) if len(t) > 1]
 
         matched_blocks = []
 
+        # 1. Search wiki domains
         for d in target_domains:
             domain_dir = self.root_dir / "wiki" / d
             if domain_dir.exists():
@@ -120,6 +121,36 @@ class HybridRAGService:
                                 "block": b,
                                 "score": score
                             })
+
+        # 2. If global/all, also search projects, research sessions, decisions, and MOCs
+        if domain.lower() in ["all", "global"]:
+            extra_folders = [
+                ("10_Projects", "projects"),
+                ("20_Research", "research"),
+                ("40_Decisions", "decisions"),
+                ("mocs", "mocs")
+            ]
+            for folder_name, cat in extra_folders:
+                folder_dir = self.root_dir / folder_name
+                if folder_dir.exists():
+                    for md_file in folder_dir.glob("**/*.md"):
+                        blocks = self.extract_blocks(md_file, domain=cat)
+                        for b in blocks:
+                            score = 0
+                            text_lower = b.content.lower()
+                            title_lower = b.note_title.lower()
+
+                            for term in query_terms:
+                                if term in text_lower:
+                                    score += 2
+                                if term in title_lower:
+                                    score += 5
+
+                            if score > 0:
+                                matched_blocks.append({
+                                    "block": b,
+                                    "score": score
+                                })
 
         # Sort by relevance score descending
         matched_blocks.sort(key=lambda x: x["score"], reverse=True)

@@ -122,3 +122,4 @@ class SessionBuilder:
             "decisions": decisions,
             "context_prompt": context_prompt
         }
+
