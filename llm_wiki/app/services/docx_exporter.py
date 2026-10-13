@@ -74,6 +74,46 @@ class DocxExporterService:
         doc.save(str(output_path))
         return output_path
 
+    def export_note_to_docx(
+        self,
+        note_path: Union[str, Path],
+        output_docx_path: Union[str, Path],
+        title: Optional[str] = None,
+        author: str = "משה"
+    ) -> Path:
+        """
+        Exports a single Markdown note file into a clean, formatted DOCX file.
+        """
+        np = Path(note_path)
+        output_path = Path(output_docx_path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        doc = Document()
+        doc_title = title or np.stem.replace("_", " ").title()
+
+        title_p = doc.add_paragraph()
+        title_p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        title_run = title_p.add_run(doc_title)
+        title_run.font.size = Pt(22)
+        title_run.font.bold = True
+        title_run.font.color.rgb = RGBColor(14, 116, 144)
+
+        author_p = doc.add_paragraph()
+        author_p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        author_run = author_p.add_run(f"מאת: {author}\n")
+        author_run.font.size = Pt(12)
+        author_run.font.italic = True
+        author_run.font.color.rgb = RGBColor(71, 85, 105)
+
+        doc.add_paragraph("________________________________________").alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+        content = np.read_text(encoding="utf-8")
+        clean_content = self.clean_markdown_for_docx(content)
+        self._add_markdown_to_docx(doc, clean_content)
+
+        doc.save(str(output_path))
+        return output_path
+
     def _add_markdown_to_docx(self, doc: Document, md_text: str):
         lines = md_text.split("\n")
         in_table = False

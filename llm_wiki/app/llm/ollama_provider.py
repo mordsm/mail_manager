@@ -15,7 +15,7 @@ class OllamaProvider(LLMProvider):
     def __init__(self, base_url: str = OLLAMA_BASE_URL, model: str = OLLAMA_MODEL):
         self.base_url = base_url.rstrip("/")
         self.model = model
-        self.client = httpx.Client(timeout=60.0)
+        self.client = httpx.Client(timeout=180.0)
         self._resolve_active_model()
 
     def _resolve_active_model(self) -> None:

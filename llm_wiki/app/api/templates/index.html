@@ -161,6 +161,15 @@
                     <ul id="ragCitationsList" style="padding-left: 1.25rem; color: #94a3b8; font-size: 0.95rem; line-height: 1.6;"></ul>
                 </div>
             </div>
+
+            <!-- Export to Word Card -->
+            <div class="card" style="margin-top: 1.5rem; border-color: #475569;">
+                <h3>📄 Export Research Note or Book to Word (.docx)</h3>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <input type="text" id="exportDocxPath" placeholder="Path to note or book folder, e.g. wiki/research/books/inner_gate" value="wiki/research/books/inner_gate" style="flex: 1; min-width: 250px;">
+                    <button onclick="downloadDocx()" style="width: auto; padding: 0.85rem 1.5rem; margin-top: 0; background: #059669;">📥 Download .DOCX</button>
+                </div>
+            </div>
         </div>
 
         <!-- TAB 4: MEMORY DASHBOARD -->
@@ -412,6 +421,15 @@
                 answerDiv.textContent = '❌ Failed to query: ' + err.message;
             }
         });
+
+        function downloadDocx() {
+            const path = document.getElementById('exportDocxPath').value.trim();
+            if (!path) {
+                alert('Please enter a note or book folder path');
+                return;
+            }
+            window.open('/api/v1/export/docx?path=' + encodeURIComponent(path), '_blank');
+        }
 
         async function fetchMemoryOverview() {
             const container = document.getElementById('memoryOverview');

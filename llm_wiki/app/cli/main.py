@@ -346,6 +346,49 @@ def schedule_cmd(
     except KeyboardInterrupt:
         typer.echo("\n🛑 Scheduler stopped.")
 
+@app.command("critic")
+def critic_cmd(
+    topic: Optional[str] = typer.Argument(None, help="Research topic slug or folder under 20_Research/"),
+    all_topics: bool = typer.Option(False, "--all", "-a", help="Run critique across all research topics")
+):
+    """
+    Runs adversarial research critique to challenge claims, detect causal overreach, and find biases.
+    """
+    from app.services.evidence_critic import EvidenceCriticService
+    service = EvidenceCriticService()
+    if all_topics or not topic:
+        typer.echo("🔍 Running Adversarial Evidence Critique across all research topics...")
+        results = service.audit_all_research_topics()
+        typer.echo(f"✅ Critique completed across {len(results)} topics.")
+        for r in results:
+            typer.echo(f"  - [{r['topic']}]: {r['heuristic_risks_count']} risks -> {r['critique_file']}")
+    else:
+        typer.echo(f"🔍 Running Adversarial Evidence Critique on: {topic}...")
+        res = service.critique_research_topic(f"20_Research/{topic}")
+        typer.echo(f"✅ Status: {res['status']}")
+        typer.echo(f"   Critique File: {res['critique_file']}")
+        typer.echo(f"   Heuristic Risks Detected: {res['heuristic_risks_count']}")
+        for r in res.get("heuristic_risks", []):
+            typer.echo(f"   ⚠️ {r}")
+
+@app.command("export-docx")
+def export_docx_cmd(
+    path: str = typer.Argument(..., help="Path to markdown note or book folder to export"),
+    output: Optional[str] = typer.Option(None, "--output", "-o", help="Custom output file path")
+):
+    """
+    Exports an Obsidian book or individual note to a clean Microsoft Word (.docx) document.
+    """
+    from app.services.docx_exporter import DocxExporterService
+    svc = DocxExporterService()
+    target = Path(path)
+    out_file = Path(output) if output else Path("outputs/docx") / f"{target.stem}.docx"
+    if target.is_dir():
+        res = svc.export_book_to_docx(book_dir=target, output_docx_path=out_file)
+    else:
+        res = svc.export_note_to_docx(note_path=target, output_docx_path=out_file)
+    typer.echo(f"✅ Exported to DOCX: {res}")
+
 @app.callback(invoke_without_command=True)
 def main_callback(
     ctx: typer.Context,

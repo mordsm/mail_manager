@@ -1,5 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from typing import Optional, List, Dict, Any
 from pathlib import Path
 import tempfile
@@ -16,6 +16,7 @@ from app.services.consolidation import MemoryConsolidationService
 from app.services.session_builder import SessionBuilder
 from app.services.graph_service import VaultGraphService
 from app.services.hybrid_rag import HybridRAGService
+from app.services.docx_exporter import DocxExporterService
 
 router = APIRouter(prefix="/api/v1")
 pipeline = LLMWikiPipeline()
@@ -28,6 +29,7 @@ consolidation_service = MemoryConsolidationService()
 session_builder = SessionBuilder()
 graph_service = VaultGraphService()
 rag_service = HybridRAGService()
+docx_service = DocxExporterService()
 
 def normalize_domain(domain: str) -> str:
     domain_clean = (domain or "unclassified").strip().lower()
@@ -195,3 +197,33 @@ async def get_memory_overview():
 async def get_wiki_graph():
     graph_data = graph_service.build_graph()
     return graph_data
+
+# --- DOCX EXPORT ENDPOINT ---
+
+@router.get("/export/docx")
+@router.post("/export/docx")
+async def export_to_docx(
+    path: str,
+    title: Optional[str] = None
+):
+    target = Path(path)
+    if not target.exists():
+        # Check relative to root directory
+        target = Path(".") / path
+        if not target.exists():
+            raise HTTPException(status_code=404, detail=f"Target path not found: {path}")
+
+    out_dir = Path("outputs/docx")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_file = out_dir / f"{target.stem}.docx"
+
+    if target.is_dir():
+        exported = docx_service.export_book_to_docx(book_dir=target, output_docx_path=out_file, title=title or target.name)
+    else:
+        exported = docx_service.export_note_to_docx(note_path=target, output_docx_path=out_file, title=title)
+
+    return FileResponse(
+        path=str(exported),
+        filename=f"{target.stem}.docx",
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )

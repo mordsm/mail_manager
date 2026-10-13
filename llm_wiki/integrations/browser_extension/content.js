@@ -55,3 +55,4 @@
     // Periodic capture every 30 seconds if page content changes
     setInterval(sendCapture, 30000);
 })();
+
