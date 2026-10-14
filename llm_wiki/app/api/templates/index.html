@@ -404,6 +404,198 @@
             cursor: grab;
         }
         #graphCanvas:active { cursor: grabbing; }
+
+        /* --- Modern Equalizer & Voice Hub (שימוש בקול לשני הכיוונים) --- */
+        .voice-hub-card {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 27, 75, 0.85) 100%);
+            border: 1px solid rgba(129, 140, 248, 0.35);
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.75rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .voice-hub-card.active-dialogue {
+            border-color: #38bdf8;
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.25);
+        }
+        .voice-state-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+        .voice-orb {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .voice-orb.listening {
+            background: rgba(2, 132, 199, 0.3);
+            border-color: #38bdf8;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.8);
+            animation: orbPulse 1.2s infinite;
+        }
+        .voice-orb.thinking {
+            background: rgba(217, 119, 6, 0.3);
+            border-color: #f59e0b;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.8);
+            animation: orbRotate 1.5s linear infinite;
+        }
+        .voice-orb.speaking {
+            background: rgba(16, 185, 129, 0.3);
+            border-color: #10b981;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
+            animation: orbPulse 0.9s infinite;
+        }
+        @keyframes orbPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        @keyframes orbRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Soundwave equalizer bars */
+        .sound-wave {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            height: 24px;
+        }
+        .sound-wave .bar {
+            width: 4px;
+            height: 6px;
+            background: #64748b;
+            border-radius: 2px;
+            transition: height 0.15s ease, background-color 0.3s;
+        }
+        .sound-wave.active .bar {
+            background: #38bdf8;
+            animation: waveBounce 0.8s ease-in-out infinite alternate;
+        }
+        .sound-wave.active.speaking .bar {
+            background: #10b981;
+            animation: waveBounce 0.5s ease-in-out infinite alternate;
+        }
+        .sound-wave .bar:nth-child(2) { animation-delay: 0.15s; }
+        .sound-wave .bar:nth-child(3) { animation-delay: 0.3s; }
+        .sound-wave .bar:nth-child(4) { animation-delay: 0.45s; }
+        .sound-wave .bar:nth-child(5) { animation-delay: 0.2s; }
+        @keyframes waveBounce {
+            0% { height: 6px; }
+            100% { height: 26px; }
+        }
+
+        /* Continuous dialogue toggle button */
+        .dialogue-toggle-btn {
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: #38bdf8;
+            padding: 0.6rem 1.1rem;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.25s ease;
+        }
+        .dialogue-toggle-btn:hover {
+            background: rgba(56, 189, 248, 0.25);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+        .dialogue-toggle-btn.active {
+            background: linear-gradient(135deg, #0284c7 0%, #10b981 100%);
+            border-color: #38bdf8;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+        }
+
+        /* Inbox Watchdog Card */
+        .inbox-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .inbox-chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.25rem 0.65rem;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            color: #cbd5e1;
+        }
+        .inbox-chip strong { color: #38bdf8; }
+
+        /* Proactive Knowledge Gaps Styles */
+        .gap-item {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            transition: all 0.25s ease;
+        }
+        .gap-item:hover {
+            border-color: rgba(56, 189, 248, 0.4);
+            transform: translateX(4px);
+        }
+        .gap-item.high { border-left: 4px solid #ef4444; }
+        .gap-item.medium { border-left: 4px solid #f59e0b; }
+        .gap-item.low { border-left: 4px solid #10b981; }
+
+        .fill-gap-btn {
+            background: linear-gradient(135deg, #0284c7 0%, #10b981 100%);
+            border: none;
+            color: #fff;
+            padding: 0.55rem 1.1rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s ease;
+        }
+        .fill-gap-btn:hover {
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+            transform: translateY(-1px);
+        }
+        .fill-gap-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
     </style>
 </head>
 <body>
@@ -452,17 +644,28 @@
                 <span class="header-badge">v2.5 • Obsidian & Local Ollama</span>
             </div>
             <div class="header-controls">
-                <label for="voiceLangSelect" style="margin: 0; font-size: 0.85rem; color: #94a3b8;">🎙️ Voice Language:</label>
-                <select id="voiceLangSelect" class="voice-lang-select">
+                <label for="voiceLangSelect" style="margin: 0; font-size: 0.85rem; color: #94a3b8;">🎙️ שפה / Lang:</label>
+                <select id="voiceLangSelect" class="voice-lang-select" onchange="updateVoiceSettings()">
                     <option value="he-IL" selected>🇮🇱 עברית (Hebrew)</option>
                     <option value="en-US">🇬🇧 English (US)</option>
                 </select>
+                <label for="voiceRateSelect" style="margin: 0; font-size: 0.85rem; color: #94a3b8;">⚡ מהירות:</label>
+                <select id="voiceRateSelect" class="voice-lang-select">
+                    <option value="0.9">0.9x</option>
+                    <option value="1.0" selected>1.0x</option>
+                    <option value="1.15">1.15x</option>
+                    <option value="1.3">1.3x</option>
+                </select>
+                <button type="button" id="headerDialogueBtn" class="dialogue-toggle-btn" onclick="toggleContinuousDialogue()">
+                    🎙️ שיחה רציפה: כבוי
+                </button>
             </div>
         </div>
 
         <!-- Navigation Tabs -->
         <div class="tabs">
             <div class="tab active" id="tabHeaderAsk" onclick="activateTab('askTab')">💬 Ask Wiki (Hybrid RAG)</div>
+            <div class="tab" id="tabHeaderGaps" onclick="activateTab('gapsTab')">⚡ פערי ידע יזומים (Proactive Gaps)</div>
             <div class="tab" id="tabHeaderResearch" onclick="activateTab('researchTab')">🔬 Live Research Runner</div>
             <div class="tab" id="tabHeaderContradictions" onclick="activateTab('contradictionsTab')">⚡ Contradictions & Decisions</div>
             <div class="tab" id="tabHeaderText" onclick="activateTab('textTab')">📝 Ingest Note / Text</div>
@@ -473,6 +676,32 @@
 
         <!-- ==================== TAB 1: ASK WIKI (HYBRID RAG) ==================== -->
         <div id="askTab" class="tab-content active">
+            <!-- Voice Dialogue Interactive Hub (שימוש בקול לשני הכיוונים) -->
+            <div class="voice-hub-card" id="voiceDialogueHub">
+                <div class="voice-state-indicator">
+                    <div class="voice-orb" id="voiceOrb">🎙️</div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 1.05rem; color: #f8fafc;" id="voiceDialogueStatusText">דיאלוג קולי דו-כיווני (Hands-free Voice Dialogue)</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);" id="voiceDialogueSubtext">שאל שאלה בקולך והמערכת תענה ותקריא אוטומטית</div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
+                    <div class="sound-wave" id="soundWave">
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                    </div>
+                    <button type="button" id="mainDialogueBtn" class="dialogue-toggle-btn" onclick="toggleContinuousDialogue()">
+                        🎙️ הפעל שיחה רציפה
+                    </button>
+                    <button type="button" class="btn-secondary" style="padding: 0.55rem 0.85rem; font-size: 0.85rem;" onclick="stopSpeakingNow()">
+                        ⏹️ עצור הקראה
+                    </button>
+                </div>
+            </div>
+
             <form id="ragQueryForm">
                 <div class="form-group">
                     <label for="ragQuestion">Your Question / Research Query (Hebrew or English)</label>
@@ -531,6 +760,41 @@
                     <input type="text" id="exportDocxPath" placeholder="Path to note or book folder, e.g. wiki/research/books/inner_gate" value="wiki/research/books/inner_gate" style="flex: 1; min-width: 250px;">
                     <button onclick="downloadDocx()" class="btn-secondary" style="background: #059669; color: #fff; font-weight: bold;">📥 Download .DOCX</button>
                 </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB: PROACTIVE KNOWLEDGE GAPS ==================== -->
+        <div id="gapsTab" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h2 style="margin: 0; color: #38bdf8; font-size: 1.4rem;">⚡ פערי ידע ומחקר יזום (Proactive Knowledge Gaps)</h2>
+                    <p style="margin: 0.25rem 0 0 0; color: var(--text-muted); font-size: 0.9rem;">
+                        סריקה אוטונומית של מושגים חסרים (Broken Links), איים מבודדים (Orphan Notes) וסתירות לפי סעיפים 28-30 ו-37 ב-AGENTS.md
+                    </p>
+                </div>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button class="btn-secondary" onclick="loadProactiveGaps()" style="padding: 0.5rem 1rem;">🔄 רענן פערי ידע</button>
+                    <button class="btn-secondary" onclick="rebuildMOCs()" style="background: rgba(16, 185, 129, 0.2); border-color: #10b981; color: #34d399; padding: 0.5rem 1rem;">🗺️ רענן מפות תוכן (MOCs)</button>
+                </div>
+            </div>
+
+            <!-- Gaps Stats Grid -->
+            <div class="grid-2" style="margin-bottom: 1.5rem;">
+                <div class="card" style="border-left: 4px solid #ef4444; margin: 0; background: rgba(15, 23, 42, 0.85);">
+                    <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.35rem;">🔗 מושגים חסרים בקישורים (Broken Links)</div>
+                    <div style="font-size: 1.8rem; font-weight: 800; color: #f87171;" id="countBrokenLinks">0</div>
+                    <div style="font-size: 0.8rem; color: #64748b;">דורשים יצירת ערך מושגי עם סנתוז RAG</div>
+                </div>
+                <div class="card" style="border-left: 4px solid #f59e0b; margin: 0; background: rgba(15, 23, 42, 0.85);">
+                    <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.35rem;">🏝️ איים מבודדים ללא קישורים (Orphan Notes)</div>
+                    <div style="font-size: 1.8rem; font-weight: 800; color: #fbbf24;" id="countOrphanNotes">0</div>
+                    <div style="font-size: 0.8rem; color: #64748b;">דורשים שילוב במפות תוכן MOC ומושגי אב</div>
+                </div>
+            </div>
+
+            <!-- Gaps Container -->
+            <div id="gapsContainer">
+                <p style="color: var(--text-muted);">טוען פערי ידע מהכספת...</p>
             </div>
         </div>
 
@@ -663,6 +927,27 @@
 
         <!-- ==================== TAB 5: FILE INGESTION ==================== -->
         <div id="fileTab" class="tab-content">
+            <!-- Live Inbox Watchdog Status Card -->
+            <div class="inbox-card" id="inboxWatcherCard">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+                        <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #10b981; box-shadow: 0 0 10px #10b981;"></span>
+                        <strong style="color: #34d399; font-size: 0.95rem;">Inbox Watchdog Active (תיקיית קליטה חיה)</strong>
+                        <span id="inboxPendingBadge" class="badge badge-success">0 קבצים ממתינים</span>
+                    </div>
+                    <div id="inboxBreakdownChips" style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                        <span class="inbox-chip">🔬 Research: <strong id="chipResearch">0</strong></span>
+                        <span class="inbox-chip">👤 Personal: <strong id="chipPersonal">0</strong></span>
+                        <span class="inbox-chip">💻 Dev: <strong id="chipDev">0</strong></span>
+                        <span class="inbox-chip">💼 Business: <strong id="chipBusiness">0</strong></span>
+                        <span class="inbox-chip">📁 Unclassified: <strong id="chipUnclass">0</strong></span>
+                    </div>
+                </div>
+                <button type="button" class="btn-secondary" style="background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.5); color: #34d399; font-weight: bold;" onclick="triggerInboxScanNow()">
+                    ⚡ סרוק תיבת דואר עכשיו
+                </button>
+            </div>
+
             <form id="uploadForm">
                 <input type="file" id="fileInput" style="display:none" onchange="handleFileChange(this.files)">
                 <div class="dropzone" id="dropzone" onclick="triggerFilePicker(event)">
@@ -811,6 +1096,7 @@
 
             const tabMap = {
                 'askTab': 'tabHeaderAsk',
+                'gapsTab': 'tabHeaderGaps',
                 'researchTab': 'tabHeaderResearch',
                 'contradictionsTab': 'tabHeaderContradictions',
                 'textTab': 'tabHeaderText',
@@ -827,110 +1113,350 @@
                 document.getElementById(tabId).classList.add('active');
             }
 
+            if (tabId === 'gapsTab') loadProactiveGaps();
+            if (tabId === 'fileTab') fetchInboxStatus();
             if (tabId === 'contradictionsTab') loadContradictions();
             if (tabId === 'researchTab') loadResearchHistory();
             if (tabId === 'memoryTab') fetchMemoryOverview();
             if (tabId === 'graphTab') initGraph();
         }
 
-        /* --- GLOBAL VOICE RECOGNITION (שימוש בקול) --- */
-        let recognition = null;
-        let isRecording = false;
+        /* --- BI-DIRECTIONAL CONVERSATIONAL VOICE MODE (שימוש בקול לשני הכיוונים) --- */
+        let isDialogueModeActive = false;
+        let dialogueState = 'idle'; // 'idle', 'listening', 'thinking', 'speaking'
+        let continuousRecognition = null;
         let currentTargetInputId = null;
         let currentMicBtnId = null;
+        let activeSpeakBtnId = null;
 
-        function initVoiceRecognition() {
+        function setVoiceHubState(state, statusText, subText) {
+            dialogueState = state;
+            const orb = document.getElementById('voiceOrb');
+            const wave = document.getElementById('soundWave');
+            const statusEl = document.getElementById('voiceDialogueStatusText');
+            const subEl = document.getElementById('voiceDialogueSubtext');
+            const hub = document.getElementById('voiceDialogueHub');
+
+            if (orb) {
+                orb.className = 'voice-orb ' + state;
+                if (state === 'listening') orb.textContent = '🎙️';
+                else if (state === 'thinking') orb.textContent = '⏳';
+                else if (state === 'speaking') orb.textContent = '🔊';
+                else orb.textContent = '🎙️';
+            }
+
+            if (wave) {
+                if (state === 'listening') {
+                    wave.className = 'sound-wave active';
+                } else if (state === 'speaking') {
+                    wave.className = 'sound-wave active speaking';
+                } else {
+                    wave.className = 'sound-wave';
+                }
+            }
+
+            if (statusEl) statusEl.textContent = statusText;
+            if (subEl) subEl.textContent = subText;
+            if (hub) {
+                if (isDialogueModeActive) hub.classList.add('active-dialogue');
+                else hub.classList.remove('active-dialogue');
+            }
+        }
+
+        function toggleContinuousDialogue() {
+            isDialogueModeActive = !isDialogueModeActive;
+            const headerBtn = document.getElementById('headerDialogueBtn');
+            const mainBtn = document.getElementById('mainDialogueBtn');
+
+            if (isDialogueModeActive) {
+                if (headerBtn) {
+                    headerBtn.textContent = '🎙️ שיחה רציפה: פעיל';
+                    headerBtn.classList.add('active');
+                }
+                if (mainBtn) {
+                    mainBtn.textContent = '⏹️ עצור מצב שיחה רציפה';
+                    mainBtn.classList.add('active');
+                }
+                activateTab('askTab');
+                speakCleanText('מצב שיחה קולי דו-כיווני הופעל. אני מקשיב לשאלתך.', () => {
+                    startDialogueListening();
+                });
+            } else {
+                if (headerBtn) {
+                    headerBtn.textContent = '🎙️ שיחה רציפה: כבוי';
+                    headerBtn.classList.remove('active');
+                }
+                if (mainBtn) {
+                    mainBtn.textContent = '🎙️ הפעל שיחה רציפה';
+                    mainBtn.classList.remove('active');
+                }
+                stopDialogueListening();
+                stopSpeakingNow();
+                setVoiceHubState('idle', 'דיאלוג קולי דו-כיווני (Hands-free Voice Dialogue)', 'מצב שיחה כבוי. לחץ להפעלה.');
+            }
+        }
+
+        function startDialogueListening() {
+            if (!isDialogueModeActive) return;
+            stopSpeakingNow();
+
             const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRec) {
-                console.warn('Web Speech API is not supported in this browser.');
-                return null;
+                alert('Web Speech API is not supported in this browser.');
+                toggleContinuousDialogue();
+                return;
             }
-            const rec = new SpeechRec();
-            rec.continuous = false;
-            rec.interimResults = false;
 
-            rec.onstart = () => {
-                isRecording = true;
+            if (continuousRecognition) {
+                try { continuousRecognition.stop(); } catch(e){}
+            }
+
+            continuousRecognition = new SpeechRec();
+            continuousRecognition.continuous = false;
+            continuousRecognition.interimResults = true;
+            continuousRecognition.lang = document.getElementById('voiceLangSelect').value;
+
+            continuousRecognition.onstart = () => {
+                setVoiceHubState('listening', 'מאזין כעת... (Listening)', 'דבר אל המיקרופון באופן חופשי...');
+            };
+
+            continuousRecognition.onresult = (event) => {
+                let interim = '';
+                let finalTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interim += event.results[i][0].transcript;
+                    }
+                }
+
+                const questionInput = document.getElementById('ragQuestion');
+                if (questionInput) {
+                    questionInput.value = finalTranscript || interim;
+                }
+
+                if (finalTranscript.trim()) {
+                    handleSpokenDialogueQuery(finalTranscript.trim());
+                }
+            };
+
+            continuousRecognition.onerror = (event) => {
+                console.warn('Dialogue speech recognition error:', event.error);
+                if (isDialogueModeActive && event.error !== 'aborted') {
+                    setTimeout(() => {
+                        if (isDialogueModeActive && dialogueState !== 'speaking' && dialogueState !== 'thinking') {
+                            startDialogueListening();
+                        }
+                    }, 1200);
+                }
+            };
+
+            continuousRecognition.onend = () => {
+                if (isDialogueModeActive && dialogueState === 'listening') {
+                    setTimeout(() => {
+                        if (isDialogueModeActive && dialogueState === 'listening') {
+                            startDialogueListening();
+                        }
+                    }, 800);
+                }
+            };
+
+            try {
+                continuousRecognition.start();
+            } catch(e) {
+                console.error('Could not start recognition:', e);
+            }
+        }
+
+        function stopDialogueListening() {
+            if (continuousRecognition) {
+                try { continuousRecognition.stop(); } catch(e){}
+                continuousRecognition = null;
+            }
+        }
+
+        function cleanTextForSpeech(text) {
+            if (!text) return '';
+            let cleaned = text
+                .replace(/\[\[(?:[^|\]]*\|)?([^\]]+)\]\]/g, '$1')
+                .replace(/https?:\/\/\S+/g, '')
+                .replace(/[#*`_~]/g, '')
+                .replace(/^\s*[-+*]\s+/gm, '')
+                .replace(/\n+/g, '. ')
+                .replace(/\s+/g, ' ')
+                .trim();
+            if (cleaned.length > 700) {
+                const cut = cleaned.substring(0, 700);
+                const lastDot = cut.lastIndexOf('.');
+                cleaned = (lastDot > 300 ? cut.substring(0, lastDot + 1) : cut) + ' ... לפרטים נוספים עיין בתשובה המלאה המוצגת על המסך.';
+            }
+            return cleaned;
+        }
+
+        function speakCleanText(rawText, onComplete) {
+            if (!('speechSynthesis' in window)) {
+                if (onComplete) onComplete();
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+            const text = cleanTextForSpeech(rawText);
+            if (!text) {
+                if (onComplete) onComplete();
+                return;
+            }
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            const isHebrew = /[\u0590-\u05FF]/.test(text);
+            utterance.lang = isHebrew ? 'he-IL' : 'en-US';
+
+            const rateSelect = document.getElementById('voiceRateSelect');
+            utterance.rate = rateSelect ? parseFloat(rateSelect.value) : 1.0;
+
+            setVoiceHubState('speaking', 'מקריא תשובה... (Speaking)', text.substring(0, 80) + '...');
+
+            utterance.onend = () => {
+                if (onComplete) {
+                    onComplete();
+                } else if (isDialogueModeActive) {
+                    setVoiceHubState('listening', 'מאזין לשאלה הבאה... (Listening)', 'דבר כעת אל המיקרופון');
+                    startDialogueListening();
+                } else {
+                    setVoiceHubState('idle', 'דיאלוג קולי דו-כיווני (Hands-free Voice Dialogue)', 'הקראה הסתיימה.');
+                }
+            };
+
+            utterance.onerror = (err) => {
+                console.warn('TTS error:', err);
+                if (onComplete) {
+                    onComplete();
+                } else if (isDialogueModeActive) {
+                    startDialogueListening();
+                }
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function stopSpeakingNow() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            if (activeSpeakBtnId) {
+                const btn = document.getElementById(activeSpeakBtnId);
+                if (btn) {
+                    btn.classList.remove('speaking');
+                    btn.textContent = '🔊 הקרא בקול / Listen';
+                }
+                activeSpeakBtnId = null;
+            }
+        }
+
+        async function handleSpokenDialogueQuery(queryText) {
+            stopDialogueListening();
+            const lower = queryText.toLowerCase();
+
+            // Quick Voice Commands Handling
+            if (lower.includes('סרוק תיבה') || lower.includes('בדוק תיבה') || lower.includes('סרוק דואר') || lower.includes('scan inbox')) {
+                speakCleanText('סורק תיבת דואר כעת...');
+                await triggerInboxScanNow();
+                return;
+            }
+            if (lower.includes('רענן מפות') || lower.includes('מפות תוכן') || lower.includes('rebuild moc')) {
+                speakCleanText('מרענן מפות תוכן בכספת כעת...');
+                await rebuildMOCs();
+                return;
+            }
+            if (lower.includes('פערים') || lower.includes('פערי ידע') || lower.includes('knowledge gaps')) {
+                activateTab('gapsTab');
+                speakCleanText('עובר ללשונית פערי ידע ומחקר יזום.');
+                return;
+            }
+            if (lower.includes('עצור') || lower.includes('הפסק') || lower.includes('בטל שיחה') || lower.includes('stop dialogue')) {
+                toggleContinuousDialogue();
+                speakCleanText('מצב שיחה קולית הופסק.');
+                return;
+            }
+
+            // Normal Knowledge Query
+            setVoiceHubState('thinking', 'מעבד שאילתה ומחפש בכספת... (Synthesizing)', queryText);
+
+            const questionInput = document.getElementById('ragQuestion');
+            if (questionInput) questionInput.value = queryText;
+
+            // Submit query form
+            document.getElementById('ragQueryForm').dispatchEvent(new Event('submit'));
+        }
+
+        /* --- GLOBAL VOICE INPUT BUTTON (Manual Mic Tap) --- */
+        let manualRecognition = null;
+
+        function toggleVoice(targetInputId, micBtnId, autoSubmit = false) {
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRec) {
+                alert('Web Speech API is not supported in your browser. Please use Chrome, Edge, or a modern Chromium browser.');
+                return;
+            }
+
+            if (manualRecognition) {
+                try { manualRecognition.stop(); } catch(e){}
+                manualRecognition = null;
+                document.getElementById('voiceToast').style.display = 'none';
+                if (micBtnId) document.getElementById(micBtnId).classList.remove('mic-recording');
+                return;
+            }
+
+            manualRecognition = new SpeechRec();
+            manualRecognition.continuous = false;
+            manualRecognition.interimResults = false;
+            manualRecognition.lang = document.getElementById('voiceLangSelect').value;
+
+            manualRecognition.onstart = () => {
                 const toast = document.getElementById('voiceToast');
                 const lang = document.getElementById('voiceLangSelect').value;
                 document.getElementById('voiceToastTitle').textContent = lang.startsWith('he') ? 'מקשיב... (Listening)' : 'Listening...';
                 document.getElementById('voiceToastDetail').textContent = lang.startsWith('he') ? 'דבר אל המיקרופון כעת' : 'Speak clearly into your microphone';
                 toast.style.display = 'flex';
-                if (currentMicBtnId) {
-                    document.getElementById(currentMicBtnId).classList.add('mic-recording');
-                }
+                if (micBtnId) document.getElementById(micBtnId).classList.add('mic-recording');
             };
 
-            rec.onresult = (event) => {
+            manualRecognition.onresult = (event) => {
                 const transcript = event.results[0][0].transcript;
-                if (currentTargetInputId) {
-                    const el = document.getElementById(currentTargetInputId);
-                    if (el) {
-                        if (el.tagName === 'TEXTAREA' && el.value) {
-                            el.value = el.value + ' ' + transcript;
-                        } else {
-                            el.value = transcript;
-                        }
+                const el = document.getElementById(targetInputId);
+                if (el) {
+                    if (el.tagName === 'TEXTAREA' && el.value) {
+                        el.value = el.value + ' ' + transcript;
+                    } else {
+                        el.value = transcript;
                     }
                 }
+                if (autoSubmit && targetInputId === 'ragQuestion') {
+                    document.getElementById('ragQueryForm').dispatchEvent(new Event('submit'));
+                }
             };
 
-            rec.onerror = (event) => {
+            manualRecognition.onerror = (event) => {
                 console.error('Speech error:', event.error);
-                stopVoice();
-                alert('Microphone error: ' + event.error);
+                if (micBtnId) document.getElementById(micBtnId).classList.remove('mic-recording');
+                document.getElementById('voiceToast').style.display = 'none';
+                manualRecognition = null;
             };
 
-            rec.onend = () => {
-                stopVoice();
+            manualRecognition.onend = () => {
+                if (micBtnId) document.getElementById(micBtnId).classList.remove('mic-recording');
+                document.getElementById('voiceToast').style.display = 'none';
+                manualRecognition = null;
             };
-
-            return rec;
-        }
-
-        function toggleVoice(targetInputId, micBtnId, autoSubmit = false) {
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                alert('Web Speech API is not supported in your browser. Please use Chrome, Edge, or a modern Chromium browser.');
-                return;
-            }
-
-            if (isRecording) {
-                stopVoice();
-                return;
-            }
-
-            recognition = initVoiceRecognition();
-            if (!recognition) return;
-
-            currentTargetInputId = targetInputId;
-            currentMicBtnId = micBtnId;
-            recognition.lang = document.getElementById('voiceLangSelect').value;
 
             try {
-                recognition.start();
-            } catch (err) {
-                console.error(err);
+                manualRecognition.start();
+            } catch(e) {
+                console.error(e);
             }
-        }
-
-        function stopVoice() {
-            isRecording = false;
-            if (recognition) {
-                try { recognition.stop(); } catch(e){}
-            }
-            document.getElementById('voiceToast').style.display = 'none';
-            if (currentMicBtnId) {
-                const btn = document.getElementById(currentMicBtnId);
-                if (btn) btn.classList.remove('mic-recording');
-            }
-            currentMicBtnId = null;
-            currentTargetInputId = null;
         }
 
         /* --- TEXT-TO-SPEECH (TTS הקראה בקול) --- */
-        let currentUtterance = null;
-        let activeSpeakBtnId = null;
-
         function toggleSpeech(textElementId, btnId) {
             if (!('speechSynthesis' in window)) {
                 alert('Speech synthesis is not supported in this browser.');
@@ -938,46 +1464,174 @@
             }
 
             if (window.speechSynthesis.speaking) {
-                window.speechSynthesis.cancel();
-                if (activeSpeakBtnId) {
-                    const btn = document.getElementById(activeSpeakBtnId);
-                    if (btn) {
-                        btn.classList.remove('speaking');
-                        btn.textContent = '🔊 הקרא בקול / Listen';
-                    }
-                }
-                activeSpeakBtnId = null;
+                stopSpeakingNow();
                 return;
             }
 
             const el = document.getElementById(textElementId);
             if (!el || !el.textContent.trim()) return;
 
-            const text = el.textContent.trim();
-            const utterance = new SpeechSynthesisUtterance(text);
-            
-            // Detect Hebrew characters
-            const isHebrew = /[\u0590-\u05FF]/.test(text);
-            utterance.lang = isHebrew ? 'he-IL' : 'en-US';
-            utterance.rate = 1.0;
-
-            const btn = document.getElementById(btnId);
             activeSpeakBtnId = btnId;
-            btn.classList.add('speaking');
-            btn.textContent = '⏹️ עצור הקראה (Stop)';
+            const btn = document.getElementById(btnId);
+            if (btn) {
+                btn.classList.add('speaking');
+                btn.textContent = '⏹️ עצור הקראה (Stop)';
+            }
 
-            utterance.onend = () => {
-                btn.classList.remove('speaking');
-                btn.textContent = '🔊 הקרא בקול / Listen';
+            speakCleanText(el.textContent.trim(), () => {
+                if (btn) {
+                    btn.classList.remove('speaking');
+                    btn.textContent = '🔊 הקרא בקול / Listen';
+                }
                 activeSpeakBtnId = null;
-            };
-            utterance.onerror = () => {
-                btn.classList.remove('speaking');
-                btn.textContent = '🔊 הקרא בקול / Listen';
-                activeSpeakBtnId = null;
-            };
+            });
+        }
 
-            window.speechSynthesis.speak(utterance);
+        function updateVoiceSettings() {
+            if (isDialogueModeActive) {
+                startDialogueListening();
+            }
+        }
+
+        /* --- PROACTIVE KNOWLEDGE GAPS & INBOX WATCHDOG --- */
+        async function loadProactiveGaps() {
+            const container = document.getElementById('gapsContainer');
+            const countBroken = document.getElementById('countBrokenLinks');
+            const countOrphan = document.getElementById('countOrphanNotes');
+            container.innerHTML = '<p style="color: var(--text-muted);">🔄 סורק פערי ידע בכספת...</p>';
+
+            try {
+                const res = await fetch('/api/v1/proactive/gaps');
+                const data = await res.json();
+                const gaps = data.gaps || [];
+
+                let brokenCount = 0;
+                let orphanCount = 0;
+
+                gaps.forEach(g => {
+                    if (g.type === 'broken_link') brokenCount++;
+                    if (g.type === 'orphan_note') orphanCount++;
+                });
+
+                if (countBroken) countBroken.textContent = brokenCount;
+                if (countOrphan) countOrphan.textContent = orphanCount;
+
+                if (gaps.length === 0) {
+                    container.innerHTML = `
+                        <div class="card" style="border-color: #10b981; background: rgba(6, 78, 59, 0.2);">
+                            <h3 style="color: #34d399; margin: 0;">✅ אין פערי ידע פתוחים בכספת!</h3>
+                            <p style="color: #a7f3d0; margin: 0.5rem 0 0 0;">כל הקישורים תקינים וכל המושגים מקושרים למפות תוכן MOC.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = gaps.map(g => {
+                    const priorityClass = g.priority ? g.priority.toLowerCase() : 'medium';
+                    const priorityBadge = g.priority === 'HIGH' ? '<span class="badge badge-danger">🔴 דחיפות גבוהה</span>' :
+                                          g.priority === 'MEDIUM' ? '<span class="badge badge-warning">🟡 דחיפות בינונית</span>' :
+                                          '<span class="badge badge-success">🟢 דחיפות נמוכה</span>';
+                    const typeIcon = g.type === 'broken_link' ? '🔗 קישור חסר' :
+                                     g.type === 'orphan_note' ? '🏝️ פתק מבודד' : '⚡ סתירה';
+
+                    return `
+                        <div class="gap-item ${priorityClass}">
+                            <div style="flex: 1; min-width: 280px;">
+                                <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.4rem; flex-wrap: wrap;">
+                                    ${priorityBadge}
+                                    <span class="badge" style="background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8;">${typeIcon}</span>
+                                    <span style="font-size: 0.8rem; color: #94a3b8;">דומיין: <strong>${g.domain || 'research'}</strong></span>
+                                </div>
+                                <h4 style="margin: 0 0 0.35rem 0; font-size: 1.1rem; color: #f8fafc;">${g.title}</h4>
+                                <div style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 0.35rem;">${g.description}</div>
+                                <div style="font-size: 0.82rem; color: #64748b;">שאילתת מחקר מוצעת: <code>${g.suggested_query}</code></div>
+                            </div>
+                            <div>
+                                <button type="button" class="fill-gap-btn" onclick="fillProactiveGap('${g.gap_id}', this)">
+                                    ⚡ השלם פער מחקרי
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                container.innerHTML = `<p style="color: #f87171;">❌ שגיאה בטעינת פערי ידע: ${err.message}</p>`;
+            }
+        }
+
+        async function fillProactiveGap(gapId, btn) {
+            btn.disabled = true;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ מבצע מחקר RAG ויוצר ערך...';
+
+            try {
+                const formData = new FormData();
+                formData.append('gap_id', gapId);
+
+                const res = await fetch('/api/v1/proactive/fill', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (data.status === 'ERROR') {
+                    alert('שגיאה בהשלמת הפער: ' + data.message);
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    return;
+                }
+
+                showStatus(`✅ פער הידע הושלם בהצלחה!\nנוצר ערך מושגי חדש:\n${data.note_path}\nמפות תוכן MOC עודכנו, והערך אונדקס בבסיס הווקטורי.`);
+                if (isDialogueModeActive) {
+                    speakCleanText(`פער הידע עבור ${data.title} הושלם בהצלחה ונוצר ערך מושגי חדש בכספת.`);
+                }
+                loadProactiveGaps();
+            } catch (err) {
+                alert('שגיאה: ' + err.message);
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        async function fetchInboxStatus() {
+            try {
+                const res = await fetch('/api/v1/inbox/status');
+                const data = await res.json();
+
+                const pendingBadge = document.getElementById('inboxPendingBadge');
+                if (pendingBadge) {
+                    pendingBadge.textContent = `${data.total_pending_files} קבצים ממתינים`;
+                    if (data.total_pending_files > 0) {
+                        pendingBadge.className = 'badge badge-warning';
+                    } else {
+                        pendingBadge.className = 'badge badge-success';
+                    }
+                }
+
+                const b = data.breakdown || {};
+                const r = document.getElementById('chipResearch'); if (r) r.textContent = (b.research || []).length;
+                const p = document.getElementById('chipPersonal'); if (p) p.textContent = (b.personal || []).length;
+                const d = document.getElementById('chipDev'); if (d) d.textContent = (b.development || []).length;
+                const bus = document.getElementById('chipBusiness'); if (bus) bus.textContent = (b.business || []).length;
+                const u = document.getElementById('chipUnclass'); if (u) u.textContent = (b.unclassified || []).length;
+            } catch (err) {
+                console.warn('Could not fetch inbox status:', err);
+            }
+        }
+
+        async function triggerInboxScanNow() {
+            showStatus('⏳ סורק ומעבד קבצים בתיקיות inbox/...');
+            try {
+                const res = await fetch('/api/v1/inbox/scan', { method: 'POST' });
+                const data = await res.json();
+                showStatus(`✅ סריקת תיבת הדואר הושלמה:\nעובדו ${data.files_processed_count} קבצים.\n` + JSON.stringify(data.processed, null, 2));
+                fetchInboxStatus();
+                if (isDialogueModeActive) {
+                    speakCleanText(`סריקת תיבת הדואר הושלמה. עובדו ${data.files_processed_count} קבצים בהצלחה.`);
+                }
+            } catch (err) {
+                showStatus('❌ שגיאה בסריקת תיבת הדואר: ' + err.message);
+            }
         }
 
         /* --- ASK WIKI (HYBRID RAG) HANDLER --- */
@@ -1023,8 +1677,15 @@
                         citationsList.appendChild(li);
                     });
                 }
+
+                if (isDialogueModeActive && data.answer) {
+                    speakCleanText(data.answer);
+                }
             } catch (err) {
                 answerDiv.textContent = '❌ Failed to query: ' + err.message;
+                if (isDialogueModeActive) {
+                    speakCleanText('חלה שגיאה בביצוע השאילתה.');
+                }
             }
         });
 
@@ -1725,6 +2386,11 @@
                 }
             }
         }
+
+        // Initialize status on load
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchInboxStatus();
+        });
     </script>
 </body>
 </html>

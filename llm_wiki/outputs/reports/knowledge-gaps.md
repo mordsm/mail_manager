@@ -1,16 +1,21 @@
 # LLM Wiki Knowledge Gap & Integrity Report
 
-- **Total Wiki Notes Analyzed**: 58
-- **Broken Links Detected**: 86
-- **Orphan Notes**: 29
-- **Missing Frontmatter**: 13
+- **Total Wiki Notes Analyzed**: 62
+- **Broken Links Detected**: 91
+- **Orphan Notes**: 32
+- **Missing Frontmatter**: 16
 
 ## Broken Links
+- Note `wiki\business\index.md` links to missing target `[[business_moc]]`
+- Note `wiki\competitive\index.md` links to missing target `[[competitive_moc]]`
+- Note `wiki\development\index.md` links to missing target `[[development_moc]]`
 - Note `wiki\index\topic_index.md` links to missing target `[[real_test_book#^head1-5191ec2a]]`
 - Note `wiki\index\topic_index.md` links to missing target `[[real_test_book#^block-d72ba1d4]]`
 - Note `wiki\index\topic_index.md` links to missing target `[[real_test_book#^head2-f3769cc4]]`
 - Note `wiki\index\topic_index.md` links to missing target `[[real_test_book#^block-6dd1036b]]`
 - Note `wiki\index\topic_index.md` links to missing target `[[real_test_book#^table-c24ee8a0]]`
+- Note `wiki\personal\index.md` links to missing target `[[personal_moc]]`
+- Note `wiki\research\index.md` links to missing target `[[research_moc]]`
 - Note `wiki\research\topics\sample-paper.md` links to missing target `[[agent-memory]]`
 - Note `wiki\research\topics\sample-paper.md` links to missing target `[[Planning]]`
 - Note `wiki\research\topics\sample-paper.md` links to missing target `[[Agent-Memory]]`
@@ -97,6 +102,7 @@
 - Note `[[2026-09-27]]` has 0 incoming links.
 - Note `[[2026-09-28]]` has 0 incoming links.
 - Note `[[2026-10-13]]` has 0 incoming links.
+- Note `[[2026-10-14]]` has 0 incoming links.
 - Note `[[topic_index]]` has 0 incoming links.
 - Note `[[fastapi-routing]]` has 0 incoming links.
 - Note `[[development-session-api-test-capture]]` has 0 incoming links.
@@ -105,6 +111,8 @@
 - Note `[[my-second-note]]` has 0 incoming links.
 - Note `[[ollama-provides-local-llm-inference]]` has 0 incoming links.
 - Note `[[short-cli-note-test]]` has 0 incoming links.
+- Note `[[scfa-butyrate-mucosal-integrity-vs-high-dose-toxicity]]` has 0 incoming links.
+- Note `[[critic_could_gut_inflammation_connect_autoimmune_disease_]]` has 0 incoming links.
 - Note `[[llm-dialogue-session-chatgpt-research-on-butyrate]]` has 0 incoming links.
 - Note `[[research-can-we-treat-it-using-stoping-the-inflamanation]]` has 0 incoming links.
 - Note `[[research-could-gut-inflammation-connect-autoimmune-disease-and-parkin]]` has 0 incoming links.
