@@ -165,7 +165,10 @@ class ProactiveGapFillerService:
                 f"## Citations & Evidence Base\n"
             )
             for c in citations:
-                body += f"- **[{c.get('block_id', 'ref')}]**: {c.get('title', 'Ref')} (`{c.get('note_path', '')}`)\n"
+                if isinstance(c, dict):
+                    body += f"- **[{c.get('block_id', 'ref')}]**: {c.get('title', 'Ref')} (`{c.get('note_path', '')}`)\n"
+                else:
+                    body += f"- {c}\n"
 
             post = frontmatter.Post(body, **post_meta)
             with open(note_path, "w", encoding="utf-8") as f:
