@@ -1,16 +1,8 @@
-# Research & Technology Index
+# Research Domain Index
 
-Welcome to the Research & Technology Domain.
+**Navigation MOC**: [[research_moc]]
 
-## Categories
+**Domain Log**: [[log]]
 
-- Topics & Concepts
-- Technologies & Software
-- Papers & Evidence
-- Hypotheses & Claims
-- Contradictions & Experiments
-
-## Domain Log
-
-See [[log|Research Domain Log]].
-
+## Overview
+Total curated knowledge units: 42

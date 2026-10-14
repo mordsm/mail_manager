@@ -1,16 +1,8 @@
-# Business & Operations Index
+# Business Domain Index
 
-Welcome to the Business & Operations Domain.
+**Navigation MOC**: [[business_moc]]
 
-## Categories
+**Domain Log**: [[log]]
 
-- Strategy & Projects
-- Products & Customers
-- Finance & Administration
-- Operations & Decisions
-- Risks & Opportunities
-
-## Domain Log
-
-See [[log|Business Domain Log]].
-
+## Overview
+Total curated knowledge units: 0

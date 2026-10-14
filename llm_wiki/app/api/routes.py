@@ -5,6 +5,8 @@ from pathlib import Path
 from datetime import datetime
 import tempfile
 import shutil
+import re
+import frontmatter
 
 from app.services.pipeline import LLMWikiPipeline
 from app.services.auditor import WikiAuditorService
@@ -20,6 +22,7 @@ from app.services.hybrid_rag import HybridRAGService
 from app.services.docx_exporter import DocxExporterService
 from app.services.contradiction import ContradictionService
 from app.services.evidence_critic import EvidenceCriticService
+from app.services.moc_service import MOCService
 
 router = APIRouter(prefix="/api/v1")
 pipeline = LLMWikiPipeline()
@@ -35,6 +38,7 @@ rag_service = HybridRAGService()
 docx_service = DocxExporterService()
 contradiction_service = ContradictionService()
 critic_service = EvidenceCriticService()
+moc_service = MOCService()
 
 def normalize_domain(domain: str) -> str:
     domain_clean = (domain or "unclassified").strip().lower()
@@ -388,3 +392,63 @@ async def list_research_sessions():
                 "snippet": txt.replace("#", "").strip()[:180] + "..."
             })
     return {"total": len(sessions), "sessions": sessions}
+
+# --- NOTE INSPECTOR & MOC REBUILD ENDPOINTS ---
+
+@router.get("/wiki/note")
+async def get_wiki_note(path: str):
+    """
+    Returns full note content, metadata, outbound links, and backlinks for interactive preview drawer.
+    """
+    target = Path(path)
+    if not target.exists():
+        target = Path(".") / path
+        if not target.exists():
+            # Try searching by note stem
+            candidates = list(Path(".").glob(f"**/{path}.md")) + list(Path(".").glob(f"**/{path}"))
+            if candidates:
+                target = candidates[0]
+            else:
+                raise HTTPException(status_code=404, detail=f"Note not found: {path}")
+
+    post = frontmatter.load(target)
+    outbound = re.findall(r"\[\[([^\]]+)\]\]", post.content)
+
+    # Fast scan for backlinks
+    stem = target.stem
+    backlinks = []
+    for md in Path(".").glob("**/*.md"):
+        if md == target or "system" in md.parts or ".venv" in md.parts or ".pytest" in md.parts:
+            continue
+        try:
+            txt = md.read_text(encoding="utf-8", errors="ignore")
+            if f"[[{stem}]]" in txt or (post.get("title") and f"[[{post.get('title')}]]" in txt):
+                backlinks.append({
+                    "title": md.stem.replace("_", " ").title(),
+                    "path": str(md)
+                })
+        except Exception:
+            continue
+
+    domain = post.get("domain", "research")
+    if isinstance(domain, list):
+        domain = domain[0] if domain else "research"
+
+    return {
+        "title": post.get("title") or target.stem.replace("_", " ").title(),
+        "path": str(target),
+        "domain": str(domain),
+        "metadata": {k: str(v) for k, v in post.metadata.items()},
+        "content": post.content,
+        "outbound_links": list(set(outbound)),
+        "backlinks": backlinks[:10]
+    }
+
+@router.post("/wiki/mocs/rebuild")
+async def rebuild_mocs_endpoint():
+    """
+    Rebuilds all curated Maps of Content across domains per AGENTS.md rule:
+    'MOCs own navigation. Wiki owns synthesis.'
+    """
+    stats = moc_service.rebuild_domain_mocs()
+    return {"status": "REBUILT", "stats": stats}

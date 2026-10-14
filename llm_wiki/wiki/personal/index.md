@@ -1,16 +1,8 @@
-# Personal Knowledge Index
+# Personal Domain Index
 
-Welcome to the Personal Domain.
+**Navigation MOC**: [[personal_moc]]
 
-## Categories
+**Domain Log**: [[log]]
 
-- Health & Nutrition
-- Psychology & Cognition
-- Habits & Training
-- Personal Goals & Projects
-- Reflections & Decisions
-
-## Domain Log
-
-See [[log|Personal Domain Log]].
-
+## Overview
+Total curated knowledge units: 1

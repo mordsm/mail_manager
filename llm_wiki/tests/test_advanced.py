@@ -123,5 +123,21 @@ def test_docx_export_endpoint():
     assert resp.status_code == 200
     assert "application/vnd.openxmlformats-officedocument" in resp.headers["content-type"]
 
+def test_wiki_note_inspector():
+    resp = client.get("/api/v1/wiki/note?path=wiki/research/books/inner_gate/chapter_01.md")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "title" in data
+    assert "content" in data
+    assert "outbound_links" in data
+    assert "backlinks" in data
+
+def test_mocs_rebuild_endpoint():
+    resp = client.post("/api/v1/wiki/mocs/rebuild")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "REBUILT"
+    assert "stats" in data
+
 
 

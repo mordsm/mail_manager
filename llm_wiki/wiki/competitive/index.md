@@ -1,16 +1,8 @@
-# Competitive Analysis Index
+# Competitive Domain Index
 
-Welcome to the Competitive Analysis Domain.
+**Navigation MOC**: [[competitive_moc]]
 
-## Categories
+**Domain Log**: [[log]]
 
-- Companies & Products
-- Features & Pricing
-- Positioning & Markets
-- Competitive Signals
-- Comparisons & Timelines
-
-## Domain Log
-
-See [[log|Competitive Domain Log]].
-
+## Overview
+Total curated knowledge units: 0

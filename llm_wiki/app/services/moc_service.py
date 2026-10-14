@@ -50,3 +50,89 @@ class MOCService:
             with open(log_path, "a", encoding="utf-8") as f:
                 f.write(entry)
         return log_path
+
+    def rebuild_domain_mocs(self) -> dict:
+        """
+        Scans vault domains and projects to build comprehensive, curated MOCs (Maps of Content).
+        Adheres to verbatim rule: 'MOCs own navigation. Wiki owns synthesis.'
+        """
+        domains = ["personal", "research", "business", "competitive", "development"]
+        mocs_dir = self.root_dir / "mocs"
+        mocs_dir.mkdir(parents=True, exist_ok=True)
+        stats = {}
+
+        master_links = []
+
+        for d in domains:
+            domain_dir = self.root_dir / "wiki" / d
+            if not domain_dir.exists():
+                continue
+
+            categories = {}
+            for md_file in sorted(domain_dir.glob("**/*.md")):
+                if md_file.name in ["index.md", "log.md"]:
+                    continue
+                cat = md_file.parent.name if md_file.parent != domain_dir else "general"
+                if cat not in categories:
+                    categories[cat] = []
+                categories[cat].append(md_file.stem)
+
+            # Build Domain MOC
+            moc_title = f"{d.capitalize()} Map of Content (MOC)"
+            lines = [
+                f"# {moc_title}\n",
+                f"**Domain**: `{d}` | **Last Synthesized**: {date.today().isoformat()}\n",
+                f"> Navigation map generated per AGENTS.md MOC specification.\n"
+            ]
+
+            total_domain_notes = 0
+            for cat, notes in categories.items():
+                lines.append(f"## {cat.capitalize()} ({len(notes)})")
+                for n in notes:
+                    lines.append(f"- [[{n}]]")
+                lines.append("")
+                total_domain_notes += len(notes)
+
+            moc_file = mocs_dir / f"{d}_moc.md"
+            moc_file.write_text("\n".join(lines), encoding="utf-8")
+            stats[d] = total_domain_notes
+            master_links.append(f"- [[{d}_moc]] — {total_domain_notes} active notes")
+
+            # Update wiki/{domain}/index.md
+            index_file = domain_dir / "index.md"
+            index_content = (
+                f"# {d.capitalize()} Domain Index\n\n"
+                f"**Navigation MOC**: [[{d}_moc]]\n\n"
+                f"**Domain Log**: [[log]]\n\n"
+                f"## Overview\n"
+                f"Total curated knowledge units: {total_domain_notes}\n"
+            )
+            index_file.write_text(index_content, encoding="utf-8")
+
+        # 2. Add Projects & Research Sessions to Master MOC
+        projects_dir = self.root_dir / "10_Projects"
+        proj_notes = [p.name for p in projects_dir.iterdir() if p.is_dir()] if projects_dir.exists() else []
+
+        research_dir = self.root_dir / "20_Research"
+        res_notes = [r.name for r in research_dir.iterdir() if r.is_dir()] if research_dir.exists() else []
+
+        proj_entries = [f"- [[{p}]]" for p in proj_notes] if proj_notes else ["- No active project directories"]
+        res_entries = [f"- [[{r}]]" for r in res_notes[:15]] if res_notes else ["- No research sessions recorded"]
+
+        master_lines = [
+            "# Master Vault Map of Content (MOC)\n",
+            f"**Generated**: {date.today().isoformat()}\n",
+            "## Domain Maps of Content",
+            *master_links,
+            "\n## Active Projects (10_Projects)",
+            *proj_entries,
+            "\n## Deep Research Sessions (20_Research)",
+            *res_entries,
+            ""
+        ]
+        master_file = mocs_dir / "master_vault_moc.md"
+        master_file.write_text("\n".join(master_lines), encoding="utf-8")
+
+        stats["total_domains_indexed"] = len(stats)
+        stats["master_moc"] = str(master_file.relative_to(self.root_dir))
+        return stats

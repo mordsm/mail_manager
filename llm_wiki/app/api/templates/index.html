@@ -755,6 +755,7 @@
         <div id="graphTab" class="tab-content">
             <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; align-items: center; flex-wrap: wrap;">
                 <input type="text" id="graphSearchInput" placeholder="🔍 Search note by title or domain..." oninput="filterGraph()" style="flex: 1; min-width: 200px;">
+                <button onclick="rebuildMOCs()" class="btn-secondary" style="background: #10b981; color: #fff; font-weight: 600;">⚡ Rebuild Maps of Content (MOCs)</button>
                 <button onclick="loadGraphData()" class="btn-secondary" style="background: #0284c7; color: #fff;">🔄 Reset Graph</button>
             </div>
 
@@ -766,8 +767,33 @@
                 <div style="display: flex; align-items: center; gap: 0.35rem;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #f43f5e; display: inline-block;"></span> Wiki Concepts</div>
             </div>
 
-            <div id="graphContainer">
+            <div id="graphContainer" style="position: relative;">
                 <canvas id="graphCanvas"></canvas>
+
+                <!-- Interactive Note Preview Drawer -->
+                <div id="graphNoteDrawer" style="position: absolute; top: 0; right: -430px; width: 410px; height: 100%; background: rgba(15, 23, 42, 0.96); backdrop-filter: blur(20px); border-left: 1px solid rgba(255,255,255,0.15); box-shadow: -15px 0 35px rgba(0,0,0,0.7); transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1); padding: 1.5rem; overflow-y: auto; z-index: 50; display: flex; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                        <div>
+                            <span id="drawerDomainBadge" class="badge" style="background: #38bdf8; margin-bottom: 0.35rem;">Domain</span>
+                            <h3 id="drawerNoteTitle" style="margin: 0; color: #fff; font-size: 1.25rem; line-height: 1.3;">Note Title</h3>
+                        </div>
+                        <button onclick="closeNoteDrawer()" style="background: transparent; border: none; color: #94a3b8; font-size: 1.4rem; cursor: pointer; padding: 0.2rem 0.5rem;">✕</button>
+                    </div>
+                    <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.85rem;"><code id="drawerNotePath">path/to/note.md</code></div>
+
+                    <div id="drawerLinksSection" style="margin-bottom: 0.85rem;">
+                        <div style="font-size: 0.82rem; font-weight: bold; color: var(--accent-cyan); margin-bottom: 0.35rem;">🔗 Outbound Links</div>
+                        <div id="drawerOutboundLinks" style="display: flex; gap: 0.35rem; flex-wrap: wrap;"></div>
+                    </div>
+
+                    <div id="drawerBacklinksSection" style="margin-bottom: 0.85rem;">
+                        <div style="font-size: 0.82rem; font-weight: bold; color: #a855f7; margin-bottom: 0.35rem;">⬅️ Inbound Backlinks</div>
+                        <div id="drawerBacklinks" style="display: flex; gap: 0.35rem; flex-wrap: wrap;"></div>
+                    </div>
+
+                    <div style="font-size: 0.85rem; font-weight: bold; color: #cbd5e1; margin-bottom: 0.35rem;">📄 Content Preview</div>
+                    <div id="drawerContentBody" dir="auto" style="flex: 1; background: rgba(0,0,0,0.35); border-radius: 8px; padding: 1rem; font-size: 0.9rem; line-height: 1.6; color: #e2e8f0; white-space: pre-wrap; overflow-y: auto; border: 1px solid rgba(255,255,255,0.06);"></div>
+                </div>
             </div>
             <p id="graphStats" style="color: #94a3b8; font-size: 0.9rem; margin-top: 0.5rem;">Loading graph...</p>
         </div>
@@ -1581,6 +1607,7 @@
 
                 if (clicked) {
                     draggedNode = clicked;
+                    openNoteDrawer(clicked.id, clicked.label);
                 } else {
                     isDragging = true;
                     dragStart = { x: e.clientX - transform.x, y: e.clientY - transform.y };
@@ -1622,6 +1649,68 @@
                 const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
                 transform.k = Math.max(0.2, Math.min(4, transform.k * zoomFactor));
             });
+        }
+
+        async function openNoteDrawer(noteId, noteTitle) {
+            const drawer = document.getElementById('graphNoteDrawer');
+            const titleEl = document.getElementById('drawerNoteTitle');
+            const pathEl = document.getElementById('drawerNotePath');
+            const badgeEl = document.getElementById('drawerDomainBadge');
+            const outboundEl = document.getElementById('drawerOutboundLinks');
+            const backlinksEl = document.getElementById('drawerBacklinks');
+            const contentEl = document.getElementById('drawerContentBody');
+
+            titleEl.textContent = noteTitle || noteId;
+            pathEl.textContent = 'Loading note details...';
+            contentEl.textContent = 'Fetching note content and backlinks...';
+            outboundEl.innerHTML = '';
+            backlinksEl.innerHTML = '';
+            drawer.style.right = '0px';
+
+            try {
+                const res = await fetch('/api/v1/wiki/note?path=' + encodeURIComponent(noteId));
+                if (!res.ok) throw new Error('Note not found or unreadable');
+                const data = await res.json();
+
+                titleEl.textContent = data.title;
+                pathEl.textContent = data.path;
+                badgeEl.textContent = data.domain ? data.domain.toUpperCase() : 'WIKI';
+                contentEl.textContent = data.content || 'No text content available.';
+
+                if (data.outbound_links && data.outbound_links.length > 0) {
+                    outboundEl.innerHTML = data.outbound_links.map(l => 
+                        `<span class="badge" style="background: rgba(56,189,248,0.2); border: 1px solid rgba(56,189,248,0.4); color: #38bdf8; cursor: pointer;" onclick="openNoteDrawer('${l}', '${l}')">[[${l}]]</span>`
+                    ).join('');
+                } else {
+                    outboundEl.innerHTML = '<span style="color: #64748b; font-size: 0.8rem;">None</span>';
+                }
+
+                if (data.backlinks && data.backlinks.length > 0) {
+                    backlinksEl.innerHTML = data.backlinks.map(b => 
+                        `<span class="badge" style="background: rgba(168,85,247,0.2); border: 1px solid rgba(168,85,247,0.4); color: #c084fc; cursor: pointer;" onclick="openNoteDrawer('${b.path}', '${b.title}')">[[${b.title}]]</span>`
+                    ).join('');
+                } else {
+                    backlinksEl.innerHTML = '<span style="color: #64748b; font-size: 0.8rem;">None</span>';
+                }
+            } catch (err) {
+                contentEl.textContent = 'Could not load full note details: ' + err.message;
+            }
+        }
+
+        function closeNoteDrawer() {
+            document.getElementById('graphNoteDrawer').style.right = '-430px';
+        }
+
+        async function rebuildMOCs() {
+            showStatus('⏳ REBUILDING MAPS OF CONTENT (MOCs)...');
+            try {
+                const res = await fetch('/api/v1/wiki/mocs/rebuild', { method: 'POST' });
+                const data = await res.json();
+                showStatus('✅ MAPS OF CONTENT (MOCs) REBUILT SUCCESSFULLY:\n' + JSON.stringify(data, null, 2));
+                loadGraphData();
+            } catch (err) {
+                showStatus('❌ FAILED TO REBUILD MOCs: ' + err.message);
+            }
         }
 
         function filterGraph() {
