@@ -139,5 +139,27 @@ def test_mocs_rebuild_endpoint():
     assert data["status"] == "REBUILT"
     assert "stats" in data
 
+def test_proactive_gaps_endpoint():
+    resp = client.get("/api/v1/proactive/gaps")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "total" in data
+    assert "gaps" in data
+    assert isinstance(data["gaps"], list)
+
+def test_inbox_status_and_scan_endpoints():
+    resp = client.get("/api/v1/inbox/status")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "total_pending_files" in data
+    assert "breakdown" in data
+
+    resp_scan = client.post("/api/v1/inbox/scan")
+    assert resp_scan.status_code == 200
+    data_scan = resp_scan.json()
+    assert data_scan["status"] == "COMPLETED"
+    assert "files_processed_count" in data_scan
+
+
 
 

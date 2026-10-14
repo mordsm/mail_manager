@@ -23,6 +23,8 @@ from app.services.docx_exporter import DocxExporterService
 from app.services.contradiction import ContradictionService
 from app.services.evidence_critic import EvidenceCriticService
 from app.services.moc_service import MOCService
+from app.services.proactive import ProactiveGapFillerService
+from app.services.watcher import InboxWatcherService
 
 router = APIRouter(prefix="/api/v1")
 pipeline = LLMWikiPipeline()
@@ -39,6 +41,8 @@ docx_service = DocxExporterService()
 contradiction_service = ContradictionService()
 critic_service = EvidenceCriticService()
 moc_service = MOCService()
+gap_filler = ProactiveGapFillerService()
+watcher_service = InboxWatcherService()
 
 def normalize_domain(domain: str) -> str:
     domain_clean = (domain or "unclassified").strip().lower()
@@ -452,3 +456,44 @@ async def rebuild_mocs_endpoint():
     """
     stats = moc_service.rebuild_domain_mocs()
     return {"status": "REBUILT", "stats": stats}
+
+# --- PROACTIVE KNOWLEDGE GAP FILLER ENDPOINTS ---
+
+@router.get("/proactive/gaps")
+async def get_proactive_gaps():
+    """
+    Returns detected knowledge gaps (broken links, orphan notes, unresolved contradictions)
+    ordered by priority (Sections 28-30 & Section 37 of AGENTS.md).
+    """
+    gaps = gap_filler.scan_knowledge_gaps()
+    return {"total": len(gaps), "gaps": gaps}
+
+@router.post("/proactive/fill")
+async def fill_proactive_gap(
+    gap_id: str = Form(...),
+    custom_query: Optional[str] = Form(None)
+):
+    """
+    Executes an autonomous gap-filling research pass to resolve a missing concept or orphan node.
+    """
+    res = gap_filler.fill_gap(gap_id=gap_id, custom_query=custom_query)
+    return res
+
+# --- INBOX WATCHDOG MONITORING ENDPOINTS ---
+
+@router.get("/inbox/status")
+async def get_inbox_status():
+    """
+    Returns live status and pending file counts per domain for the Inbox Watchdog.
+    """
+    status = watcher_service.get_status()
+    return status
+
+@router.post("/inbox/scan")
+async def trigger_inbox_scan():
+    """
+    Triggers an immediate scan and ingestion cycle for all pending files in the inbox/ folders.
+    """
+    res = watcher_service.scan_now()
+    return res
+

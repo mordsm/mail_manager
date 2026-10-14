@@ -33,13 +33,42 @@ class InboxFileEventHandler(FileSystemEventHandler):
             print(f"[Watchdog] Ingestion {res['status']}: {res.get('raw_path', '')}", flush=True)
             if res.get("status") == "COMPLETED":
                 print(f"[Watchdog] Synthesized note: {res.get('note_path', '')}", flush=True)
+                
+                # 1. Index note into vector embeddings
+                try:
+                    from app.services.vector_service import VectorIndexService
+                    vec_svc = VectorIndexService(root_dir=self.pipeline.root_dir)
+                    note_p = Path(res.get("note_path", ""))
+                    if not note_p.is_absolute():
+                        note_p = self.pipeline.root_dir / note_p
+                    if note_p.exists():
+                        vec_svc.index_block(
+                            block_id=note_p.stem,
+                            content=note_p.read_text(encoding="utf-8", errors="replace")[:1200],
+                            note_path=str(note_p.relative_to(self.pipeline.root_dir)),
+                            note_title=res.get("title", note_p.stem),
+                            domain=domain
+                        )
+                except Exception as ve:
+                    print(f"[Watchdog Vector Warning] {ve}", flush=True)
+
+                # 2. Update Domain MOC
+                try:
+                    from app.services.moc_service import MOCService
+                    moc_svc = MOCService(root_dir=self.pipeline.root_dir)
+                    moc_svc.update_moc(f"{domain.capitalize()} MOC", "Recent Ingestions", res.get("title", ""))
+                except Exception as me:
+                    print(f"[Watchdog MOC Warning] {me}", flush=True)
+
             elif res.get("status") == "DUPLICATE":
                 print(f"[Watchdog] Skipped duplicate file (SHA-256 matched existing content).", flush=True)
             # Remove inbox copy after successful processing or duplicate detection
             if source_path.exists():
                 source_path.unlink()
+            return res
         except Exception as e:
             print(f"[Watchdog Error] Failed to process {source_path.name}: {e}", flush=True)
+            return {"status": "ERROR", "message": str(e)}
 
     def on_created(self, event):
         if event.is_directory:
@@ -48,34 +77,69 @@ class InboxFileEventHandler(FileSystemEventHandler):
 
 class InboxWatcherService:
     """
-    Background Watchdog Service monitoring inbox/ folder.
+    Background Watchdog Service monitoring inbox/ folder with live file system events and on-demand scans.
     """
     def __init__(self, root_dir: Union[str, Path] = "."):
         self.root_dir = Path(root_dir)
         self.pipeline = LLMWikiPipeline(root_dir=self.root_dir)
         self.observer = Observer()
         self.handler = InboxFileEventHandler(self.pipeline)
+        self.inbox_dir = self.root_dir / "inbox"
+        self._ensure_folders()
 
-    def scan_existing(self, inbox_dir: Path):
-        """Processes any files already present in the inbox before watcher started."""
-        print(f"[InboxWatcher] Scanning existing files in {inbox_dir}...", flush=True)
-        for file_path in inbox_dir.glob("**/*"):
-            if file_path.is_file():
-                self.handler.handle_file(file_path)
+    def _ensure_folders(self):
+        self.inbox_dir.mkdir(parents=True, exist_ok=True)
+        for domain in ALLOWED_DOMAINS:
+            (self.inbox_dir / domain).mkdir(parents=True, exist_ok=True)
+
+    def get_status(self) -> dict:
+        """Returns pending files per domain in inbox/."""
+        self._ensure_folders()
+        breakdown = {}
+        total = 0
+        for domain in ALLOWED_DOMAINS:
+            d_dir = self.inbox_dir / domain
+            files = [f.name for f in d_dir.glob("*") if f.is_file() and not f.name.startswith(".")]
+            breakdown[domain] = files
+            total += len(files)
+
+        return {
+            "total_pending_files": total,
+            "inbox_directory": str(self.inbox_dir),
+            "breakdown": breakdown
+        }
+
+    def scan_now(self) -> dict:
+        """Processes all pending files in the inbox immediately."""
+        self._ensure_folders()
+        processed = []
+        for domain in ALLOWED_DOMAINS:
+            d_dir = self.inbox_dir / domain
+            for f in sorted(d_dir.glob("*")):
+                if f.is_file() and not f.name.startswith("."):
+                    res = self.handler.handle_file(f)
+                    processed.append({
+                        "file": f.name,
+                        "domain": domain,
+                        "result": res
+                    })
+
+        return {
+            "status": "COMPLETED",
+            "files_processed_count": len(processed),
+            "processed": processed
+        }
 
     def start(self):
-        inbox_dir = self.root_dir / "inbox"
-        inbox_dir.mkdir(parents=True, exist_ok=True)
-        for domain in ALLOWED_DOMAINS:
-            (inbox_dir / domain).mkdir(parents=True, exist_ok=True)
-
+        self._ensure_folders()
         # 1. Scan any pre-existing files
-        self.scan_existing(inbox_dir)
+        print(f"[InboxWatcher] Scanning existing files in {self.inbox_dir}...", flush=True)
+        self.scan_now()
 
         # 2. Schedule live watchdog observer
-        self.observer.schedule(self.handler, str(inbox_dir), recursive=True)
+        self.observer.schedule(self.handler, str(self.inbox_dir), recursive=True)
         self.observer.start()
-        print(f"[InboxWatcher] Monitoring {inbox_dir} for new incoming files...", flush=True)
+        print(f"[InboxWatcher] Monitoring {self.inbox_dir} for new incoming files...", flush=True)
 
         try:
             while True:
