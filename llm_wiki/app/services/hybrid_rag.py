@@ -6,6 +6,7 @@ import httpx
 from app.services.parser import MarkdownParser
 from app.llm.base import LLMProvider
 from app.llm.ollama_provider import OllamaProvider
+from app.llm import get_llm_provider
 from app.services.vector_service import VectorIndexService
 
 
@@ -92,15 +93,76 @@ class HybridRAGService:
 
         return blocks
 
+    def is_vault_overview_query(self, query: str) -> bool:
+        """
+        Detects if user is asking for an overview or inventory of the vault / knowledge base.
+        e.g. 'מה הדברים שרשומים אצלך כרגע בידע', 'מה יש בכספת', 'איזה נושאים קיימים'
+        """
+        q = query.lower().strip()
+        patterns = [
+            r"מה.*(רשום|כתוב|נמצא|קיים|שמור|ידוע|בידע|בכספת|שלך)",
+            r"(איזה|אילו|מהם|מה).*?(נושאים|תחומים|דברים|פרויקטים|מחקרים|הערכים|המידע)",
+            r"תסכם.*(ידע|כספת|נושאים|תכולה)",
+            r"מה אתה יודע",
+            r"סקיר(ת|ה).*(כספת|ידע|מפות)",
+            r"מה יש (לך|אצלך|בכספת)",
+            r"מה.*(בידע|במאגר|במערכת)",
+            r"what (is in|exists in|topics|knowledge|notes exist)",
+            r"overview of",
+            r"list (topics|notes|projects)"
+        ]
+        return any(re.search(pat, q) for pat in patterns)
+
+    def get_vault_overview_blocks(self) -> List[MicroBlock]:
+        """
+        Gathers high-level Maps of Content (MOCs) to provide complete knowledge overview.
+        """
+        blocks = []
+        master_moc = self.root_dir / "mocs" / "master_vault_moc.md"
+        if master_moc.exists():
+            txt = master_moc.read_text(encoding="utf-8", errors="ignore")
+            blocks.append(MicroBlock(
+                block_id="master-vault-moc",
+                content=txt[:2500],
+                note_path=master_moc.relative_to(self.root_dir),
+                note_title="Master Vault Map of Content (MOC)",
+                domain="mocs"
+            ))
+
+        moc_dir = self.root_dir / "mocs"
+        if moc_dir.exists():
+            for m in moc_dir.glob("*_moc.md"):
+                if m.name != "master_vault_moc.md":
+                    txt = m.read_text(encoding="utf-8", errors="ignore")
+                    domain_name = m.stem.replace("_moc", "")
+                    blocks.append(MicroBlock(
+                        block_id=f"{domain_name}-overview",
+                        content=txt[:1500],
+                        note_path=m.relative_to(self.root_dir),
+                        note_title=f"Domain MOC: {domain_name.capitalize()}",
+                        domain=domain_name
+                    ))
+        return blocks
+
     def search_local_vault(self, query: str, domain: str = "all") -> List[Dict[str, Any]]:
         """
         Searches all micro-blocks in the vault matching query keywords across all domains and vault folders,
         fusing lexical keyword scoring with dense semantic vector embedding similarity.
         """
+        fused_map: Dict[tuple, Dict[str, Any]] = {}
+
+        # 0. Check for Vault Overview Query
+        if self.is_vault_overview_query(query):
+            overview_blocks = self.get_vault_overview_blocks()
+            for b in overview_blocks:
+                key = (str(b.note_path), b.block_id)
+                fused_map[key] = {
+                    "block": b,
+                    "score": 100.0
+                }
+
         target_domains = ["personal", "research", "business", "competitive", "development"] if domain.lower() in ["all", "global"] else [domain]
         query_terms = [t.lower() for t in re.findall(r"\w+", query) if len(t) > 1]
-
-        fused_map: Dict[tuple, Dict[str, Any]] = {}
 
         # 1. Search wiki domains
         for d in target_domains:
@@ -210,10 +272,12 @@ class HybridRAGService:
             pass
         return None
 
-    def query(self, question: str, domain: str = "all", allow_web_fallback: bool = True) -> Dict[str, Any]:
+    def query(self, question: str, domain: str = "all", allow_web_fallback: bool = True, provider: Optional[str] = None) -> Dict[str, Any]:
         """
         Executes the full Hybrid RAG Workflow.
+        Allows specifying external sub-model provider (e.g. 'gemini', 'openai', 'ollama').
         """
+        active_llm = get_llm_provider(provider) if provider else self.llm
         local_results = self.search_local_vault(question, domain=domain)
         has_sufficient_local = len(local_results) > 0
 
@@ -251,7 +315,7 @@ class HybridRAGService:
         )
 
         try:
-            llm_response = self.llm.generate(user_prompt, system_prompt=system_prompt)
+            llm_response = active_llm.generate(user_prompt, system_prompt=system_prompt)
             if not llm_response or "Fallback" in llm_response:
                 llm_response = self._synthesize_fallback(question, local_results, web_context)
         except Exception:
@@ -262,7 +326,8 @@ class HybridRAGService:
             "answer": llm_response,
             "citations": citations,
             "local_blocks_found": len(local_results),
-            "web_fallback_used": web_context is not None
+            "web_fallback_used": web_context is not None,
+            "provider_used": active_llm.__class__.__name__
         }
 
     def _synthesize_fallback(self, question: str, local_results: List[Dict[str, Any]], web_context: Optional[str]) -> str:

@@ -95,15 +95,94 @@ async def query_wiki(
     query: str = Form(...),
     domain: str = Form("all"),
     mode: str = Form("hybrid"),
-    allow_web: bool = Form(False)
+    allow_web: bool = Form(False),
+    provider: Optional[str] = Form(None)
 ):
     target_domain = "all" if domain.lower() in ["all", "global"] else normalize_domain(domain)
     if mode == "hybrid":
-        res = rag_service.query(question=query, domain=target_domain, allow_web_fallback=allow_web)
+        res = rag_service.query(question=query, domain=target_domain, allow_web_fallback=allow_web, provider=provider)
         return res
     else:
         res = planner.query(domain=target_domain, question=query)
         return res
+
+@router.get("/llm/status")
+async def get_llm_status():
+    """
+    Returns current LLM status, available providers (Gemini, Ollama, OpenAI),
+    and whether external API keys are configured.
+    """
+    import os
+    gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY", "")
+    openai_key = os.environ.get("OPENAI_API_KEY", "")
+    return {
+        "active_default_provider": os.environ.get("LLM_PROVIDER", "auto"),
+        "providers": {
+            "gemini": {
+                "name": "Google Gemini Flash (External Sub-Model)",
+                "available": bool(gemini_key and len(gemini_key) > 10),
+                "model": "gemini-2.0-flash",
+                "speed": "Ultra Fast (< 0.8s)",
+                "has_key": bool(gemini_key)
+            },
+            "ollama": {
+                "name": "Ollama Llama 3.2 (Local CPU)",
+                "available": True,
+                "model": "llama3.2:latest",
+                "speed": "Local Offline (CPU)",
+                "has_key": True
+            },
+            "openai": {
+                "name": "OpenAI / Groq (Cloud)",
+                "available": bool(openai_key and openai_key.startswith("sk-")),
+                "model": "gpt-4o-mini",
+                "speed": "Fast Cloud (1-2s)",
+                "has_key": bool(openai_key)
+            }
+        }
+    }
+
+@router.post("/llm/config")
+async def save_llm_config(
+    provider: Optional[str] = Form(None),
+    gemini_api_key: Optional[str] = Form(None),
+    openai_api_key: Optional[str] = Form(None)
+):
+    """
+    Saves API keys and default provider in process memory and updates .env file.
+    """
+    import os
+    if provider:
+        os.environ["LLM_PROVIDER"] = provider.lower()
+    if gemini_api_key and gemini_api_key.strip():
+        os.environ["GEMINI_API_KEY"] = gemini_api_key.strip()
+    if openai_api_key and openai_api_key.strip():
+        os.environ["OPENAI_API_KEY"] = openai_api_key.strip()
+
+    # Append or update .env file
+    env_file = Path(".env")
+    env_lines = env_file.read_text(encoding="utf-8").splitlines() if env_file.exists() else []
+    env_dict = {}
+    for line in env_lines:
+        if "=" in line and not line.startswith("#"):
+            k, v = line.split("=", 1)
+            env_dict[k.strip()] = v.strip()
+    if provider:
+        env_dict["LLM_PROVIDER"] = provider.lower()
+    if gemini_api_key and gemini_api_key.strip():
+        env_dict["GEMINI_API_KEY"] = gemini_api_key.strip()
+    if openai_api_key and openai_api_key.strip():
+        env_dict["OPENAI_API_KEY"] = openai_api_key.strip()
+
+    new_content = "\n".join(f"{k}={v}" for k, v in env_dict.items()) + "\n"
+    env_file.write_text(new_content, encoding="utf-8")
+
+    return {
+        "status": "SAVED",
+        "active_provider": os.environ.get("LLM_PROVIDER", "auto"),
+        "gemini_active": bool(os.environ.get("GEMINI_API_KEY")),
+        "message": "LLM settings updated successfully."
+    }
 
 @router.get("/wiki/lint")
 @router.post("/wiki/lint")

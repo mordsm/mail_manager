@@ -390,7 +390,7 @@
         /* Graph Canvas */
         #graphContainer {
             width: 100%;
-            height: 560px;
+            height: 680px;
             background: #060911;
             border-radius: 12px;
             border: 1px solid var(--border-glass);
@@ -404,6 +404,41 @@
             cursor: grab;
         }
         #graphCanvas:active { cursor: grabbing; }
+
+        .graph-toolbar {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            display: flex;
+            gap: 8px;
+            z-index: 20;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(12px);
+            padding: 6px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+        }
+        .graph-tool-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #f1f5f9;
+            padding: 6px 11px;
+            border-radius: 7px;
+            font-size: 0.83rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .graph-tool-btn:hover {
+            background: rgba(56, 189, 248, 0.25);
+            border-color: #38bdf8;
+            color: #fff;
+            transform: translateY(-1px);
+        }
 
         /* --- Modern Equalizer & Voice Hub (שימוש בקול לשני הכיוונים) --- */
         .voice-hub-card {
@@ -634,6 +669,27 @@
                 <button type="button" class="btn-primary" style="width: auto; background: var(--accent-emerald);" onclick="submitResolution()">Save & Sign Resolution</button>
             </div>
         </div>
+    <!-- API Key Configuration Modal -->
+    <div id="apiKeyModal" class="modal-overlay">
+        <div class="modal-box">
+            <h2 style="margin-top: 0; color: #38bdf8; font-size: 1.4rem;">🔑 הגדרת מנועי בינה ומפתחות API</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem;">
+                חבר מודל חיצוני מהיר (כגון <strong>Google Gemini Flash</strong>) לקבלת זמני תגובה מיידיים (פחות משנייה) והבנה חדה בעברית.
+            </p>
+            <div class="form-group">
+                <label>Google Gemini API Key (מומלץ עבור Gemini 2.0 Flash / 1.5 Flash)</label>
+                <input type="password" id="modalGeminiKey" placeholder="AIzaSy...">
+                <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">ניתן להנפיק מפתח בחינם ב-Google AI Studio (aistudio.google.com).</div>
+            </div>
+            <div class="form-group" style="margin-top: 1rem;">
+                <label>OpenAI / Groq API Key (אופציונלי)</label>
+                <input type="password" id="modalOpenAiKey" placeholder="sk-...">
+            </div>
+            <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
+                <button type="button" class="btn-secondary" onclick="closeApiKeyModal()">ביטול</button>
+                <button type="button" class="btn-primary" style="width: auto; background: #0284c7;" onclick="saveApiKeys()">שמור מפתחות והפעל</button>
+            </div>
+        </div>
     </div>
 
     <div class="container">
@@ -641,7 +697,7 @@
         <div class="header">
             <div class="header-title">
                 <h1>🧠 LLM Wiki Knowledge Portal</h1>
-                <span class="header-badge">v2.5 • Obsidian & Local Ollama</span>
+                <span class="header-badge">v2.6 • Multi-Model & Obsidian</span>
             </div>
             <div class="header-controls">
                 <label for="voiceLangSelect" style="margin: 0; font-size: 0.85rem; color: #94a3b8;">🎙️ שפה / Lang:</label>
@@ -662,16 +718,16 @@
             </div>
         </div>
 
-        <!-- Navigation Tabs -->
+        <!-- Navigation Tabs (Re-ordered: Knowledge Graph is #2, Vault Health moved to #8) -->
         <div class="tabs">
-            <div class="tab active" id="tabHeaderAsk" onclick="activateTab('askTab')">💬 Ask Wiki (Hybrid RAG)</div>
-            <div class="tab" id="tabHeaderGaps" onclick="activateTab('gapsTab')">⚡ פערי ידע יזומים (Proactive Gaps)</div>
-            <div class="tab" id="tabHeaderResearch" onclick="activateTab('researchTab')">🔬 Live Research Runner</div>
-            <div class="tab" id="tabHeaderContradictions" onclick="activateTab('contradictionsTab')">⚡ Contradictions & Decisions</div>
-            <div class="tab" id="tabHeaderText" onclick="activateTab('textTab')">📝 Ingest Note / Text</div>
-            <div class="tab" id="tabHeaderFile" onclick="activateTab('fileTab')">📁 Ingest File</div>
-            <div class="tab" id="tabHeaderMemory" onclick="activateTab('memoryTab')">🧠 Memory Dashboard</div>
-            <div class="tab" id="tabHeaderGraph" onclick="activateTab('graphTab')">🕸️ Knowledge Graph</div>
+            <div class="tab active" id="tabHeaderAsk" onclick="activateTab('askTab')">💬 שאלות ותובנות (Ask Wiki & Voice)</div>
+            <div class="tab" id="tabHeaderGraph" onclick="activateTab('graphTab')">🕸️ מפת קשרים חזותית (Knowledge Graph)</div>
+            <div class="tab" id="tabHeaderText" onclick="activateTab('textTab')">📝 קליטת פתק / טקסט</div>
+            <div class="tab" id="tabHeaderFile" onclick="activateTab('fileTab')">📁 קליטת קבצים</div>
+            <div class="tab" id="tabHeaderResearch" onclick="activateTab('researchTab')">🔬 מחקר מדעי מעמיק (Live Research)</div>
+            <div class="tab" id="tabHeaderContradictions" onclick="activateTab('contradictionsTab')">⚡ סתירות והחלטות</div>
+            <div class="tab" id="tabHeaderMemory" onclick="activateTab('memoryTab')">🧠 זיכרון מערכת</div>
+            <div class="tab" id="tabHeaderGaps" onclick="activateTab('gapsTab')">🛠️ תקינות קישורים (Vault Health)</div>
         </div>
 
         <!-- ==================== TAB 1: ASK WIKI (HYBRID RAG) ==================== -->
@@ -699,6 +755,24 @@
                     <button type="button" class="btn-secondary" style="padding: 0.55rem 0.85rem; font-size: 0.85rem;" onclick="stopSpeakingNow()">
                         ⏹️ עצור הקראה
                     </button>
+                </div>
+            </div>
+
+            <!-- Model Switcher Bar -->
+            <div class="card" style="background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(56, 189, 248, 0.25); margin-bottom: 1.25rem; padding: 0.9rem 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+                    <label for="ragModelProvider" style="font-weight: 700; color: #38bdf8; margin: 0; font-size: 0.95rem;">🤖 מנוע בינה (LLM Engine):</label>
+                    <select id="ragModelProvider" style="padding: 0.45rem 0.85rem; border-radius: 8px; background: #1e293b; color: #fff; border: 1px solid #475569; font-size: 0.9rem;">
+                        <option value="gemini" selected>⚡ Google Gemini Flash (סב-מודל חיצוני מהיר במיוחד - הבנה מושלמת)</option>
+                        <option value="ollama">🦙 Ollama Llama 3.2 (מודל מקומי CPU - אופליין מלא)</option>
+                        <option value="openai">🌐 OpenAI / Groq (ענן)</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <button type="button" class="btn-secondary" style="padding: 0.4rem 0.85rem; font-size: 0.85rem;" onclick="openApiKeyModal()">
+                        🔑 הגדרת מפתח API
+                    </button>
+                    <span id="activeProviderBadge" class="badge badge-success" style="font-size: 0.8rem;">Gemini / Ollama Active</span>
                 </div>
             </div>
 
@@ -763,32 +837,32 @@
             </div>
         </div>
 
-        <!-- ==================== TAB: PROACTIVE KNOWLEDGE GAPS ==================== -->
+        <!-- ==================== TAB: VAULT HEALTH & LINK MAINTENANCE ==================== -->
         <div id="gapsTab" class="tab-content">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
                 <div>
-                    <h2 style="margin: 0; color: #38bdf8; font-size: 1.4rem;">⚡ פערי ידע ומחקר יזום (Proactive Knowledge Gaps)</h2>
-                    <p style="margin: 0.25rem 0 0 0; color: var(--text-muted); font-size: 0.9rem;">
-                        סריקה אוטונומית של מושגים חסרים (Broken Links), איים מבודדים (Orphan Notes) וסתירות לפי סעיפים 28-30 ו-37 ב-AGENTS.md
+                    <h2 style="margin: 0; color: #38bdf8; font-size: 1.35rem;">🛠️ בדיקת תקינות קישורים ותחזוקת כספת (Vault Health & Links)</h2>
+                    <p style="margin: 0.25rem 0 0 0; color: var(--text-muted); font-size: 0.88rem;">
+                        כלי עזר טכני של Obsidian: מאתר קישורים למושגים שטרם נוצר להם דף (Broken Links) או פתקים ללא קישור נכנס (Orphan Notes). אין בכך להעיד על חוסר בידע, אלא על קישורים הדורשים השלמה טכנית בכספת.
                     </p>
                 </div>
                 <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                    <button class="btn-secondary" onclick="loadProactiveGaps()" style="padding: 0.5rem 1rem;">🔄 רענן פערי ידע</button>
+                    <button class="btn-secondary" onclick="loadProactiveGaps()" style="padding: 0.5rem 1rem;">🔄 רענן בדיקת קישורים</button>
                     <button class="btn-secondary" onclick="rebuildMOCs()" style="background: rgba(16, 185, 129, 0.2); border-color: #10b981; color: #34d399; padding: 0.5rem 1rem;">🗺️ רענן מפות תוכן (MOCs)</button>
                 </div>
             </div>
 
             <!-- Gaps Stats Grid -->
-            <div class="grid-2" style="margin-bottom: 1.5rem;">
-                <div class="card" style="border-left: 4px solid #ef4444; margin: 0; background: rgba(15, 23, 42, 0.85);">
-                    <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.35rem;">🔗 מושגים חסרים בקישורים (Broken Links)</div>
-                    <div style="font-size: 1.8rem; font-weight: 800; color: #f87171;" id="countBrokenLinks">0</div>
-                    <div style="font-size: 0.8rem; color: #64748b;">דורשים יצירת ערך מושגי עם סנתוז RAG</div>
+            <div class="grid-2" style="margin-bottom: 1.25rem;">
+                <div class="card" style="border-left: 4px solid #38bdf8; margin: 0; background: rgba(15, 23, 42, 0.85); padding: 1rem 1.25rem;">
+                    <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.25rem;">🔗 קישורים פנימיים שטרם נכתבו (Uncreated Notes)</div>
+                    <div style="font-size: 1.6rem; font-weight: 800; color: #38bdf8;" id="countBrokenLinks">0</div>
+                    <div style="font-size: 0.78rem; color: #64748b;">ניתן ליצור עבורם ערך מושגי ישירות מהכפתור להלן</div>
                 </div>
-                <div class="card" style="border-left: 4px solid #f59e0b; margin: 0; background: rgba(15, 23, 42, 0.85);">
-                    <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.35rem;">🏝️ איים מבודדים ללא קישורים (Orphan Notes)</div>
-                    <div style="font-size: 1.8rem; font-weight: 800; color: #fbbf24;" id="countOrphanNotes">0</div>
-                    <div style="font-size: 0.8rem; color: #64748b;">דורשים שילוב במפות תוכן MOC ומושגי אב</div>
+                <div class="card" style="border-left: 4px solid #a855f7; margin: 0; background: rgba(15, 23, 42, 0.85); padding: 1rem 1.25rem;">
+                    <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.25rem;">🏝️ פתקים מבודדים ללא קישורים (Orphan Notes)</div>
+                    <div style="font-size: 1.6rem; font-weight: 800; color: #c084fc;" id="countOrphanNotes">0</div>
+                    <div style="font-size: 0.78rem; color: #64748b;">פתקים שכדאי לחבר למפת תוכן (MOC) מרכזית</div>
                 </div>
             </div>
 
@@ -1054,6 +1128,15 @@
 
             <div id="graphContainer" style="position: relative;">
                 <canvas id="graphCanvas"></canvas>
+
+                <!-- Floating Interactive Controls -->
+                <div class="graph-toolbar">
+                    <button type="button" onclick="spreadGraphWide()" class="graph-tool-btn" title="פיזור רחב של כל הצמתים על פני שטח נרחב">↔️ פיזור רחב (Spread Wide)</button>
+                    <button type="button" onclick="zoomGraph(1.25)" class="graph-tool-btn" title="הגדל תצוגה">➕ הגדל</button>
+                    <button type="button" onclick="zoomGraph(0.8)" class="graph-tool-btn" title="הקטן תצוגה">➖ הקטן</button>
+                    <button type="button" onclick="fitGraphView()" class="graph-tool-btn" title="מרכז את הגרף למסך">🎯 מרכז תצוגה</button>
+                    <button type="button" onclick="togglePhysicsPause()" id="pausePhysicsBtn" class="graph-tool-btn" title="הקפא או הפעל תנועה">⏸️ הקפא תנועה</button>
+                </div>
 
                 <!-- Interactive Note Preview Drawer -->
                 <div id="graphNoteDrawer" style="position: absolute; top: 0; right: -430px; width: 410px; height: 100%; background: rgba(15, 23, 42, 0.96); backdrop-filter: blur(20px); border-left: 1px solid rgba(255,255,255,0.15); box-shadow: -15px 0 35px rgba(0,0,0,0.7); transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1); padding: 1.5rem; overflow-y: auto; z-index: 50; display: flex; flex-direction: column;">
@@ -1689,18 +1772,21 @@
             citationsList.innerHTML = '';
 
             try {
+                const provider = document.getElementById('ragModelProvider') ? document.getElementById('ragModelProvider').value : 'gemini';
                 const formData = new FormData();
                 formData.append('query', question);
                 formData.append('domain', domain);
                 formData.append('mode', 'hybrid');
                 formData.append('allow_web', allowWeb);
+                formData.append('provider', provider);
 
                 const res = await fetch('/api/v1/query', { method: 'POST', body: formData });
                 const data = await res.json();
 
                 answerDiv.textContent = data.answer || 'No answer generated.';
                 const foundCount = data.local_blocks_found || (data.citations ? data.citations.length : 0);
-                badge.textContent = `${foundCount} Local Sources`;
+                const provName = data.provider_used ? ` • ${data.provider_used}` : '';
+                badge.textContent = `${foundCount} מקורות מקומיים${provName}`;
 
                 if (data.citations && data.citations.length > 0) {
                     citationsCard.style.display = 'block';
@@ -2129,9 +2215,11 @@
         let animationFrameId;
         let hoveredNode = null;
         let draggedNode = null;
-        let transform = { x: 0, y: 0, k: 1 };
+        let transform = { x: 0, y: 0, k: 0.85 };
         let isDragging = false;
         let dragStart = { x: 0, y: 0 };
+        let alpha = 1.0;
+        let isPhysicsPaused = false;
 
         function getGroupColor(group) {
             if (!group) return '#64748b';
@@ -2154,6 +2242,71 @@
             loadGraphData();
         }
 
+        function wakeGraph(amount = 0.35) {
+            alpha = Math.max(alpha, amount);
+            if (!animationFrameId) {
+                simulateGraph();
+            }
+        }
+
+        function togglePhysicsPause() {
+            isPhysicsPaused = !isPhysicsPaused;
+            const btn = document.getElementById('pausePhysicsBtn');
+            if (btn) {
+                btn.innerHTML = isPhysicsPaused ? '▶️ הפעל תנועה' : '⏸️ הקפא תנועה';
+            }
+            if (!isPhysicsPaused) {
+                wakeGraph(0.3);
+            }
+        }
+
+        function zoomGraph(factor) {
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const newK = Math.max(0.15, Math.min(3.5, transform.k * factor));
+            transform.x = cx - (cx - transform.x) * (newK / transform.k);
+            transform.y = cy - (cy - transform.y) * (newK / transform.k);
+            transform.k = newK;
+            renderGraph();
+        }
+
+        function fitGraphView() {
+            if (nodes.length === 0) return;
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            for (const n of nodes) {
+                if (n.x < minX) minX = n.x;
+                if (n.x > maxX) maxX = n.x;
+                if (n.y < minY) minY = n.y;
+                if (n.y > maxY) maxY = n.y;
+            }
+            const graphWidth = maxX - minX + 160;
+            const graphHeight = maxY - minY + 160;
+            const scaleX = canvas.width / graphWidth;
+            const scaleY = canvas.height / graphHeight;
+            const k = Math.max(0.2, Math.min(1.2, Math.min(scaleX, scaleY)));
+            transform.k = k;
+            transform.x = (canvas.width - (minX + maxX) * k) / 2;
+            transform.y = (canvas.height - (minY + maxY) * k) / 2;
+            renderGraph();
+        }
+
+        function spreadGraphWide() {
+            if (nodes.length === 0) return;
+            const width = canvas.width;
+            const height = canvas.height;
+            for (let i = 0; i < nodes.length; i++) {
+                const n = nodes[i];
+                const angle = (i / nodes.length) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
+                const radius = 120 + Math.random() * (width * 0.85);
+                n.x = width / 2 + Math.cos(angle) * radius;
+                n.y = height / 2 + Math.sin(angle) * (radius * 0.75);
+                n.vx = 0;
+                n.vy = 0;
+            }
+            fitGraphView();
+            wakeGraph(1.0);
+        }
+
         async function loadGraphData() {
             try {
                 document.getElementById('graphStats').textContent = 'טוען נתוני גרף מתוך הכספת...';
@@ -2171,11 +2324,13 @@
                 const height = canvas.height;
 
                 const nodeMap = {};
-                nodes = graphData.nodes.map(n => {
+                nodes = graphData.nodes.map((n, idx) => {
+                    const angle = (idx / (graphData.nodes.length || 1)) * Math.PI * 2;
+                    const r = 90 + Math.random() * (width * 0.65);
                     const node = {
                         ...n,
-                        x: width / 2 + (Math.random() - 0.5) * (width * 0.7),
-                        y: height / 2 + (Math.random() - 0.5) * (height * 0.7),
+                        x: width / 2 + Math.cos(angle) * r,
+                        y: height / 2 + Math.sin(angle) * (r * 0.75),
                         vx: 0,
                         vy: 0,
                         radius: Math.max(5, Math.min(18, 5 + (n.degree || 0) * 1.5)),
@@ -2190,8 +2345,9 @@
                     target: nodeMap[l.target] || null
                 })).filter(l => l.source && l.target);
 
-                transform = { x: 0, y: 0, k: 1 };
+                transform = { x: 0, y: 0, k: 0.8 };
                 if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                alpha = 1.0;
                 simulateGraph();
             } catch (err) {
                 document.getElementById('graphStats').textContent = 'Failed to load graph: ' + err.message;
@@ -2199,33 +2355,53 @@
         }
 
         function simulateGraph() {
-            const repulsion = 120;
-            const springLen = 60;
-            const springK = 0.05;
-            const centerGravity = 0.01;
-            const damping = 0.88;
+            if (isPhysicsPaused) {
+                renderGraph();
+                animationFrameId = requestAnimationFrame(simulateGraph);
+                return;
+            }
+
+            if (alpha < 0.002) {
+                alpha = 0;
+                renderGraph();
+                animationFrameId = requestAnimationFrame(simulateGraph);
+                return; // Cold equilibrium: zero velocity, zero trembling, 0% CPU!
+            }
+
+            const repulsion = 3200;
+            const springLen = 140;
+            const springK = 0.035;
+            const centerGravity = 0.0008;
+            const damping = 0.75;
+            const maxV = 6.0;
 
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
 
             for (let i = 0; i < nodes.length; i++) {
                 const n1 = nodes[i];
-                n1.vx += (cx - n1.x) * centerGravity;
-                n1.vy += (cy - n1.y) * centerGravity;
+                if (n1 === draggedNode) continue;
+                n1.vx += (cx - n1.x) * centerGravity * alpha;
+                n1.vy += (cy - n1.y) * centerGravity * alpha;
 
                 for (let j = i + 1; j < nodes.length; j++) {
                     const n2 = nodes[j];
                     const dx = n2.x - n1.x;
                     const dy = n2.y - n1.y;
-                    const distSq = dx * dx + dy * dy + 10;
+                    const distSq = dx * dx + dy * dy + 25;
+                    if (distSq > 220000) continue; // Distance cutoff
                     const dist = Math.sqrt(distSq);
-                    const force = repulsion / distSq;
+                    const force = (repulsion / distSq) * alpha;
                     const fx = (dx / dist) * force;
                     const fy = (dy / dist) * force;
-                    n1.vx -= fx;
-                    n1.vy -= fy;
-                    n2.vx += fx;
-                    n2.vy += fy;
+                    if (n1 !== draggedNode) {
+                        n1.vx -= fx;
+                        n1.vy -= fy;
+                    }
+                    if (n2 !== draggedNode) {
+                        n2.vx += fx;
+                        n2.vy += fy;
+                    }
                 }
             }
 
@@ -2233,22 +2409,34 @@
                 const dx = link.target.x - link.source.x;
                 const dy = link.target.y - link.source.y;
                 const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-                const force = (dist - springLen) * springK;
+                const force = (dist - springLen) * springK * alpha;
                 const fx = (dx / dist) * force;
                 const fy = (dy / dist) * force;
-                link.source.vx += fx;
-                link.source.vy += fy;
-                link.target.vx -= fx;
-                link.target.vy -= fy;
+                if (link.source !== draggedNode) {
+                    link.source.vx += fx;
+                    link.source.vy += fy;
+                }
+                if (link.target !== draggedNode) {
+                    link.target.vx -= fx;
+                    link.target.vy -= fy;
+                }
             }
 
             for (const n of nodes) {
-                if (n === draggedNode) continue;
+                if (n === draggedNode) {
+                    n.vx = 0;
+                    n.vy = 0;
+                    continue;
+                }
                 n.vx *= damping;
                 n.vy *= damping;
+                n.vx = Math.max(-maxV, Math.min(maxV, n.vx));
+                n.vy = Math.max(-maxV, Math.min(maxV, n.vy));
                 n.x += n.vx;
                 n.y += n.vy;
             }
+
+            alpha *= 0.985; // Cool down temperature
 
             renderGraph();
             animationFrameId = requestAnimationFrame(simulateGraph);
@@ -2260,8 +2448,8 @@
             ctx.translate(transform.x, transform.y);
             ctx.scale(transform.k, transform.k);
 
-            ctx.strokeStyle = '#334155';
-            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1.2;
             for (const link of links) {
                 ctx.beginPath();
                 ctx.moveTo(link.source.x, link.source.y);
@@ -2274,11 +2462,11 @@
                 ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2);
                 ctx.fillStyle = n.color;
                 ctx.fill();
-                ctx.strokeStyle = (hoveredNode === n) ? '#ffffff' : '#0f172a';
-                ctx.lineWidth = (hoveredNode === n) ? 2.5 : 1;
+                ctx.strokeStyle = (hoveredNode === n || draggedNode === n) ? '#ffffff' : '#0f172a';
+                ctx.lineWidth = (hoveredNode === n || draggedNode === n) ? 2.5 : 1;
                 ctx.stroke();
 
-                if (n.radius >= 8 || hoveredNode === n) {
+                if (n.radius >= 8 || hoveredNode === n || draggedNode === n) {
                     ctx.fillStyle = (hoveredNode === n) ? '#38bdf8' : '#cbd5e1';
                     ctx.font = (hoveredNode === n) ? 'bold 12px sans-serif' : '10px sans-serif';
                     ctx.fillText(n.label, n.x + n.radius + 3, n.y + 3);
@@ -2297,7 +2485,7 @@
                 let clicked = null;
                 for (const n of nodes) {
                     const dist = Math.hypot(n.x - mouseX, n.y - mouseY);
-                    if (dist <= n.radius) {
+                    if (dist <= n.radius + 2) {
                         clicked = n;
                         break;
                     }
@@ -2305,6 +2493,9 @@
 
                 if (clicked) {
                     draggedNode = clicked;
+                    draggedNode.vx = 0;
+                    draggedNode.vy = 0;
+                    wakeGraph(0.25);
                     openNoteDrawer(clicked.id, clicked.label);
                 } else {
                     isDragging = true;
@@ -2322,31 +2513,98 @@
                     draggedNode.y = mouseY;
                     draggedNode.vx = 0;
                     draggedNode.vy = 0;
+                    wakeGraph(0.2);
                 } else if (isDragging) {
                     transform.x = e.clientX - dragStart.x;
                     transform.y = e.clientY - dragStart.y;
+                    renderGraph();
                 } else {
                     hoveredNode = null;
                     for (const n of nodes) {
                         const dist = Math.hypot(n.x - mouseX, n.y - mouseY);
-                        if (dist <= n.radius + 2) {
+                        if (dist <= n.radius + 3) {
                             hoveredNode = n;
                             break;
                         }
                     }
+                    if (hoveredNode) renderGraph();
                 }
             });
 
             window.addEventListener('mouseup', () => {
-                draggedNode = null;
+                if (draggedNode) {
+                    draggedNode.vx = 0;
+                    draggedNode.vy = 0;
+                    draggedNode = null;
+                    wakeGraph(0.1);
+                }
                 isDragging = false;
             });
 
             canvas.addEventListener('wheel', (e) => {
                 e.preventDefault();
-                const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
-                transform.k = Math.max(0.2, Math.min(4, transform.k * zoomFactor));
+                const zoomFactor = e.deltaY < 0 ? 1.12 : 0.88;
+                zoomGraph(zoomFactor);
             });
+        }
+
+        /* --- API KEY MANAGEMENT MODAL LOGIC --- */
+        async function openApiKeyModal() {
+            try {
+                const res = await fetch('/api/v1/llm/status');
+                const data = await res.json();
+                const gem = data.providers?.gemini;
+                if (gem?.has_key) {
+                    document.getElementById('modalGeminiKey').placeholder = '•••••••••••••••• (API Key Active)';
+                }
+            } catch (e) {}
+            document.getElementById('apiKeyModal').style.display = 'flex';
+        }
+
+        function closeApiKeyModal() {
+            document.getElementById('apiKeyModal').style.display = 'none';
+        }
+
+        async function saveApiKeys() {
+            const gemKey = document.getElementById('modalGeminiKey').value.trim();
+            const openKey = document.getElementById('modalOpenAiKey').value.trim();
+            const prov = document.getElementById('ragModelProvider') ? document.getElementById('ragModelProvider').value : 'gemini';
+
+            const fd = new FormData();
+            if (prov) fd.append('provider', prov);
+            if (gemKey) fd.append('gemini_api_key', gemKey);
+            if (openKey) fd.append('openai_api_key', openKey);
+
+            try {
+                const res = await fetch('/api/v1/llm/config', { method: 'POST', body: fd });
+                const data = await res.json();
+                closeApiKeyModal();
+                showStatus('✅ הגדרות מודל בינה נשמרו בהצלחה:\n' + JSON.stringify(data, null, 2));
+                checkLlmStatus();
+            } catch (err) {
+                alert('שגיאה בשמירת מפתחות: ' + err.message);
+            }
+        }
+
+        async function checkLlmStatus() {
+            try {
+                const res = await fetch('/api/v1/llm/status');
+                const data = await res.json();
+                const badge = document.getElementById('activeProviderBadge');
+                if (badge) {
+                    if (data.providers?.gemini?.available) {
+                        badge.textContent = '⚡ Gemini Flash פעיל (מהירות שיא)';
+                        badge.className = 'badge badge-success';
+                    } else if (data.providers?.openai?.available) {
+                        badge.textContent = '🌐 OpenAI פעיל';
+                        badge.className = 'badge badge-purple';
+                    } else {
+                        badge.textContent = '🦙 Ollama מקומי (CPU)';
+                        badge.className = 'badge';
+                        badge.style.background = '#475569';
+                    }
+                }
+            } catch (e) {}
         }
 
         async function openNoteDrawer(noteId, noteTitle) {
@@ -2442,6 +2700,7 @@
         // Initialize status on load
         window.addEventListener('DOMContentLoaded', () => {
             fetchInboxStatus();
+            checkLlmStatus();
         });
     </script>
 </body>
