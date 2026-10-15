@@ -1278,19 +1278,52 @@
 
         function cleanTextForSpeech(text) {
             if (!text) return '';
+
             let cleaned = text
-                .replace(/\[\[(?:[^|\]]*\|)?([^\]]+)\]\]/g, '$1')
+                // 1. Remove markdown code blocks & inline code
+                .replace(/```[\s\S]*?```/g, '')
+                .replace(/`[^`]+`/g, '')
+                // 2. Remove URLs & file paths
                 .replace(/https?:\/\/\S+/g, '')
-                .replace(/[#*`_~]/g, '')
-                .replace(/^\s*[-+*]\s+/gm, '')
+                .replace(/[a-zA-Z0-9_\-\\]+\.(?:md|py|json|yaml|txt|docx|pdf)/gi, '')
+                // 3. Wikilinks [[target|label]] -> label, [[target]] -> target
+                .replace(/\[\[(?:[^|\]]*\|)?([^\]]+)\]\]/g, '$1')
+                // 4. Citation brackets like [1], [2], [ref-xxx], [^block-xxx]
+                .replace(/\[\^?[a-zA-Z0-9_\-]+\]/g, '')
+                // 5. Remove any remaining square or curly brackets [ ] { }
+                .replace(/[\[\]{}]/g, ' ')
+                // 6. Parentheses: remove ( and ) symbols, keep the words inside without saying "פתח סוגריים"
+                .replace(/\(([^)]*)\)/g, ' $1 ')
+                .replace(/[()]/g, ' ')
+                // 7. Colons & Semicolons: replace with a gentle comma so voice pauses naturally rather than saying "נקודתיים"
+                .replace(/[:;]/g, ', ')
+                // 8. Quotes & apostrophes: remove entirely
+                .replace(/["'״׳“”„«»]/g, '')
+                // 9. Slashes: ו/או -> או, others to space
+                .replace(/ו\/או/g, 'או')
+                .replace(/[\/\\]/g, ' ')
+                // 10. Asterisks, hashes, backticks, tildes, carets, underscores
+                .replace(/[*#`~^_]/g, '')
+                // 11. List bullets & dashes: replace - and • with space so voice doesn't say "מקף"
+                .replace(/^\s*[-+*•–—]\s+/gm, '')
+                .replace(/[\-–—]/g, ' ')
+                // 12. Ellipsis (...) -> replace with a clean period
+                .replace(/\.{2,}/g, '. ')
+                // 13. Clean multiple commas or periods
+                .replace(/,\s*,+/g, ',')
+                .replace(/\.\s*\.+/g, '.')
+                .replace(/,\s*\./g, '.')
+                // 14. Convert newlines to sentence pauses
                 .replace(/\n+/g, '. ')
                 .replace(/\s+/g, ' ')
                 .trim();
-            if (cleaned.length > 700) {
-                const cut = cleaned.substring(0, 700);
+
+            if (cleaned.length > 550) {
+                const cut = cleaned.substring(0, 550);
                 const lastDot = cut.lastIndexOf('.');
-                cleaned = (lastDot > 300 ? cut.substring(0, lastDot + 1) : cut) + ' ... לפרטים נוספים עיין בתשובה המלאה המוצגת על המסך.';
+                cleaned = (lastDot > 250 ? cut.substring(0, lastDot + 1) : cut) + ' התשובה המלאה מופיעה על המסך.';
             }
+
             return cleaned;
         }
 
@@ -2123,12 +2156,16 @@
 
         async function loadGraphData() {
             try {
-                document.getElementById('graphStats').textContent = 'Loading graph data from vault...';
+                document.getElementById('graphStats').textContent = 'טוען נתוני גרף מתוך הכספת...';
                 const res = await fetch('/api/v1/wiki/graph');
+                if (!res.ok) {
+                    const errText = await res.text();
+                    throw new Error(errText || 'HTTP ' + res.status);
+                }
                 graphData = await res.json();
                 
                 document.getElementById('graphStats').textContent = 
-                    `Vault Graph: ${graphData.total_nodes} Notes & Entities | ${graphData.total_links} Links & Provenance Connections`;
+                    `מפת קשרים (Vault Graph): ${graphData.total_nodes} פתקים ומושגים | ${graphData.total_links} קשרי הפניה ופרוביננס`;
 
                 const width = canvas.width;
                 const height = canvas.height;
@@ -2363,14 +2400,29 @@
         }
 
         async function rebuildMOCs() {
-            showStatus('⏳ REBUILDING MAPS OF CONTENT (MOCs)...');
+            const btn = document.activeElement;
+            const originalText = btn && btn.tagName === 'BUTTON' ? btn.innerHTML : null;
+            if (btn && btn.tagName === 'BUTTON') {
+                btn.disabled = true;
+                btn.innerHTML = '⏳ מרענן מפות תוכן...';
+            }
+            showStatus('⏳ מחדש ומסנכרן את כל מפות התוכן (MOCs)...');
             try {
                 const res = await fetch('/api/v1/wiki/mocs/rebuild', { method: 'POST' });
+                if (!res.ok) {
+                    const errText = await res.text();
+                    throw new Error(errText || 'HTTP ' + res.status);
+                }
                 const data = await res.json();
-                showStatus('✅ MAPS OF CONTENT (MOCs) REBUILT SUCCESSFULLY:\n' + JSON.stringify(data, null, 2));
+                showStatus('✅ מפות התוכן נבנו וסונכרנו בהצלחה!\n' + JSON.stringify(data, null, 2));
                 loadGraphData();
             } catch (err) {
-                showStatus('❌ FAILED TO REBUILD MOCs: ' + err.message);
+                showStatus('❌ שגיאה בבניית מפות תוכן: ' + err.message);
+            } finally {
+                if (btn && btn.tagName === 'BUTTON') {
+                    btn.disabled = false;
+                    if (originalText) btn.innerHTML = originalText;
+                }
             }
         }
 

@@ -45,7 +45,12 @@ class OllamaProvider(LLMProvider):
         payload = {
             "model": self.model,
             "prompt": full_prompt,
-            "stream": False
+            "stream": False,
+            "options": {
+                "num_predict": 380,
+                "temperature": 0.2,
+                "top_p": 0.9
+            }
         }
         try:
             resp = self.client.post(url, json=payload)

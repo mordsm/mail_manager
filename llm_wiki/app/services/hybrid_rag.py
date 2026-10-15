@@ -192,13 +192,13 @@ class HybridRAGService:
     def search_web_fallback(self, query: str) -> Optional[str]:
         """
         Fetches web search snippets if local vault coverage is partial or missing.
-        Uses DuckDuckGo Instant Answer API or HTTP search fallback.
+        Uses DuckDuckGo search fallback with fast timeout.
         """
         try:
-            url = f"https://html.duckduckgo.com/html/?q={httpx.URL(query).raw_path.decode()}"
+            url = "https://html.duckduckgo.com/html/"
             headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
-            with httpx.Client(timeout=4.0) as client:
-                res = client.get(url, headers=headers)
+            with httpx.Client(timeout=2.5) as client:
+                res = client.get(url, params={"q": query}, headers=headers)
                 if res.status_code == 200:
                     text = res.text
                     # Extract snippets
@@ -215,7 +215,7 @@ class HybridRAGService:
         Executes the full Hybrid RAG Workflow.
         """
         local_results = self.search_local_vault(question, domain=domain)
-        has_sufficient_local = len(local_results) > 0 and local_results[0]["score"] >= 4
+        has_sufficient_local = len(local_results) > 0
 
         web_context = None
         if not has_sufficient_local and allow_web_fallback:
