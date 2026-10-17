@@ -1,6 +1,6 @@
 # Master Vault Map of Content (MOC)
 
-**Generated**: 2026-10-15
+**Generated**: 2026-10-17
 
 ## Domain Maps of Content
 - [[personal_moc]] — 1 active notes
@@ -8,8 +8,10 @@
 - [[business_moc]] — 0 active notes
 - [[competitive_moc]] — 0 active notes
 - [[development_moc]] — 3 active notes
+- [[domain_content_manager_moc]] — 240 notes (Domain Content Manager)
 
 ## Active Projects (10_Projects)
+- [[domain_content_manager]]
 - [[llm_wiki]]
 - [[research_manager]]
 - [[sharons]]

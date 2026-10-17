@@ -36,6 +36,16 @@ class VaultGraphService:
             group = parts[0]
             if group == "wiki" and len(parts) > 1:
                 group = f"wiki/{parts[1]}"
+            elif group == "10_Projects" and len(parts) > 1:
+                if parts[1] == "domain_content_manager":
+                    if len(parts) > 3 and parts[2] == "02 By Domain":
+                        group = f"content_manager/{parts[3]}"
+                    elif len(parts) > 2:
+                        group = f"content_manager/{parts[2]}"
+                    else:
+                        group = "content_manager"
+                else:
+                    group = f"project/{parts[1]}"
 
             title = f.stem
             try:
@@ -56,6 +66,7 @@ class VaultGraphService:
                 "label": title,
                 "path": rel_path,
                 "group": group,
+                "is_uncreated": False,
                 "degree": 0
             }
 
@@ -70,13 +81,14 @@ class VaultGraphService:
                     clean_target = target_raw.strip().lower()
                     target_id = name_to_id.get(clean_target, clean_target.replace(" ", "-"))
 
-                    # If target node doesn't exist yet, add it as ghost/external node
+                    # If target node doesn't exist yet, add it as concept placeholder (uncreated)
                     if target_id not in nodes_dict:
                         nodes_dict[target_id] = {
                             "id": target_id,
                             "label": target_raw.strip(),
                             "path": "",
-                            "group": "external",
+                            "group": "uncreated",
+                            "is_uncreated": True,
                             "degree": 0
                         }
 

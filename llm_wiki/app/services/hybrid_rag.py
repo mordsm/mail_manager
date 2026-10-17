@@ -167,9 +167,15 @@ class HybridRAGService:
         if subsubject and subsubject.lower() != "all":
             sub_keywords, sub_folders = self.taxonomy.get_filter_rules(domain, subsubject)
 
-        # 1. Search wiki domains
+        # 1. Search wiki domains and configured subject folders
+        tax = self.taxonomy.get_taxonomy()
         for d in target_domains:
-            domain_dir = self.root_dir / "wiki" / d
+            configured_folder = tax.get(d, {}).get("folder")
+            if configured_folder:
+                domain_dir = self.root_dir / configured_folder
+            else:
+                domain_dir = self.root_dir / "wiki" / d
+
             if domain_dir.exists():
                 for md_file in domain_dir.glob("**/*.md"):
                     blocks = self.extract_blocks(md_file, domain=d)

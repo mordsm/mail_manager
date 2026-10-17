@@ -1,0 +1,245 @@
+vault_name: LLM Wiki & Connected Vaults
+timestamp: '2026-10-17T21:22:57.360302'
+total_notes: 312
+connected_external_vaults:
+- name: domain_content_manager
+  path: 10_Projects/domain_content_manager
+  source: c:\workspace\domain_content_manager\vault
+  total_notes: 240
+  subfolders:
+    00 Inbox:
+      count: 216
+      notes:
+      - 10_Incredible_Things_ChatGPT_Browser_Use_Can_Do_(Automate_Everything)_598b167c
+      - 11_Hair_Ffixes_f5eb4533
+      - 8_ChatGPT_Agents_That_Do_My_Work_for_Me_(Steal_These)_8aa02fa2
+      - Gut_Detox_The_Fastest_Way_To_Repair_Your_Gut_Naturally_05619ba4
+      - gut_exercises_a2a8dbf7
+      - httpswww.youtube.comwatchv=RCHEdi8O81E&pp=ugUEEgJlbg%3D%3D_a61f229d
+      - httpsyoutu.beGZtLsvklYBIsi=WMHA1YRRgD5p7zP7_617cf38c
+      - httpsyoutu.beq2cg1gEYWJQs_66e6169d
+      - make_anyone_miss_you_542002a8
+      - Optimal_Protocols_to_Build_Strength_6b35889b
+      - Rosemary_Hair_Oil_🌿_to_support_hair_growth_537b7c4a
+      - Scalp_massage_for_hair_growth_4153bce8
+      - Secret_codes_for_ChatGPT_&_Claude_539fe2ab
+      - Unlock_the_secrets_of_human_connection_to_cultivate_charisma,_32eaa151
+      - Vegas_Nerve_exercises_5f901932
+      - אינפוגרפיקה_של_נוגד_תקיעות_98dc434a
+      - אינפוגרפיקות_מרובות_לבדיקה_0c84f987
+      - אינפוגרפיקות_מרובות_לבדיקה_1d12c12a
+      - אינפוגרפיקות_מרובות_לבדיקה_1e4aa36d
+      - אינפוגרפיקות_מרובות_לבדיקה_1f37cf7a
+      - אינפוגרפיקות_מרובות_לבדיקה_3023c6b7
+      - אינפוגרפיקות_מרובות_לבדיקה_4339dd6a
+      - אינפוגרפיקות_מרובות_לבדיקה_46d67787
+      - אינפוגרפיקות_מרובות_לבדיקה_4bacc74c
+      - אינפוגרפיקות_מרובות_לבדיקה_4d862c8a
+    01 Tagged:
+      count: 0
+      notes: []
+    02 By Domain:
+      count: 23
+      notes:
+      - מרק_כתום_מחזק_חיסון_עם_ג'ינג'ר,_כורכום_וחלב_קוקוס_0c2c3677
+      - מרק_כתום_מחזק_חיסון_עם_ג'ינג'ר,_כורכום_וחלב_קוקוס_1523a96e
+      - מרק_כתום_מחזק_חיסון_עם_ג'ינג'ר,_כורכום_וחלב_קוקוס_9f9cbb04
+      - מרק_כתום_מחזק_חיסון_עם_ג'ינג'ר,_כורכום_וחלב_קוקוס_fb2284d0
+      - מדריך_פיננסי_ניהול_תקציב_משפחתי_והשקעה_במדדי_מניות_1e59fbdc
+      - מדריך_פיננסי_ניהול_תקציב_משפחתי_והשקעה_במדדי_מניות_721ec3b3
+      - מדריך_פיננסי_ניהול_תקציב_משפחתי_והשקעה_במדדי_מניות_f3166f09
+      - מדריך_ליקוט_פטריות_מאכל_חורפיות_והתגוננות_מרעלים_018f2023
+      - מדריך_ליקוט_פטריות_מאכל_חורפיות_והתגוננות_מרעלים_07ed9788
+      - מדריך_ליקוט_פטריות_מאכל_חורפיות_והתגוננות_מרעלים_74b605ec
+      - מדריך_ליקוט_פטריות_מאכל_חורפיות_והתגוננות_מרעלים_a0f48717
+      - גידול_נענע,_לואיזה_ומנטה_בערוגות_ביתיות_ובאדניות_009f915f
+      - גידול_נענע,_לואיזה_ומנטה_בערוגות_ביתיות_ובאדניות_00b780a0
+      - גידול_נענע,_לואיזה_ומנטה_בערוגות_ביתיות_ובאדניות_17f381dd
+      - גידול_נענע,_לואיזה_ומנטה_בערוגות_ביתיות_ובאדניות_2784a972
+      - אינפוגרפיק_ציר_המעי-מוח_וייצור_סרוטונין_במערכת_העיכול_550d008d
+      - אינפוגרפיק_ציר_המעי-מוח_וייצור_סרוטונין_במערכת_העיכול_620f0470
+      - אינפוגרפיק_ציר_המעי-מוח_וייצור_סרוטונין_במערכת_העיכול_7eb8c50d
+      - אינפוגרפיק_ציר_המעי-מוח_וייצור_סרוטונין_במערכת_העיכול_fd0560e9
+      - טיפול_טבעי_בחיזוק_שורשי_השיער_ושיקום_הקרקפת_b26e4eb8
+      - פרוטוקול_מדיטציה_ומיינדפולנס_להפחתת_מתח_וחרדה_49373d27
+      - פרוטוקול_מדיטציה_ומיינדפולנס_להפחתת_מתח_וחרדה_ec0624ec
+      - פרוטוקול_מדיטציה_ומיינדפולנס_להפחתת_מתח_וחרדה_fc671ab4
+    03 Outputs:
+      count: 1
+      notes:
+      - מדריך_מרקי_חורף
+    04 Templates:
+      count: 0
+      notes: []
+domains:
+  attachments:
+    total_notes: 0
+    notes: []
+  Auto classify:
+    total_notes: 0
+    notes: []
+  business:
+    total_notes: 0
+    notes: []
+  competitive:
+    total_notes: 0
+    notes: []
+  daily:
+    total_notes: 6
+    notes:
+    - '2026-09-27'
+    - '2026-09-28'
+    - '2026-10-13'
+    - '2026-10-14'
+    - '2026-10-15'
+    - '2026-10-17'
+  development:
+    total_notes: 3
+    notes:
+    - fastapi-routing
+    - development-session-api-test-capture
+    - development-session-cli-capture-investigating-force-directed-graph-rende
+  index:
+    total_notes: 1
+    notes:
+    - topic_index
+  personal:
+    total_notes: 1
+    notes:
+    - morning-routine
+  research:
+    total_notes: 42
+    notes:
+    - my-second-note
+    - ollama-provides-local-llm-inference
+    - short-cli-note-test
+    - scfa-butyrate-mucosal-integrity-vs-high-dose-toxicity
+    - critic_could_gut_inflammation_connect_autoimmune_disease_
+    - llm-dialogue-session-chatgpt-research-on-butyrate
+    - research-can-we-treat-it-using-stoping-the-inflamanation
+    - research-could-gut-inflammation-connect-autoimmune-disease-and-parkin
+    - research-parkinson-disease-gut-inflammation-treatment
+    - research-stopping-inflammation-as-a-way-to-fight-cancer
+    - research-stopping-inflammation-as-a-way-to-fight-sjögrens-syndrome
+    - research-what-are-the-best-current-approaches-for-building-an-ai-rese
+    - research-what-are-the-possible-outside-triggers-for-sjogren-and-can-w
+    - research-what-are-the-sources-tested-and-confirmed-for-autoimmune-dis
+    - research-what-environmenatl-conditiondietand-other-way-of-life-trigg
+    - research-what-environmental-conditiondietand-other-way-of-life-trigg
+    - research-מה-לפי-המחקרים-הסיבות-למחלות-אוטואימוניות-ובמיוחד-תסמונת-סיו
+    - research-סיבות-אפריות-להתפרצות-מחלות-אוטואימוניות-בכלל-ותסמונת-סיוגרן
+    - real_test_book
+    - sample-paper
+    - test-agent-cognition
+    - פרומפט-לספר
+    - chapter_01
+    - chapter_02
+    - chapter_03
+    - chapter_04
+    - chapter_05
+    - chapter_06
+    - chapter_07
+    - chapter_08
+    - chapter_09
+    - chapter_10
+    - chapter_11
+    - chapter_12
+    - chapter_13
+    - chapter_14
+    - chapter_15
+    - chapter_16
+    - chapter_17
+    - chapter_18
+    - chapter_19
+    - master_network_moc
+projects:
+  llm_wiki:
+    total_notes: 1
+    notes:
+    - project_memory
+  research_manager:
+    total_notes: 1
+    notes:
+    - project_memory
+  sharons:
+    total_notes: 1
+    notes:
+    - project_memory
+deep_research_sessions:
+  api_test_capture:
+    has_overview: true
+    files:
+    - overview.md
+  can_we_treat_it_using_stoping_the_inflamanation:
+    has_overview: true
+    files:
+    - overview.md
+  chatgpt_research_on_butyrate:
+    has_overview: true
+    files:
+    - overview.md
+  cli_capture_investigating_force-directed_graph_rende:
+    has_overview: true
+    files:
+    - overview.md
+  could_gut_inflammation_connect_autoimmune_disease_:
+    has_overview: true
+    files:
+    - overview.md
+  parkinson_disease_gut_inflammation_treatment:
+    has_overview: true
+    files:
+    - overview.md
+  stopping_inflammation_as_a_way_to_fight_cancer:
+    has_overview: true
+    files:
+    - overview.md
+  stopping_inflammation_as_a_way_to_fight_sjögren_s_:
+    has_overview: true
+    files:
+    - overview.md
+  what_are_the_best_current_approaches_for_building_:
+    has_overview: true
+    files:
+    - overview.md
+  what_are_the_possible_outside_triggers_for_sjogren:
+    has_overview: true
+    files:
+    - overview.md
+  what_are_the_sources_tested_and_confirmed_for_auto:
+    has_overview: true
+    files:
+    - overview.md
+  what_environmenatl_condition_dietand_other_way_of_:
+    has_overview: true
+    files:
+    - overview.md
+  what_environmental_condition_dietand_other_way_of_:
+    has_overview: true
+    files:
+    - overview.md
+  מה_לפי_המחקרים_הסיבות_למחלות_אוטואימוניות_ובמיוחד_:
+    has_overview: true
+    files:
+    - overview.md
+  סיבות_אפריות_להתפרצות_מחלות_אוטואימוניות_בכלל_ותסמ:
+    has_overview: true
+    files:
+    - overview.md
+decisions:
+  total: 1
+  records:
+  - 2026-09-27_primary_evidence_source
+mocs:
+- auto-classify-overview
+- business_moc
+- competitive_moc
+- development-overview
+- development_moc
+- domain_content_manager_moc
+- master_vault_moc
+- personal-overview
+- personal_moc
+- research-overview
+- research_moc
+- wiki-moc

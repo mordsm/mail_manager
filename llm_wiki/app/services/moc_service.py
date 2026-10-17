@@ -146,7 +146,30 @@ class MOCService:
                 )
                 _safe_write_text(index_file, index_content)
 
-            # 2. Add Projects & Research Sessions to Master MOC
+            # 2. Add domain_content_manager dedicated MOC if connected
+            dcm_dir = self.root_dir / "10_Projects" / "domain_content_manager"
+            if dcm_dir.exists():
+                dcm_lines = [
+                    "# Domain Content Manager Map of Content (MOC)\n",
+                    f"**Generated**: {date.today().isoformat()} | **Path**: `10_Projects/domain_content_manager`\n",
+                    "> Master Navigation Map for multi-domain content (Health, Culinary, Garden, Foraging, Financial, Mental, Inbox).\n"
+                ]
+                dcm_total = 0
+                for sub in sorted([s for s in dcm_dir.iterdir() if s.is_dir()]):
+                    notes = sorted(list(sub.glob("**/*.md")))
+                    if notes:
+                        dcm_lines.append(f"## {sub.name} ({len(notes)})")
+                        for n in notes:
+                            dcm_lines.append(f"- [[{n.stem}]]")
+                        dcm_lines.append("")
+                        dcm_total += len(notes)
+
+                dcm_moc_file = mocs_dir / "domain_content_manager_moc.md"
+                _safe_write_text(dcm_moc_file, "\n".join(dcm_lines))
+                stats["domain_content_manager"] = dcm_total
+                master_links.append(f"- [[domain_content_manager_moc]] — {dcm_total} notes (Domain Content Manager)")
+
+            # 3. Add Projects & Research Sessions to Master MOC
             projects_dir = self.root_dir / "10_Projects"
             proj_notes = [p.name for p in projects_dir.iterdir() if p.is_dir()] if projects_dir.exists() else []
 

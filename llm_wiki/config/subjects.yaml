@@ -90,6 +90,57 @@ subjects:
         keywords: ["goal", "reflection", "מטרות", "יעדים", "מחשבות"]
         folder: "wiki/personal"
 
+  domain_content_manager:
+    title: "Domain Content Manager"
+    title_he: "מנהל תוכן ותחומים (Domain Content Manager)"
+    description: "Multi-domain voice-first knowledge: Health, Culinary, Garden, Foraging, Financial, Mental"
+    folder: "10_Projects/domain_content_manager"
+    subsubjects:
+      all:
+        title: "All Content Manager Domains"
+        title_he: "📂 כל תחומי מנהל התוכן"
+        folder: "10_Projects/domain_content_manager"
+      health:
+        title: "Health & Medicine"
+        title_he: "🏥 בריאות, רפואה ומעי"
+        keywords: ["health", "בריאות", "מיקרוביום", "מעי", "תרופות", "סימפטומים"]
+        folder: "10_Projects/domain_content_manager/02 By Domain/Health"
+      culinary:
+        title: "Culinary & Cooking"
+        title_he: "🍳 קולינריה ובישול"
+        keywords: ["culinary", "בישול", "מתכונים", "מטבח", "קולינריה", "מזון"]
+        folder: "10_Projects/domain_content_manager/02 By Domain/Culinary"
+      garden:
+        title: "Garden & Agriculture"
+        title_he: "🌱 גינון, אדמה וצמחים"
+        keywords: ["garden", "גינה", "גינון", "צמחים", "השקיה", "שתילה"]
+        folder: "10_Projects/domain_content_manager/02 By Domain/Garden"
+      foraging:
+        title: "Foraging & Wild Plants"
+        title_he: "🌿 ליקוט וצמחי בר"
+        keywords: ["foraging", "ליקוט", "צמחי בר", "פטריות", "צמחים"]
+        folder: "10_Projects/domain_content_manager/02 By Domain/Foraging"
+      financial:
+        title: "Financial & Investments"
+        title_he: "💰 פיננסים והשקעות"
+        keywords: ["financial", "כספים", "השקעות", "פיננסי", "תקציב", "בורסה"]
+        folder: "10_Projects/domain_content_manager/02 By Domain/Financial"
+      mental:
+        title: "Mental & Psychology"
+        title_he: "🧠 נפש, רווחה ופסיכולוגיה"
+        keywords: ["mental", "פסיכולוגיה", "נפש", "רווחה", "מיינדפולנס"]
+        folder: "10_Projects/domain_content_manager/02 By Domain/Mental"
+      inbox:
+        title: "Inbox & New Captures"
+        title_he: "📥 אינבוקס ותוכן חדש"
+        keywords: ["inbox", "אינבוקס", "חדש"]
+        folder: "10_Projects/domain_content_manager/00 Inbox"
+      outputs:
+        title: "Outputs & Summaries"
+        title_he: "📑 תוצרים וסיכומים"
+        keywords: ["outputs", "תוצרים", "סיכומים"]
+        folder: "10_Projects/domain_content_manager/03 Outputs"
+
   development:
     title: "Development & Engineering"
     title_he: "פיתוח והנדסת תוכנה"

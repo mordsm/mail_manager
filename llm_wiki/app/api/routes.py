@@ -1,11 +1,12 @@
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse, FileResponse, PlainTextResponse
 from typing import Optional, List, Dict, Any
 from pathlib import Path
 from datetime import datetime
 import tempfile
 import shutil
 import re
+import yaml
 import frontmatter
 
 from app.services.pipeline import LLMWikiPipeline
@@ -510,17 +511,46 @@ async def list_research_sessions():
 async def get_wiki_note(path: str):
     """
     Returns full note content, metadata, outbound links, and backlinks for interactive preview drawer.
+    If the note does not physically exist on disk, gracefully returns an uncreated concept stub with its backlinks.
     """
-    target = Path(path)
-    if not target.exists():
-        target = Path(".") / path
-        if not target.exists():
-            # Try searching by note stem
-            candidates = list(Path(".").glob(f"**/{path}.md")) + list(Path(".").glob(f"**/{path}"))
-            if candidates:
-                target = candidates[0]
-            else:
-                raise HTTPException(status_code=404, detail=f"Note not found: {path}")
+    target = Path(path) if path else None
+    if not target or not target.exists():
+        if path:
+            target = Path(".") / path
+            if not target.exists():
+                # Try searching by note stem or filename
+                candidates = list(Path(".").glob(f"**/{path}.md")) + list(Path(".").glob(f"**/{path}"))
+                if candidates:
+                    target = candidates[0]
+                else:
+                    target = None
+
+    if not target or not target.exists():
+        # Concept placeholder / uncreated note
+        clean_name = path.replace("-", " ").strip() if path else "Unknown Concept"
+        backlinks = []
+        for md in Path(".").glob("**/*.md"):
+            if "system" in md.parts or ".venv" in md.parts or ".pytest" in md.parts:
+                continue
+            try:
+                txt = md.read_text(encoding="utf-8", errors="ignore")
+                if f"[[{path}]]" in txt or f"[[{clean_name}]]" in txt:
+                    backlinks.append({
+                        "title": md.stem.replace("_", " ").title(),
+                        "path": str(md)
+                    })
+            except Exception:
+                continue
+        return {
+            "title": clean_name.title(),
+            "path": "",
+            "domain": "concept_placeholder",
+            "is_uncreated": True,
+            "metadata": {"type": "concept_placeholder", "status": "uncreated"},
+            "content": f"🔗 ערך מושגי שטרם נוצר לו פתק פיזי (Concept Stub / Uncreated Note).\n\nמושג זה הוזכר ומקושר מתוך {len(backlinks)} פתקים בכספת.\nניתן להקליק למטה על כפתור 'צור פתק זה' כדי להקים עבורו קובץ פתק ייעודי באופן מיידי.",
+            "outbound_links": [],
+            "backlinks": backlinks[:15]
+        }
 
     post = frontmatter.load(target)
     outbound = re.findall(r"\[\[([^\]]+)\]\]", post.content)
@@ -549,11 +579,147 @@ async def get_wiki_note(path: str):
         "title": post.get("title") or target.stem.replace("_", " ").title(),
         "path": str(target),
         "domain": str(domain),
+        "is_uncreated": False,
         "metadata": {k: str(v) for k, v in post.metadata.items()},
         "content": post.content,
         "outbound_links": list(set(outbound)),
-        "backlinks": backlinks[:10]
+        "backlinks": backlinks[:15]
     }
+
+@router.post("/wiki/note/create")
+async def create_uncreated_note(
+    title: str = Form(...),
+    domain: str = Form("research"),
+    content: str = Form(""),
+    tags: str = Form("")
+):
+    """
+    Creates a new atomic markdown note in the vault for an uncreated concept.
+    """
+    clean_stem = re.sub(r"[^\w\s-]", "", title).strip().replace(" ", "_")
+    target_dir = Path("wiki") / domain
+    target_dir.mkdir(parents=True, exist_ok=True)
+    target_file = target_dir / f"{clean_stem}.md"
+
+    tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else ["concept", domain]
+    body = content.strip() or f"# {title}\n\nמושג זה נוצר מתוך מפת הקשרים החזותית.\n\n## סקירה ראשונית\n^block-{clean_stem[:8]}\n"
+
+    post = frontmatter.Post(body, title=title, domain=domain, tags=tag_list, status="seed")
+    target_file.write_text(frontmatter.dumps(post), encoding="utf-8")
+
+    moc_service.rebuild_domain_mocs()
+
+    return {
+        "status": "success",
+        "path": str(target_file),
+        "title": title,
+        "message": f"פתק חדש נוצר בהצלחה: {target_file}"
+    }
+
+@router.get("/vault/inventory")
+async def get_vault_inventory(format: str = "json"):
+    """
+    Generates a full structured inventory of all notes, folders, and connected vaults
+    in hierarchical format (YAML or JSON).
+    """
+    inventory = {
+        "vault_name": "LLM Wiki & Connected Vaults",
+        "timestamp": datetime.now().isoformat(),
+        "total_notes": 0,
+        "connected_external_vaults": [],
+        "domains": {},
+        "projects": {},
+        "deep_research_sessions": {},
+        "decisions": {},
+        "mocs": []
+    }
+
+    total_count = 0
+
+    # 1. Connected External Vaults
+    dcm_dir = Path("10_Projects/domain_content_manager")
+    if dcm_dir.exists():
+        dcm_notes = list(dcm_dir.rglob("*.md"))
+        dcm_subfolders = {}
+        for sub in dcm_dir.iterdir():
+            if sub.is_dir():
+                sub_mds = [m.stem for m in sub.rglob("*.md")]
+                dcm_subfolders[sub.name] = {
+                    "count": len(sub_mds),
+                    "notes": sub_mds[:25]
+                }
+        total_count += len(dcm_notes)
+        inventory["connected_external_vaults"].append({
+            "name": "domain_content_manager",
+            "path": "10_Projects/domain_content_manager",
+            "source": "c:\\workspace\\domain_content_manager\\vault",
+            "total_notes": len(dcm_notes),
+            "subfolders": dcm_subfolders
+        })
+
+    # 2. Wiki domains
+    wiki_dir = Path("wiki")
+    if wiki_dir.exists():
+        for d in wiki_dir.iterdir():
+            if d.is_dir() and not d.name.startswith("."):
+                mds = [m.stem for m in d.rglob("*.md") if m.name not in ["index.md", "log.md"]]
+                total_count += len(mds)
+                inventory["domains"][d.name] = {
+                    "total_notes": len(mds),
+                    "notes": mds
+                }
+
+    # 3. 10_Projects
+    proj_dir = Path("10_Projects")
+    if proj_dir.exists():
+        for p in proj_dir.iterdir():
+            if p.is_dir() and p.name != "domain_content_manager":
+                p_mds = [m.stem for m in p.rglob("*.md")]
+                total_count += len(p_mds)
+                inventory["projects"][p.name] = {
+                    "total_notes": len(p_mds),
+                    "notes": p_mds
+                }
+
+    # 4. 20_Research
+    res_dir = Path("20_Research")
+    if res_dir.exists():
+        for r in res_dir.iterdir():
+            if r.is_dir():
+                ov = r / "overview.md"
+                r_mds = [f.name for f in r.glob("*.md")]
+                total_count += len(r_mds)
+                inventory["deep_research_sessions"][r.name] = {
+                    "has_overview": ov.exists(),
+                    "files": r_mds
+                }
+
+    # 5. 40_Decisions
+    dec_dir = Path("40_Decisions")
+    if dec_dir.exists():
+        dec_mds = [m.stem for m in dec_dir.glob("*.md")]
+        total_count += len(dec_mds)
+        inventory["decisions"] = {
+            "total": len(dec_mds),
+            "records": dec_mds
+        }
+
+    # 6. MOCs
+    moc_dir = Path("mocs")
+    if moc_dir.exists():
+        inventory["mocs"] = [m.stem for m in moc_dir.glob("*.md")]
+
+    inventory["total_notes"] = total_count
+
+    yaml_str = yaml.dump(inventory, allow_unicode=True, sort_keys=False, default_flow_style=False)
+
+    out_dir = Path("outputs")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "vault_inventory.yaml").write_text(yaml_str, encoding="utf-8")
+
+    if format.lower() == "yaml":
+        return PlainTextResponse(yaml_str, media_type="text/yaml")
+    return inventory
 
 @router.post("/wiki/mocs/rebuild")
 async def rebuild_mocs_endpoint():
