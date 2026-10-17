@@ -8,6 +8,7 @@ from app.llm.base import LLMProvider
 from app.llm.ollama_provider import OllamaProvider
 from app.llm import get_llm_provider
 from app.services.vector_service import VectorIndexService
+from app.services.taxonomy_service import SubjectTaxonomyService
 
 
 class MicroBlock:
@@ -35,8 +36,8 @@ class HybridRAGService:
     """
     Hybrid RAG Engine for OCKA (Obsidian Central Knowledge Agent).
     Workflow:
-    1. Search local Obsidian micro-blocks (^block-xxxx) across requested domains.
-    2. Evaluate evidence relevance score.
+    1. Search local Obsidian micro-blocks (^block-xxxx) across requested domains and sub-subjects.
+    2. Evaluate evidence relevance score with sub-subject boosts.
     3. If local evidence is partial or missing, fetch supplementary web context.
     4. Synthesize unified response with granular block citations.
     """
@@ -46,6 +47,7 @@ class HybridRAGService:
         self.parser = MarkdownParser()
         self.llm = llm_provider or OllamaProvider()
         self.vector_service = VectorIndexService(root_dir=self.root_dir)
+        self.taxonomy = SubjectTaxonomyService(root_dir=self.root_dir)
 
     def extract_blocks(self, note_path: Path, domain: str) -> List[MicroBlock]:
         """
@@ -144,10 +146,10 @@ class HybridRAGService:
                     ))
         return blocks
 
-    def search_local_vault(self, query: str, domain: str = "all") -> List[Dict[str, Any]]:
+    def search_local_vault(self, query: str, domain: str = "all", subsubject: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Searches all micro-blocks in the vault matching query keywords across all domains and vault folders,
-        fusing lexical keyword scoring with dense semantic vector embedding similarity.
+        fusing lexical keyword scoring with dense semantic vector embedding similarity and sub-subject taxonomy rules.
         """
         fused_map: Dict[tuple, Dict[str, Any]] = {}
 
@@ -164,6 +166,12 @@ class HybridRAGService:
         target_domains = ["personal", "research", "business", "competitive", "development"] if domain.lower() in ["all", "global"] else [domain]
         query_terms = [t.lower() for t in re.findall(r"\w+", query) if len(t) > 1]
 
+        # Sub-subject taxonomy rules
+        sub_keywords: List[str] = []
+        sub_folders: List[str] = []
+        if subsubject and subsubject.lower() != "all":
+            sub_keywords, sub_folders = self.taxonomy.get_filter_rules(domain, subsubject)
+
         # 1. Search wiki domains
         for d in target_domains:
             domain_dir = self.root_dir / "wiki" / d
@@ -174,12 +182,24 @@ class HybridRAGService:
                         score = 0
                         text_lower = b.content.lower()
                         title_lower = b.note_title.lower()
+                        path_posix = b.note_path.as_posix().lower()
 
                         for term in query_terms:
                             if term in text_lower:
                                 score += 2
                             if term in title_lower:
                                 score += 5
+
+                        # Sub-subject boost
+                        if sub_folders and any(sf.lower() in path_posix for sf in sub_folders):
+                            score += 12
+                        if sub_keywords:
+                            for sk in sub_keywords:
+                                sk_lower = sk.lower()
+                                if sk_lower in text_lower:
+                                    score += 4
+                                if sk_lower in title_lower:
+                                    score += 8
 
                         if score > 0:
                             key = (str(b.note_path), b.block_id)
@@ -229,6 +249,17 @@ class HybridRAGService:
             for sm in semantic_matches:
                 key = (sm["note_path"], sm["block_id"])
                 sem_boost = sm.get("semantic_score", 0.0) * 10.0
+                path_lower = sm["note_path"].lower()
+
+                # Sub-subject boost for vector results
+                if sub_folders and any(sf.lower() in path_lower for sf in sub_folders):
+                    sem_boost += 12.0
+                if sub_keywords:
+                    for sk in sub_keywords:
+                        sk_lower = sk.lower()
+                        if sk_lower in sm.get("content", "").lower():
+                            sem_boost += 4.0
+
                 if key in fused_map:
                     fused_map[key]["score"] += sem_boost
                 else:
@@ -272,13 +303,14 @@ class HybridRAGService:
             pass
         return None
 
-    def query(self, question: str, domain: str = "all", allow_web_fallback: bool = True, provider: Optional[str] = None) -> Dict[str, Any]:
+    def query(self, question: str, domain: str = "all", subsubject: Optional[str] = None, allow_web_fallback: bool = True, provider: Optional[str] = None) -> Dict[str, Any]:
         """
         Executes the full Hybrid RAG Workflow.
-        Allows specifying external sub-model provider (e.g. 'gemini', 'openai', 'ollama').
+        Allows specifying external sub-model provider (e.g. 'gemini', 'openai', 'ollama')
+        and filtering by main domain and sub-subject taxonomy.
         """
         active_llm = get_llm_provider(provider) if provider else self.llm
-        local_results = self.search_local_vault(question, domain=domain)
+        local_results = self.search_local_vault(question, domain=domain, subsubject=subsubject)
         has_sufficient_local = len(local_results) > 0
 
         web_context = None
@@ -301,6 +333,7 @@ class HybridRAGService:
             context_str += f"### 🌐 Web Context (External Fallback):\n{web_context}\n\n"
 
         # Synthesize prompt
+        subsubject_hint = f"Focus Subject: {domain} | Sub-Subject: {subsubject}\n" if subsubject and subsubject != "all" else ""
         system_prompt = (
             "You are the Obsidian Central Knowledge Agent (OCKA). "
             "Your task is to answer user queries accurately using local Obsidian vault micro-blocks as primary direct evidence. "
@@ -309,6 +342,7 @@ class HybridRAGService:
         )
 
         user_prompt = (
+            f"{subsubject_hint}"
             f"Question: {question}\n\n"
             f"Retrieved Context:\n{context_str}\n"
             "Please provide a clear, comprehensive answer in Hebrew."
@@ -323,6 +357,8 @@ class HybridRAGService:
 
         return {
             "question": question,
+            "domain": domain,
+            "subsubject": subsubject,
             "answer": llm_response,
             "citations": citations,
             "local_blocks_found": len(local_results),

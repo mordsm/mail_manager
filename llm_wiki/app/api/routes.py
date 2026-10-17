@@ -94,17 +94,38 @@ async def ingest_text(
 async def query_wiki(
     query: str = Form(...),
     domain: str = Form("all"),
+    subsubject: Optional[str] = Form(None),
     mode: str = Form("hybrid"),
     allow_web: bool = Form(False),
     provider: Optional[str] = Form(None)
 ):
     target_domain = "all" if domain.lower() in ["all", "global"] else normalize_domain(domain)
     if mode == "hybrid":
-        res = rag_service.query(question=query, domain=target_domain, allow_web_fallback=allow_web, provider=provider)
+        res = rag_service.query(
+            question=query,
+            domain=target_domain,
+            subsubject=subsubject,
+            allow_web_fallback=allow_web,
+            provider=provider
+        )
         return res
     else:
         res = planner.query(domain=target_domain, question=query)
         return res
+
+@router.get("/taxonomy")
+async def get_taxonomy():
+    """
+    Returns the full subjects and sub-subjects taxonomy dynamically loaded from config/subjects.yaml.
+    """
+    return rag_service.taxonomy.get_taxonomy()
+
+@router.get("/taxonomy/subsubjects")
+async def get_subsubjects(subject: str = "research"):
+    """
+    Returns sub-subjects for a specific main subject.
+    """
+    return rag_service.taxonomy.get_subsubjects(subject)
 
 @router.get("/llm/status")
 async def get_llm_status():
@@ -115,14 +136,15 @@ async def get_llm_status():
     import os
     gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY", "")
     openai_key = os.environ.get("OPENAI_API_KEY", "")
+    active_gemini_model = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash-lite")
     return {
         "active_default_provider": os.environ.get("LLM_PROVIDER", "auto"),
         "providers": {
             "gemini": {
-                "name": "Google Gemini Flash (External Sub-Model)",
+                "name": f"Google Gemini Flash ({active_gemini_model})",
                 "available": bool(gemini_key and len(gemini_key) > 10),
-                "model": "gemini-2.0-flash",
-                "speed": "Ultra Fast (< 0.8s)",
+                "model": active_gemini_model,
+                "speed": "Ultra Fast (< 0.8s, Lowest Cost)",
                 "has_key": bool(gemini_key)
             },
             "ollama": {

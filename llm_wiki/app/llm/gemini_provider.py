@@ -9,12 +9,13 @@ from app.llm.base import LLMProvider
 class GeminiProvider(LLMProvider):
     """
     Google Gemini LLM provider for ultra-fast, high-accuracy external comprehension & synthesis.
-    Supports gemini-2.0-flash / gemini-1.5-flash (<0.8s latency, native Hebrew support).
+    Defaults to gemini-2.5-flash-lite (Google's least expensive, high-speed flash model).
+    Supports gemini-2.5-flash / gemini-flash-latest with automatic model fallback.
     Uses standard REST API via httpx, requiring no external heavy SDK dependencies.
     """
-    def __init__(self, api_key: Optional[str] = None, model: str = "gemini-2.0-flash"):
+    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
         self.api_key = api_key or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY", "")
-        self.model = model
+        self.model = model or os.environ.get("GEMINI_MODEL", "gemini-2.5-flash-lite")
         self.base_url = "https://generativelanguage.googleapis.com/v1beta"
         self.client = httpx.Client(timeout=45.0)
 
@@ -46,20 +47,36 @@ class GeminiProvider(LLMProvider):
                 "parts": [{"text": system_prompt}]
             }
 
-        try:
-            resp = self.client.post(url, headers=headers, json=payload)
-            if resp.status_code != 200:
-                err_detail = resp.text
-                return f"[Gemini API Error {resp.status_code}] {err_detail}"
-            data = resp.json()
-            candidates = data.get("candidates", [])
-            if candidates:
-                parts = candidates[0].get("content", {}).get("parts", [])
-                if parts:
-                    return parts[0].get("text", "").strip()
-            return "[Gemini Provider] Empty response received."
-        except Exception as e:
-            return f"[Gemini Provider Error] {e}"
+        candidate_models = [self.model, "gemini-2.5-flash-lite", "gemini-2.5-flash", "gemini-flash-latest"]
+        # Deduplicate while preserving order
+        unique_models = []
+        for m in candidate_models:
+            if m not in unique_models:
+                unique_models.append(m)
+
+        last_err = ""
+        for m in unique_models:
+            req_url = f"{self.base_url}/models/{m}:generateContent?key={self.api_key}"
+            try:
+                resp = self.client.post(req_url, headers=headers, json=payload)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    candidates = data.get("candidates", [])
+                    if candidates:
+                        parts = candidates[0].get("content", {}).get("parts", [])
+                        if parts:
+                            self.model = m  # Remember working model
+                            return parts[0].get("text", "").strip()
+                    return "[Gemini Provider] Empty response received."
+                elif resp.status_code == 404:
+                    last_err = f"[Gemini API Error 404] Model {m} not found."
+                    continue
+                else:
+                    return f"[Gemini API Error {resp.status_code}] {resp.text}"
+            except Exception as e:
+                last_err = f"[Gemini Provider Error] {e}"
+
+        return last_err or "[Gemini Provider] Failed to generate."
 
     def structured_output(self, prompt: str, response_model: Type[BaseModel], system_prompt: Optional[str] = None) -> BaseModel:
         if not self.is_available:
@@ -152,3 +169,4 @@ class GeminiProvider(LLMProvider):
             "contradictions": [],
             "proposed_links": [f"[[{domain}]]"] + [f"[[{e}]]" for e in entities[:3]]
         }
+

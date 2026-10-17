@@ -787,25 +787,37 @@
                     </div>
                 </div>
 
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label for="ragDomain">Search Scope</label>
-                        <select id="ragDomain">
-                            <option value="all">All Domains & Projects (Dense Vector + Lexical Global Search)</option>
-                            <option value="research">Research & Technology (20_Research, books, papers)</option>
-                            <option value="development">Development (10_Projects, code, tasks)</option>
-                            <option value="personal">Personal</option>
-                            <option value="business">Business & Operations</option>
-                            <option value="competitive">Competitive Analysis</option>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 0.5rem;">
+                    <div class="form-group" style="margin-bottom: 0.5rem;">
+                        <label for="ragDomain">📂 נושא ראשי (Main Subject)</label>
+                        <select id="ragDomain" onchange="onSubjectChange()">
+                            <option value="all">🌐 כל התחומים והפרויקטים (חיפוש גלובלי מלא)</option>
+                            <option value="research">🔬 מחקר וטכנולוגיה (Research & Technology)</option>
+                            <option value="personal">🌱 אישי ובריאות (Personal & Health)</option>
+                            <option value="development">💻 פיתוח והנדסה (Development & Projects)</option>
+                            <option value="business">📊 עסקים ותפעול (Business & Operations)</option>
+                            <option value="competitive">🎯 ניתוח תחרותי (Competitive Analysis)</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="ragWebFallback">External Web Context</label>
+                    <div class="form-group" style="margin-bottom: 0.5rem;">
+                        <label for="ragSubSubject">📑 תת-נושא ממוקד (Sub-Subject)</label>
+                        <select id="ragSubSubject">
+                            <option value="all">🔍 כל תתי-הנושאים (ללא סינון נוסף)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0.5rem;">
+                        <label for="ragWebFallback">🌐 הקשר רשת חיצוני</label>
                         <select id="ragWebFallback">
-                            <option value="false">Local Vault Only (Strict Offline Provenance)</option>
-                            <option value="true">Allow Web Search Fallback if Vault Evidence Incomplete</option>
+                            <option value="false">🔒 כספת מקומית בלבד (Offline Provenance)</option>
+                            <option value="true">🌐 אפשר השלמה מן הרשת במידת הצורך</option>
                         </select>
                     </div>
+                </div>
+
+                <!-- External Configuration Notice -->
+                <div style="margin-top: 0.25rem; margin-bottom: 1.25rem; font-size: 0.84rem; color: #94a3b8; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; background: rgba(15, 23, 42, 0.65); padding: 0.5rem 0.85rem; border-radius: 8px; border: 1px solid rgba(56, 189, 248, 0.2);">
+                    <span>⚙️ <strong>מבנה הנושאים ותתי-הנושאים מוגדר בקובץ חיצוני:</strong> <code style="color: #38bdf8; background: rgba(56, 189, 248, 0.12); padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 600;">config/subjects.yaml</code> (ניתן לעריכה ישירה בכל עורך או באובסידיאן)</span>
+                    <button type="button" onclick="loadTaxonomy(true)" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.3); color: #38bdf8; border-radius: 6px; padding: 0.2rem 0.6rem; cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: all 0.2s;">🔄 רענן נושאים</button>
                 </div>
 
                 <button type="submit" class="btn-primary">🔍 ASK WIKI & SYNTHESIZE ANSWER</button>
@@ -1752,11 +1764,73 @@
             }
         }
 
+        /* --- TAXONOMY & SUB-SUBJECTS MANAGEMENT --- */
+        let cachedTaxonomy = null;
+
+        async function loadTaxonomy(showToast = false) {
+            try {
+                const res = await fetch('/api/v1/taxonomy');
+                if (!res.ok) return;
+                cachedTaxonomy = await res.json();
+                
+                // Populate main subjects
+                const domainSelect = document.getElementById('ragDomain');
+                if (domainSelect && cachedTaxonomy) {
+                    const currentVal = domainSelect.value || 'all';
+                    let optsHtml = '<option value="all">🌐 כל התחומים והפרויקטים (חיפוש גלובלי מלא)</option>';
+                    for (const [key, subj] of Object.entries(cachedTaxonomy)) {
+                        const title = subj.title_he || subj.title || key;
+                        const enTitle = subj.title ? ` (${subj.title})` : '';
+                        optsHtml += `<option value="${key}">${title}${enTitle}</option>`;
+                    }
+                    domainSelect.innerHTML = optsHtml;
+                    if (cachedTaxonomy[currentVal] || currentVal === 'all') {
+                        domainSelect.value = currentVal;
+                    }
+                }
+                
+                onSubjectChange();
+
+                if (showToast) {
+                    showStatus('✅ מבנה הנושאים ותתי-הנושאים סונכרן בהצלחה מתוך config/subjects.yaml');
+                }
+            } catch (err) {
+                console.warn('Could not load subjects taxonomy:', err);
+            }
+        }
+
+        function onSubjectChange() {
+            const domainSelect = document.getElementById('ragDomain');
+            const subSelect = document.getElementById('ragSubSubject');
+            if (!subSelect) return;
+
+            const selectedSubject = domainSelect ? domainSelect.value : 'all';
+            subSelect.innerHTML = '';
+
+            if (selectedSubject === 'all' || !cachedTaxonomy || !cachedTaxonomy[selectedSubject]) {
+                subSelect.innerHTML = '<option value="all">🔍 כל תתי-הנושאים (ללא סינון נוסף)</option>';
+                return;
+            }
+
+            const subjectData = cachedTaxonomy[selectedSubject];
+            const subs = subjectData.subsubjects || {};
+
+            let subOptsHtml = '<option value="all">🔍 כל תתי-הנושאים של ' + (subjectData.title_he || subjectData.title) + '</option>';
+            for (const [subKey, subInfo] of Object.entries(subs)) {
+                if (subKey === 'all') continue;
+                const subTitle = subInfo.title_he || subInfo.title || subKey;
+                subOptsHtml += `<option value="${subKey}">${subTitle}</option>`;
+            }
+
+            subSelect.innerHTML = subOptsHtml;
+        }
+
         /* --- ASK WIKI (HYBRID RAG) HANDLER --- */
         document.getElementById('ragQueryForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const question = document.getElementById('ragQuestion').value.trim();
             const domain = document.getElementById('ragDomain').value;
+            const subsubject = document.getElementById('ragSubSubject') ? document.getElementById('ragSubSubject').value : 'all';
             const allowWeb = document.getElementById('ragWebFallback').value;
 
             if (!question) return;
@@ -1778,6 +1852,7 @@
                 const formData = new FormData();
                 formData.append('query', question);
                 formData.append('domain', domain);
+                formData.append('subsubject', subsubject);
                 formData.append('mode', 'hybrid');
                 formData.append('allow_web', allowWeb);
                 formData.append('provider', provider);
@@ -1788,7 +1863,8 @@
                 answerDiv.textContent = data.answer || 'No answer generated.';
                 const foundCount = data.local_blocks_found || (data.citations ? data.citations.length : 0);
                 const provName = data.provider_used ? ` • ${data.provider_used}` : '';
-                badge.textContent = `${foundCount} מקורות מקומיים${provName}`;
+                const subName = (data.subsubject && data.subsubject !== 'all') ? ` [תת-נושא: ${data.subsubject}]` : '';
+                badge.textContent = `${foundCount} מקורות מקומיים${subName}${provName}`;
 
                 if (data.citations && data.citations.length > 0) {
                     citationsCard.style.display = 'block';
@@ -2703,6 +2779,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             fetchInboxStatus();
             checkLlmStatus();
+            loadTaxonomy();
         });
     </script>
 </body>

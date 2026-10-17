@@ -1,0 +1,154 @@
+# ==============================================================================
+# LLM Wiki Knowledge Taxonomy: Main Subjects & Sub-Subjects Configuration
+# ==============================================================================
+# You can edit this file externally at any time using any text editor or Obsidian.
+# Changes are dynamically reloaded by the system and available immediately in the UI.
+#
+# Structure for each subject:
+#   <subject_key>:
+#     title: "English Title"
+#     title_he: "Hebrew Title"
+#     description: "Scope description"
+#     folder: "wiki/<domain>"
+#     subsubjects:
+#       <subsubject_key>:
+#         title: "English Sub-Subject Title"
+#         title_he: "Hebrew Sub-Subject Title"
+#         folder: "wiki/<domain>/optional_subfolder"
+#         keywords: ["keyword1", "keyword2", ...]
+
+subjects:
+  research:
+    title: "Research & Technology"
+    title_he: "מחקר וטכנולוגיה"
+    description: "Scientific literature, mechanistic biology, medicine, and deep research"
+    folder: "wiki/research"
+    subsubjects:
+      all:
+        title: "All Research Sub-Subjects"
+        title_he: "🔬 כל תחומי המחקר"
+        folder: "wiki/research"
+      autoimmune:
+        title: "Autoimmune Diseases"
+        title_he: "מחלות אוטואימוניות (Sjögren, Lupus, MS)"
+        keywords: ["autoimmune", "sjögren", "sjogren", "lupus", "אוטואימוני", "שיוגרן", "זאבת"]
+        folder: "wiki/research"
+      microbiome_gut:
+        title: "Gut Microbiome & Barrier"
+        title_he: "מיקרוביום, מחסום מעי ודלקתיות"
+        keywords: ["microbiome", "gut", "barrier", "intestinal", "permeability", "מעי", "מיקרוביום", "מחסום מעי", "דלקת"]
+        folder: "wiki/research"
+      neurodegenerative:
+        title: "Neurodegenerative Diseases"
+        title_he: "מחלות נוירודגנרטיביות (Parkinson, Alzheimer)"
+        keywords: ["parkinson", "alzheimer", "neurodegenerative", "פרקינסון", "אלצהיימר"]
+        folder: "wiki/research"
+      pharmacology_metabolites:
+        title: "Pharmacology & Metabolites (Butyrate, SCFAs)"
+        title_he: "פרמקולוגיה ומטבוליטים (בוטיראט, חומצות שומן קצרות)"
+        keywords: ["butyrate", "scfa", "metabolite", "קטונים", "בוטיראט", "מטבוליטים"]
+        folder: "wiki/research"
+      oncology:
+        title: "Oncology & Cancer Inflammation"
+        title_he: "אונקולוגיה ודלקתיות בסרטן"
+        keywords: ["cancer", "oncology", "tumor", "סרטן", "אונקולוגיה"]
+        folder: "wiki/research"
+      books_inner_gate:
+        title: "Books & Monographs (The Inner Gate)"
+        title_he: "ספרים ומונוגרפיות (השער הפנימי)"
+        keywords: ["inner_gate", "שער פנימי", "ספר"]
+        folder: "wiki/research/books"
+
+  personal:
+    title: "Personal"
+    title_he: "אישי ובריאות"
+    description: "Health records, training, habits, nutrition, and personal goals"
+    folder: "wiki/personal"
+    subsubjects:
+      all:
+        title: "All Personal"
+        title_he: "🌱 כל האישי"
+        folder: "wiki/personal"
+      health_biomarkers:
+        title: "Health & Biomarkers"
+        title_he: "בריאות, בדיקות דם ומדדים"
+        keywords: ["health", "blood", "biomarker", "בריאות", "בדיקות דם", "מדדים"]
+        folder: "wiki/personal"
+      habits_training:
+        title: "Habits, Routines & Training"
+        title_he: "הרגלים, שגרות יום ואימונים"
+        keywords: ["habit", "routine", "exercise", "training", "הרגלים", "שגרה", "אימון"]
+        folder: "wiki/personal"
+      nutrition_diet:
+        title: "Nutrition & Supplements"
+        title_he: "תזונה, דיאטה ותוספים"
+        keywords: ["diet", "food", "supplement", "תזונה", "מזון", "תוספים"]
+        folder: "wiki/personal"
+      reflections_goals:
+        title: "Reflections & Goals"
+        title_he: "רפלקציות, מטרות ויעדים"
+        keywords: ["goal", "reflection", "מטרות", "יעדים", "מחשבות"]
+        folder: "wiki/personal"
+
+  development:
+    title: "Development & Engineering"
+    title_he: "פיתוח והנדסת תוכנה"
+    description: "Active software projects, architectures, code, and technical specs"
+    folder: "wiki/development"
+    subsubjects:
+      all:
+        title: "All Development"
+        title_he: "💻 כל הפיתוח והפרויקטים"
+        folder: "wiki/development"
+      llm_wiki:
+        title: "LLM Wiki Architecture"
+        title_he: "ארכיטקטורת LLM Wiki (OCKA)"
+        keywords: ["llm_wiki", "ocka", "obsidian", "rag", "wiki"]
+        folder: "10_Projects/llm_wiki"
+      research_manager:
+        title: "Research Manager Project"
+        title_he: "פרויקט Research Manager"
+        keywords: ["research_manager", "agent", "supervisor", "critic"]
+        folder: "10_Projects/research_manager"
+      sharons_projects:
+        title: "Sharons & Workspaces"
+        title_he: "מרחבי פרויקטים נוספים"
+        keywords: ["sharons", "workspace", "projects"]
+        folder: "10_Projects/sharons"
+
+  business:
+    title: "Business & Operations"
+    title_he: "עסקים ותפעול"
+    description: "Business strategy, finances, customers, and operations"
+    folder: "wiki/business"
+    subsubjects:
+      all:
+        title: "All Business"
+        title_he: "📊 כל העסקי"
+        folder: "wiki/business"
+      strategy_planning:
+        title: "Strategy & Planning"
+        title_he: "אסטרטגיה ותכנון עסקי"
+        keywords: ["strategy", "planning", "אסטרטגיה", "תכנון"]
+        folder: "wiki/business"
+      finance_operations:
+        title: "Finance & Operations"
+        title_he: "פיננסים, תקציב ותפעול"
+        keywords: ["finance", "budget", "operations", "תקציב", "פיננסים", "תפעול"]
+        folder: "wiki/business"
+
+  competitive:
+    title: "Competitive Analysis"
+    title_he: "ניתוח תחרותי ושוק"
+    description: "Market signals, competitors, products, and positioning"
+    folder: "wiki/competitive"
+    subsubjects:
+      all:
+        title: "All Competitive"
+        title_he: "🎯 כל הניתוח התחרותי"
+        folder: "wiki/competitive"
+      market_landscape:
+        title: "Market Landscape & Players"
+        title_he: "מפת שוק ומתחרים"
+        keywords: ["competitor", "market", "player", "מתחרים", "שוק"]
+        folder: "wiki/competitive"
