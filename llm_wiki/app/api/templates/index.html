@@ -715,6 +715,54 @@
         </div>
     </div>
 
+    <!-- Record New Decision Modal -->
+    <div id="newDecisionModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 650px; width: 94%;">
+            <h2 style="margin-top: 0; color: #10b981; font-size: 1.4rem;">⚖️ תיעוד החלטה מחייבת בכספת (New Decision)</h2>
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.25rem;">
+                החלטה מנומקת הנשמרת לצמיתות ב-<code>40_Decisions/</code> ומשמשת כעקרון מנחה למערכת ולסוכני הבינה.
+            </p>
+            <form id="newDecisionForm" onsubmit="event.preventDefault(); saveNewDecision();">
+                <div class="form-group">
+                    <label>כותרת / נושא ההחלטה (Topic / Title)</label>
+                    <input type="text" id="modalDecisionTitle" placeholder="e.g. שימוש בחיפוש היברידי או ארכיטקטורת זיכרון" required>
+                </div>
+                <div class="form-group">
+                    <label>מה הוחלט? (The Decision Statement)</label>
+                    <textarea id="modalDecisionText" placeholder="תאר את ההחלטה שנבחרה בצורה ברורה וחד משמעית..." style="height: 85px;" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>נימוק ורציונל (Why? Rationale)</label>
+                    <textarea id="modalDecisionReason" placeholder="מדוע נבחרה החלטה זו? מה העדויות או השיקולים התומכים?" style="height: 75px;" required></textarea>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>חלופות שנשקלו ונפסלו (Alternatives)</label>
+                        <textarea id="modalDecisionAlternatives" placeholder="אילו פתרונות חלופיים נפסלו ומדוע?" style="height: 70px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>פשרות וחסרונות שנלקחו (Tradeoffs)</label>
+                        <textarea id="modalDecisionTradeoffs" placeholder="מה הפשרות או המחיר שמשלמים עבור הבחירה?" style="height: 70px;"></textarea>
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>פרויקט / תחום (Project Domain)</label>
+                        <input type="text" id="modalDecisionDomain" value="llm_wiki">
+                    </div>
+                    <div class="form-group">
+                        <label>נחתם ע&quot;י (Resolved By)</label>
+                        <input type="text" id="modalDecisionSigner" value="Moshe">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.25rem;">
+                    <button type="button" class="btn-secondary" onclick="closeNewDecisionModal()">ביטול</button>
+                    <button type="submit" class="btn-primary" style="width: auto; background: #10b981;">💾 שמור וחתום החלטה בכספת</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="container">
         <!-- Header -->
         <div class="header">
@@ -748,20 +796,114 @@
             </div>
         </div>
 
-        <!-- Navigation Tabs (Re-ordered: Knowledge Graph is #2, Vault Health moved to #8) -->
+        <!-- Navigation Tabs: Realigned around the Knowledge Lifecycle -->
         <div class="tabs">
-            <div class="tab active" id="tabHeaderAsk" onclick="activateTab('askTab')">💬 שאלות ותובנות (Ask Wiki & Voice)</div>
-            <div class="tab" id="tabHeaderGraph" onclick="activateTab('graphTab')">🕸️ מפת קשרים חזותית (Knowledge Graph)</div>
-            <div class="tab" id="tabHeaderText" onclick="activateTab('textTab')">📝 קליטת פתק / טקסט</div>
-            <div class="tab" id="tabHeaderFile" onclick="activateTab('fileTab')">📁 קליטת קבצים</div>
-            <div class="tab" id="tabHeaderResearch" onclick="activateTab('researchTab')">🔬 מחקר מדעי מעמיק (Live Research)</div>
-            <div class="tab" id="tabHeaderContradictions" onclick="activateTab('contradictionsTab')">⚡ סתירות והחלטות</div>
-            <div class="tab" id="tabHeaderMemory" onclick="activateTab('memoryTab')">🧠 זיכרון מערכת</div>
-            <div class="tab" id="tabHeaderGaps" onclick="activateTab('gapsTab')">🔗 קישורים להשלמה (Links)</div>
+            <div class="tab active" id="tabHeaderIntelligence" onclick="activateTab('intelligenceTab')">🌟 מודיעין אישי (Intelligence OS)</div>
+            <div class="tab" id="tabHeaderAsk" onclick="activateTab('askTab')">💬 שאלות ותובנות (Ask Wiki)</div>
+            <div class="tab" id="tabHeaderResearch" onclick="activateTab('researchTab')">🔬 מחקר יזום (Investigate)</div>
+            <div class="tab" id="tabHeaderDecisions" onclick="activateTab('decisionsTab')">⚖️ החלטות ושיקולים (Decisions)</div>
+            <div class="tab" id="tabHeaderMemory" onclick="activateTab('memoryTab')">🧠 דשבורד זיכרון (Memory Dashboard)</div>
+            <div class="tab" id="tabHeaderGraph" onclick="activateTab('graphTab')">🕸️ מפת קשרים ופרויקטים (Explorer)</div>
+            <div class="tab" id="tabHeaderCapture" onclick="activateTab('captureTab')">📥 קליטה מהירה (Capture Hub)</div>
+        </div>
+
+        <!-- ==================== TAB 0: PERSONAL INTELLIGENCE OS (HOMEPAGE) ==================== -->
+        <div id="intelligenceTab" class="tab-content active">
+            <!-- Hero Search: NotebookLM / Perplexity style -->
+            <div style="background: radial-gradient(circle at 50% 20%, rgba(56, 189, 248, 0.15) 0%, rgba(15, 23, 42, 0.95) 75%); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 18px; padding: 2.25rem 2rem; margin-bottom: 2rem; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6); text-align: center;">
+                <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3); padding: 0.3rem 0.85rem; border-radius: 20px; font-size: 0.82rem; color: #38bdf8; font-weight: 700; margin-bottom: 1rem;">
+                    🌟 Personal Intelligence Operating System • מונחה תוצאות וידע
+                </div>
+                <h2 style="font-size: 1.85rem; font-weight: 800; color: #fff; margin: 0 0 0.6rem 0; letter-spacing: -0.5px;">
+                    מה תרצה לחקור, לזכור או להבין היום?
+                </h2>
+                <p style="color: #94a3b8; font-size: 0.95rem; margin: 0 auto 1.5rem auto; max-width: 650px;">
+                    חיפוש סמנטי היברידי עמוק בכל 312 הפתקים, פרויקטים, החלטות עבר ומאמרים מדעיים בכספת Obsidian שלך.
+                </p>
+
+                <!-- Big Search Box -->
+                <div style="max-width: 760px; margin: 0 auto; position: relative;">
+                    <div style="display: flex; gap: 0.5rem; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 12px; padding: 0.4rem 0.6rem; box-shadow: 0 8px 25px rgba(0,0,0,0.5);">
+                        <input type="text" id="homeQuickQueryInput" placeholder="שאל שאלה, חפש מושג, או בקש סיכום החלטות..." dir="auto" style="flex: 1; background: transparent; border: none; outline: none; color: #fff; font-size: 1.05rem; padding: 0.6rem 0.75rem;" onkeydown="if(event.key==='Enter') executeHomeSearch()">
+                        <button type="button" class="mic-btn" title="שאל בקול" onclick="toggleVoice('homeQuickQueryInput', null, true)">🎙️</button>
+                        <button type="button" class="btn-primary" style="width: auto; padding: 0.6rem 1.4rem; font-size: 0.95rem;" onclick="executeHomeSearch()">
+                            🔍 הבן עכשיו
+                        </button>
+                    </div>
+
+                    <!-- Prompt Suggestion Chips -->
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; margin-top: 1rem;">
+                        <button type="button" class="inbox-chip" style="cursor: pointer;" onclick="setAndRunHomePrompt('מה החלטנו לגבי ארכיטקטורת הזיכרון של המערכת?')">
+                            💡 מה החלטנו על ארכיטקטורת הזיכרון?
+                        </button>
+                        <button type="button" class="inbox-chip" style="cursor: pointer;" onclick="setAndRunHomePrompt('סכם את ממצאי המחקר על בוטיראט ודלקתיות מעי')">
+                            🔬 סכם מחקר על בוטיראט ודלקת
+                        </button>
+                        <button type="button" class="inbox-chip" style="cursor: pointer;" onclick="setAndRunHomePrompt('מה הפרויקטים הפעילים כרגע ומה הסטטוס שלהם?')">
+                            🚀 מה הפרויקטים הפעילים כרגע?
+                        </button>
+                        <button type="button" class="inbox-chip" style="cursor: pointer;" onclick="setAndRunHomePrompt('אילו פערי ידע והחלטות פתוחות מומלץ לי לקדם הלאה?')">
+                            🎯 מה מומלץ לעשות הלאה?
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- The 3 Core Outcome Pillars -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+                <!-- Pillar 1: What did I learn recently? -->
+                <div class="card" style="border-top: 3px solid #38bdf8;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+                        <h3 style="margin: 0; font-size: 1.15rem; color: #38bdf8;">📖 מה למדנו לאחרונה?</h3>
+                        <span class="badge" style="background: rgba(56,189,248,0.2); color: #38bdf8;">Recent Learning</span>
+                    </div>
+                    <div id="homeRecentActivityList" style="font-size: 0.88rem; line-height: 1.6; color: #cbd5e1;">
+                        טוען פעילות אחרונה...
+                    </div>
+                </div>
+
+                <!-- Pillar 2: What changed since last time? -->
+                <div class="card" style="border-top: 3px solid #10b981;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+                        <h3 style="margin: 0; font-size: 1.15rem; color: #10b981;">🔄 מה השתנה לאחרונה?</h3>
+                        <span class="badge" style="background: rgba(16,185,129,0.2); color: #34d399;">Timeline</span>
+                    </div>
+                    <div id="homeTimelineList" style="font-size: 0.88rem; line-height: 1.6; color: #cbd5e1;">
+                        טוען ציר זמן...
+                    </div>
+                </div>
+
+                <!-- Pillar 3: What should I do next? (Proactive Intelligence) -->
+                <div class="card" style="border-top: 3px solid #f59e0b;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+                        <h3 style="margin: 0; font-size: 1.15rem; color: #f59e0b;">💡 מה כדאי לעשות הלאה?</h3>
+                        <span class="badge" style="background: rgba(245,158,11,0.2); color: #fbbf24;">Proactive Intelligence</span>
+                    </div>
+                    <div id="homeProactiveFeedList" style="font-size: 0.88rem; line-height: 1.6; color: #cbd5e1;">
+                        טוען המלצות חכמות...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Projects Dashboard Section -->
+            <div style="margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.25rem; color: #f8fafc;">🚀 דשבורד פרויקטים פעילים (Project Intelligence)</h3>
+                        <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 3px;">תמונת מצב שוטפת: מטרות, החלטות מרכזיות, שאלות פתוחות וצעדים הבאים</div>
+                    </div>
+                    <button type="button" class="btn-secondary" style="padding: 0.4rem 0.85rem; font-size: 0.82rem;" onclick="activateTab('graphTab')">
+                        🕸️ פתח מפת קשרים ועץ פרויקטים
+                    </button>
+                </div>
+                <div id="homeActiveProjectsGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                    טוען פרויקטים פעילים...
+                </div>
+            </div>
         </div>
 
         <!-- ==================== TAB 1: ASK WIKI (HYBRID RAG) ==================== -->
-        <div id="askTab" class="tab-content active">
+        <div id="askTab" class="tab-content">
             <!-- Voice Dialogue Interactive Hub (שימוש בקול לשני הכיוונים) -->
             <div class="voice-hub-card" id="voiceDialogueHub">
                 <div class="voice-state-indicator">
@@ -917,14 +1059,37 @@
         <!-- ==================== TAB 2: LIVE RESEARCH RUNNER ==================== -->
         <div id="researchTab" class="tab-content">
             <div class="card" style="background: rgba(15, 23, 42, 0.9); border-color: rgba(168, 85, 247, 0.3);">
-                <h3 style="color: #c084fc;">🔬 Interactive Live Research Runner</h3>
-                <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 1.25rem;">
-                    Launches an autonomous scientific investigation: retrieves multi-domain evidence, runs adversarial critique (falsification tests, sample size audits, causal overreach detection), and records a structured research note into <code>20_Research/</code> with semantic vector embeddings.
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                    <h3 style="color: #c084fc; margin: 0;">🔬 חקירה ומחקר מדעי יזום (Investigate This Topic)</h3>
+                    <span class="badge" style="background: rgba(168,85,247,0.2); color: #c084fc;">4-Step Scientific Pipeline</span>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 1rem;">
+                    סוכן המחקר מפעיל חקירה מדעית אוטונומית שקופה: איסוף ראיות מרובות תחומים, תקיפה ביקורתית קפדנית (מדגמים, הטיות, מובהקות סטטיסטית), סינתזה ללא טשטוש סתירות, ותיעוד פתק קנוני בכספת ב-<code>20_Research/</code>.
                 </p>
+
+                <!-- 4-Step Scientific Workflow Visual Bar -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.6rem; margin: 1.25rem 0; text-align: center;">
+                    <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 0.65rem 0.5rem;">
+                        <div style="font-weight: 700; color: #38bdf8; font-size: 0.88rem;">1. איסוף ראיות</div>
+                        <div style="font-size: 0.75rem; color: #94a3b8;">חיפוש ספרות וסינון קפדני</div>
+                    </div>
+                    <div style="background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.3); border-radius: 8px; padding: 0.65rem 0.5rem;">
+                        <div style="font-weight: 700; color: #fb7185; font-size: 0.88rem;">2. תקיפת ממצאים</div>
+                        <div style="font-size: 0.75rem; color: #94a3b8;">Research Critic להפרכה</div>
+                    </div>
+                    <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 0.65rem 0.5rem;">
+                        <div style="font-weight: 700; color: #34d399; font-size: 0.88rem;">3. סינתזה מאוזנת</div>
+                        <div style="font-size: 0.75rem; color: #94a3b8;">איזון סתירות ומסקנות</div>
+                    </div>
+                    <div style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px; padding: 0.65rem 0.5rem;">
+                        <div style="font-weight: 700; color: #c084fc; font-size: 0.88rem;">4. עדכון הכספת</div>
+                        <div style="font-size: 0.75rem; color: #94a3b8;">יצירת פתק ב-20_Research</div>
+                    </div>
+                </div>
 
                 <form id="liveResearchForm">
                     <div class="form-group">
-                        <label for="researchQueryInput">Scientific Question / Hypothesis (Hebrew or English)</label>
+                        <label for="researchQueryInput">שאלת מחקר או השערה מדעית (Hebrew or English)</label>
                         <div class="input-with-voice">
                             <input type="text" id="researchQueryInput" dir="auto" placeholder="e.g. האם קטונים אקסוגניים משפרים תפקוד קוגניטיבי במודלים נוירולוגיים?" required>
                             <button type="button" class="mic-btn" id="researchMicBtn" title="Speak hypothesis by voice" onclick="toggleVoice('researchQueryInput', 'researchMicBtn', false)">🎙️</button>
@@ -933,22 +1098,22 @@
 
                     <div class="grid-2">
                         <div class="form-group">
-                            <label for="researchDomainSelect">Target Research Domain</label>
+                            <label for="researchDomainSelect">תחום מחקר יעד (Target Domain)</label>
                             <select id="researchDomainSelect">
-                                <option value="research" selected>Research & Technology (Scientific Literature)</option>
-                                <option value="development">Development & Engineering</option>
-                                <option value="personal">Personal Health & Cognition</option>
-                                <option value="business">Business & Operations</option>
+                                <option value="research" selected>🔬 מחקר וטכנולוגיה (Research & Literature)</option>
+                                <option value="development">💻 פיתוח והנדסה (Development)</option>
+                                <option value="personal">🌱 בריאות וקוגניציה אישית (Personal Health)</option>
+                                <option value="business">📊 עסקים ותפעול (Business)</option>
                             </select>
                         </div>
                         <div class="form-group" style="display: flex; align-items: center; gap: 0.75rem; padding-top: 1.8rem;">
                             <input type="checkbox" id="researchCriticToggle" checked style="width: 20px; height: 20px; accent-color: #a855f7;">
-                            <label for="researchCriticToggle" style="margin: 0; cursor: pointer;">Enable Adversarial Evidence Critic Pass</label>
+                            <label for="researchCriticToggle" style="margin: 0; cursor: pointer;">הפעל ביקורת ספקנית מחמירה (Adversarial Critic Pass)</label>
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-primary" id="researchRunBtn" style="background: linear-gradient(135deg, #7c3aed 0%, #0284c7 100%);">
-                        🚀 RUN DEEP RESEARCH CYCLE
+                    <button type="submit" class="btn-primary" id="researchRunBtn" style="background: linear-gradient(135deg, #7c3aed 0%, #0284c7 100%); font-size: 1.05rem; padding: 0.75rem 1.5rem;">
+                        🔍 התחל חקירה מעמיקה (Start Research)
                     </button>
                 </form>
             </div>
@@ -988,81 +1153,58 @@
             </div>
         </div>
 
-        <!-- ==================== TAB 3: CONTRADICTIONS & DECISIONS ==================== -->
-        <div id="contradictionsTab" class="tab-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <!-- ==================== TAB 3: DECISIONS & CONTRADICTIONS ==================== -->
+        <div id="decisionsTab" class="tab-content">
+            <!-- Formal Decisions Header & Action -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
                 <div>
-                    <h2 style="margin: 0; color: var(--accent-amber); font-size: 1.4rem;">⚡ Contradictions & Decisions Matrix</h2>
+                    <h2 style="margin: 0; color: #10b981; font-size: 1.45rem;">⚖️ החלטות מחייבות ושיקולי עבר (Decisions & Reasoning Log)</h2>
                     <p style="margin: 0.25rem 0 0 0; color: var(--text-muted); font-size: 0.9rem;">
-                        Rigorous tracking of empirical disagreements. Provenance preserved without premature resolution.
+                        תיעוד עקרונות מחייבים, רציונל, חלופות שנבחנו ופשרות (Tradeoffs) המעוגנים לצמיתות ב-<code>40_Decisions/</code>.
                     </p>
                 </div>
-                <button class="btn-secondary" onclick="loadContradictions()" style="padding: 0.5rem 1rem;">🔄 Refresh Contradictions</button>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn-primary" onclick="openNewDecisionModal()" style="padding: 0.5rem 1.1rem; width: auto; background: #10b981; font-weight: 700;">
+                        ➕ תעד החלטה חדשה בכספת
+                    </button>
+                    <button class="btn-secondary" onclick="loadDecisionsList()" style="padding: 0.5rem 0.9rem; font-size: 0.85rem;">🔄 רענן החלטות</button>
+                </div>
             </div>
 
-            <div id="contradictionsContainer">
-                <p style="color: var(--text-muted);">Loading contradictions from vault...</p>
+            <!-- Decisions List Container -->
+            <div id="decisionsListContainer" style="margin-bottom: 2.25rem;">
+                <p style="color: var(--text-muted);">טוען החלטות מהכספת...</p>
             </div>
 
-            <!-- Formal Decisions Section (40_Decisions) -->
-            <div style="margin-top: 2.25rem; border-top: 1px solid var(--border-glass); padding-top: 1.5rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;">
+            <!-- Unresolved Contradictions Section -->
+            <div style="border-top: 1px solid var(--border-glass); padding-top: 1.75rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     <div>
-                        <h3 style="margin: 0; color: #38bdf8; font-size: 1.25rem;">📜 החלטות מחייבות שנקבעו בכספת (40_Decisions)</h3>
+                        <h3 style="margin: 0; color: var(--accent-amber); font-size: 1.25rem;">⚡ סתירות מדעיות פתוחות הממתינות להכרעה</h3>
                         <p style="margin: 0.25rem 0 0 0; color: var(--text-muted); font-size: 0.88rem;">
-                            כל ההחלטות הארכיטקטוניות והמדעיות שנחתמו על ידי המנהל ומחייבות את כל סוכני המחקר.
+                            מחלוקות אמפיריות שנחשפו בספרות. פתרון סתירה מייצר החלטה מנומקת מחייבת.
                         </p>
                     </div>
-                    <button class="btn-secondary" onclick="loadDecisionsList()" style="padding: 0.4rem 0.85rem; font-size: 0.85rem; background: rgba(56,189,248,0.15); border-color: #38bdf8; color: #38bdf8;">🔄 רענן החלטות</button>
+                    <button class="btn-secondary" onclick="loadContradictions()" style="padding: 0.4rem 0.85rem; font-size: 0.85rem;">🔄 רענן סתירות</button>
                 </div>
-                <div id="decisionsListContainer">
-                    <p style="color: var(--text-muted);">טוען החלטות מהכספת...</p>
+
+                <div id="contradictionsContainer">
+                    <p style="color: var(--text-muted);">סורק את הכספת אחר סתירות פתוחות...</p>
                 </div>
             </div>
         </div>
 
-        <!-- ==================== TAB 4: NOTE / TEXT INGESTION ==================== -->
-        <div id="textTab" class="tab-content">
-            <form id="textForm">
-                <div class="form-group">
-                    <label for="noteTitle">Note / Document Title</label>
-                    <div class="input-with-voice">
-                        <input type="text" id="noteTitle" dir="auto" placeholder="e.g. קטואדפטציה ומיקרוביום המעי" required>
-                        <button type="button" class="mic-btn" id="titleMicBtn" title="Dictate title by voice" onclick="toggleVoice('noteTitle', 'titleMicBtn', false)">🎙️</button>
-                    </div>
+        <!-- ==================== TAB 6: UNIFIED CAPTURE HUB ==================== -->
+        <div id="captureTab" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                <div>
+                    <h2 style="margin: 0; color: #38bdf8; font-size: 1.4rem;">📥 מרכז קליטה מהירה (Capture Hub)</h2>
+                    <p style="margin: 0.25rem 0 0 0; color: var(--text-muted); font-size: 0.9rem;">
+                        הזן רעיון מהיר, פתק, הקלטה קולית, מסמך או סרוק את תיבת הדואר הנכנס לכספת.
+                    </p>
                 </div>
+            </div>
 
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label for="domainSelectText">📂 תחום ראשי (Domain)</label>
-                        <select id="domainSelectText" onchange="onTextDomainChange()">
-                            <!-- Populated dynamically from taxonomy -->
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="subsubjectSelectText">📑 תת-נושא מוגדר (Sub-Subject)</label>
-                        <select id="subsubjectSelectText">
-                            <option value="all">🔍 כללי לתחום</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <label for="noteContent" style="margin: 0;">Note Content (Markdown or Raw Text)</label>
-                        <button type="button" class="mic-btn" id="contentMicBtn" style="padding: 0.3rem 0.8rem; font-size: 0.9rem; gap: 0.4rem;" onclick="toggleVoice('noteContent', 'contentMicBtn', false)">
-                            🎙️ הקלד באמצעות קול (Dictate)
-                        </button>
-                    </div>
-                    <textarea id="noteContent" dir="auto" placeholder="Enter notes, observations, or dictate your thoughts here..." required></textarea>
-                </div>
-
-                <button type="submit" class="btn-primary">📝 INGEST NOTE / TEXT INTO VAULT</button>
-            </form>
-        </div>
-
-        <!-- ==================== TAB 5: FILE INGESTION ==================== -->
-        <div id="fileTab" class="tab-content">
             <!-- Live Inbox Watchdog Status Card -->
             <div class="inbox-card" id="inboxWatcherCard">
                 <div>
@@ -1084,92 +1226,202 @@
                 </button>
             </div>
 
-            <form id="uploadForm">
-                <input type="file" id="fileInput" style="display:none" onchange="handleFileChange(this.files)">
-                <div class="dropzone" id="dropzone" onclick="triggerFilePicker(event)">
-                    <p id="dropPrompt" style="font-size: 1.15rem; font-weight: 600; color: #e2e8f0; margin: 0 0 8px 0; pointer-events: none;">
-                        📂 Drag & Drop PDF, Document, Audio, or Markdown Note
-                    </p>
-                    <p style="font-size: 0.9rem; color: #94a3b8; margin: 0; pointer-events: none;">
-                        or <span style="color: var(--accent-cyan); text-decoration: underline;">click to browse files</span>
-                    </p>
-                    <div id="fileStatus" style="margin-top: 12px; font-weight: bold; color: var(--accent-cyan); font-size: 1rem; pointer-events: none;">No file selected</div>
+            <div class="grid-2" style="gap: 1.5rem;">
+                <!-- Fast Note Ingest -->
+                <div class="card" style="margin: 0;">
+                    <h3 style="color: #38bdf8; margin-top: 0;">📝 קליטת פתק / רעיון מהיר</h3>
+                    <form id="textForm">
+                        <div class="form-group">
+                            <label for="noteTitle">כותרת הפתק</label>
+                            <div class="input-with-voice">
+                                <input type="text" id="noteTitle" dir="auto" placeholder="e.g. קטואדפטציה ומיקרוביום המעי" required>
+                                <button type="button" class="mic-btn" id="titleMicBtn" title="Dictate title by voice" onclick="toggleVoice('noteTitle', 'titleMicBtn', false)">🎙️</button>
+                            </div>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label for="domainSelectText">תחום ראשי</label>
+                                <select id="domainSelectText" onchange="onTextDomainChange()"></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="subsubjectSelectText">תת-נושא</label>
+                                <select id="subsubjectSelectText"><option value="all">🔍 כללי לתחום</option></select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                                <label for="noteContent" style="margin: 0;">תוכן הפתק (Markdown)</label>
+                                <button type="button" class="mic-btn" id="contentMicBtn" style="padding: 0.2rem 0.6rem; font-size: 0.82rem; gap: 0.3rem;" onclick="toggleVoice('noteContent', 'contentMicBtn', false)">
+                                    🎙️ הקלד בקול
+                                </button>
+                            </div>
+                            <textarea id="noteContent" dir="auto" placeholder="הכנס תוכן או הכתיב את מחשבותיך..." required style="height: 140px;"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-primary" style="background: #0284c7;">📥 קלוט פתק לכספת</button>
+                    </form>
                 </div>
 
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label for="domainSelectFile">📂 תחום ראשי (Domain)</label>
-                        <select id="domainSelectFile" onchange="onFileDomainChange()">
-                            <!-- Populated dynamically from taxonomy -->
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="subsubjectSelectFile">📑 תת-נושא מוגדר (Sub-Subject)</label>
-                        <select id="subsubjectSelectFile">
-                            <option value="all">🔍 כללי לתחום</option>
-                        </select>
-                    </div>
-                </div>
+                <!-- File Drag & Drop Ingest -->
+                <div class="card" style="margin: 0;">
+                    <h3 style="color: #a855f7; margin-top: 0;">📁 קליטת קבצים ומסמכים</h3>
+                    <form id="uploadForm">
+                        <input type="file" id="fileInput" style="display:none" onchange="handleFileChange(this.files)">
+                        <div class="dropzone" id="dropzone" onclick="triggerFilePicker(event)" style="padding: 1.5rem 1rem;">
+                            <p id="dropPrompt" style="font-size: 1.05rem; font-weight: 600; color: #e2e8f0; margin: 0 0 6px 0; pointer-events: none;">
+                                📂 גרור לכאן קובץ PDF, מסמך או Markdown
+                            </p>
+                            <p style="font-size: 0.85rem; color: #94a3b8; margin: 0; pointer-events: none;">
+                                או <span style="color: var(--accent-cyan); text-decoration: underline;">לחץ לבחירת קובץ</span>
+                            </p>
+                            <div id="fileStatus" style="margin-top: 8px; font-weight: bold; color: var(--accent-cyan); font-size: 0.92rem; pointer-events: none;">לא נבחר קובץ</div>
+                        </div>
 
-                <button type="submit" class="btn-primary">INGEST FILE</button>
-            </form>
+                        <div class="grid-2" style="margin-top: 1rem;">
+                            <div class="form-group">
+                                <label for="domainSelectFile">תחום יעד</label>
+                                <select id="domainSelectFile" onchange="onFileDomainChange()"></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="subsubjectSelectFile">תת-נושא</label>
+                                <select id="subsubjectSelectFile"><option value="all">🔍 כללי לתחום</option></select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary" style="background: #7c3aed; margin-top: 0.5rem;">📥 קלוט קובץ לכספת</button>
+                    </form>
+                </div>
+            </div>
         </div>
 
-        <!-- ==================== TAB 6: MEMORY DASHBOARD ==================== -->
+        <!-- ==================== TAB 4: MEMORY DASHBOARD ==================== -->
         <div id="memoryTab" class="tab-content">
-            <div id="memoryOverview">
-                <p style="color: var(--text-muted);">Loading memory system state...</p>
-            </div>
-
-            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.25rem;">
-                <button class="btn-primary" onclick="fetchMemoryOverview()" style="background: #0284c7; flex: 1; min-width: 180px;">🔄 Refresh Memory Overview</button>
-                <button class="btn-primary" onclick="triggerConsolidation()" style="background: #16a34a; flex: 1; min-width: 180px;">⚡ Trigger Daily Consolidation</button>
-                <button class="btn-primary" onclick="openVaultYamlModal()" style="background: #0d9488; flex: 1; min-width: 180px;">📋 הצג מבנה כספת כ-YAML</button>
-            </div>
-
-            <!-- Context Inspector -->
-            <div class="card" style="margin-top: 1.5rem;">
-                <h3>🔍 Inspect Project Context for LLM</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+                <div>
+                    <h2 style="margin: 0; color: #a855f7; font-size: 1.45rem;">🧠 דשבורד זיכרון מתמיד (Memory Dashboard)</h2>
+                    <p style="margin: 0.25rem 0 0 0; color: var(--text-muted); font-size: 0.9rem;">
+                        ניהול הזיכרון לטווח ארוך: מה נלמד, מה חשוב, מה השתנה, וסנכרון יומיומי ל-Obsidian.
+                    </p>
+                </div>
                 <div style="display: flex; gap: 0.5rem;">
-                    <input type="text" id="contextProjectInput" placeholder="Project name, e.g. llm_wiki" value="llm_wiki">
-                    <button onclick="inspectContext()" class="btn-secondary" style="background: #6366f1; color: #fff;">Inspect</button>
-                </div>
-                <div id="contextDisplay" style="margin-top: 1rem; display: none;">
-                    <textarea id="contextTextarea" readonly style="height: 180px; font-size: 0.9rem;"></textarea>
+                    <button class="btn-primary" onclick="triggerConsolidation()" style="padding: 0.5rem 1.1rem; width: auto; background: #16a34a; font-weight: 700;">
+                        ✨ סנכרן עבודת יום לזיכרון (Consolidate Today)
+                    </button>
+                    <button class="btn-secondary" onclick="loadMemoryDashboard()" style="padding: 0.5rem 0.9rem; font-size: 0.85rem;">🔄 רענן דשבורד</button>
                 </div>
             </div>
 
-            <!-- Quick Memory Capture Form -->
-            <div class="card" style="margin-top: 1rem;">
-                <h3>📝 Quick Event / Decision Capture</h3>
-                <form id="quickCaptureForm">
-                    <div class="grid-2">
-                        <div class="form-group">
-                            <label>Capture Type</label>
-                            <select id="quickCaptureType" onchange="toggleCaptureFields()">
-                                <option value="event">Activity / Thought Event</option>
-                                <option value="decision">Explicit Decision</option>
-                            </select>
+            <!-- Key Memory Outcome Metrics Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.75rem;">
+                <div class="card" style="margin: 0; border-left: 4px solid #10b981; background: rgba(15, 23, 42, 0.85); padding: 1rem 1.25rem;">
+                    <div style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 0.2rem;">📥 מה חדש היום? (New Memories)</div>
+                    <div style="font-size: 1.6rem; font-weight: 800; color: #34d399;" id="memCountNewToday">8 אירועים</div>
+                    <div style="font-size: 0.76rem; color: #64748b;">נקלטו משיחות, סריקות ופתקים</div>
+                </div>
+                <div class="card" style="margin: 0; border-left: 4px solid #f59e0b; background: rgba(15, 23, 42, 0.85); padding: 1rem 1.25rem;">
+                    <div style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 0.2rem;">⏳ ממתין לגיבוש (Pending Consolidation)</div>
+                    <div style="font-size: 1.6rem; font-weight: 800; color: #fbbf24;" id="memCountPending">3 פריטים</div>
+                    <div style="font-size: 0.76rem; color: #64748b;">יועברו לסיכום היומי בלחיצה</div>
+                </div>
+                <div class="card" style="margin: 0; border-left: 4px solid #38bdf8; background: rgba(15, 23, 42, 0.85); padding: 1rem 1.25rem;">
+                    <div style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 0.2rem;">⭐ ידע בחשיבות עליונה</div>
+                    <div style="font-size: 1.6rem; font-weight: 800; color: #38bdf8;" id="memCountImportant">14 עוגנים</div>
+                    <div style="font-size: 0.76rem; color: #64748b;">ארכיטקטורה, בוטיראט, קטונים</div>
+                </div>
+                <div class="card" style="margin: 0; border-left: 4px solid #a855f7; background: rgba(15, 23, 42, 0.85); padding: 1rem 1.25rem;">
+                    <div style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 0.2rem;">🔄 פרויקטים שעודכנו לאחרונה</div>
+                    <div style="font-size: 1.6rem; font-weight: 800; color: #c084fc;">4 פרויקטים</div>
+                    <div style="font-size: 0.76rem; color: #64748b;">LLM Wiki, Research, DCM, Compass</div>
+                </div>
+                <div class="card" style="margin: 0; border-left: 4px solid #ef4444; background: rgba(15, 23, 42, 0.85); padding: 1rem 1.25rem;">
+                    <div style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 0.2rem;">💤 פתקים רדומים (Forgotten Candidates)</div>
+                    <div style="font-size: 1.6rem; font-weight: 800; color: #f87171;" id="memCountDormant">2 פתקים</div>
+                    <div style="font-size: 0.76rem; color: #64748b;">לא אוזכרו מזה 12 חודשים</div>
+                </div>
+            </div>
+
+            <!-- Two-Column Memory Split -->
+            <div class="grid-2" style="gap: 1.5rem;">
+                <!-- What does the system remember? -->
+                <div>
+                    <div class="card" style="margin-bottom: 1.25rem;">
+                        <h3 style="color: #38bdf8; margin-top: 0;">📚 תמונת זיכרון מרוכזת (Memory State)</h3>
+                        <div id="memoryOverview">
+                            <p style="color: var(--text-muted);">טוען תמונת זיכרון...</p>
                         </div>
-                        <div class="form-group">
-                            <label>Project / Domain Hint</label>
-                            <input type="text" id="quickProject" placeholder="e.g. llm_wiki, research_manager" value="llm_wiki">
+                    </div>
+
+                    <!-- High Importance Knowledge Anchors -->
+                    <div class="card">
+                        <h3 style="color: #fbbf24; margin-top: 0;">⭐ מושגי יסוד ועוגנים מרכזיים (Core Anchors)</h3>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
+                            <div style="padding: 0.6rem; background: rgba(0,0,0,0.3); border-radius: 6px; border-right: 3px solid #38bdf8;">
+                                <strong style="color: #fff;">Agent Memory Architecture</strong>
+                                <div style="color: #94a3b8; font-size: 0.82rem;">זיכרון מבוסס Obsidian, קובצי Markdown וסנכרון יומיומי ללא בסיס נתונים סגור.</div>
+                            </div>
+                            <div style="padding: 0.6rem; background: rgba(0,0,0,0.3); border-radius: 6px; border-right: 3px solid #10b981;">
+                                <strong style="color: #fff;">Research Reliability Framework</strong>
+                                <div style="color: #94a3b8; font-size: 0.82rem;">סוכן Critic ייעודי, בדיקת הטיות וסרבנות לטיוח סתירות מדעיות.</div>
+                            </div>
+                            <div style="padding: 0.6rem; background: rgba(0,0,0,0.3); border-radius: 6px; border-right: 3px solid #a855f7;">
+                                <strong style="color: #fff;">Hybrid RAG Fusion (BM25 + Vectors)</strong>
+                                <div style="color: #94a3b8; font-size: 0.82rem;">דירוג הדדי (RRF) המבטיח דיוק במינוחים מקצועיים והבנה סמנטית.</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>Title / Topic</label>
-                        <input type="text" id="quickTitle" placeholder="e.g. SQLite Index Optimization" required>
+                </div>
+
+                <!-- Right Column: Quick Event/Decision Capture & Context Inspection -->
+                <div>
+                    <!-- Quick Memory Capture Form -->
+                    <div class="card" style="margin-bottom: 1.25rem;">
+                        <h3 style="color: #a855f7; margin-top: 0;">📝 תיעוד אירוע, מחשבה או החלטה לזיכרון</h3>
+                        <form id="quickCaptureForm">
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>סוג האירוע</label>
+                                    <select id="quickCaptureType" onchange="toggleCaptureFields()">
+                                        <option value="event">אירוע / פעילות / מחשבה</option>
+                                        <option value="decision">החלטה מנומקת</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>פרויקט / תחום יעד</label>
+                                    <input type="text" id="quickProject" placeholder="e.g. llm_wiki, research_manager" value="llm_wiki">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>כותרת / נושא</label>
+                                <input type="text" id="quickTitle" placeholder="e.g. שיפור דיאלוג קולי או תובנה מחקרית" required>
+                            </div>
+                            <div class="form-group" id="decisionReasonGroup" style="display: none;">
+                                <label>נימוק ורציונל להחלטה</label>
+                                <input type="text" id="quickReason" placeholder="מדוע נבחרה החלטה זו?">
+                            </div>
+                            <div class="form-group">
+                                <label id="quickContentLabel">פרטי האירוע / התוכן</label>
+                                <textarea id="quickContent" placeholder="הזן פרטים שחשוב שהמערכת תזכור..." required style="height: 95px;"></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary" style="background: #8b5cf6;">💾 שמור אירוע בזיכרון המערכת</button>
+                        </form>
                     </div>
-                    <div class="form-group" id="decisionReasonGroup" style="display: none;">
-                        <label>Decision Rationale / Reason</label>
-                        <input type="text" id="quickReason" placeholder="e.g. Improves query latency by 80%">
+
+                    <!-- Context Inspector (Under the hood) -->
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <h4 style="margin: 0; color: #cbd5e1;">🔍 בחינת הקשר הפרויקט ל-LLM (Context Inspector)</h4>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="contextProjectInput" placeholder="שם פרויקט, e.g. llm_wiki" value="llm_wiki">
+                            <button onclick="inspectContext()" class="btn-secondary" style="background: #6366f1; color: #fff;">בדוק</button>
+                        </div>
+                        <div id="contextDisplay" style="margin-top: 0.75rem; display: none;">
+                            <textarea id="contextTextarea" readonly style="height: 150px; font-size: 0.85rem;"></textarea>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label id="quickContentLabel">Content / Decision Details</label>
-                        <textarea id="quickContent" placeholder="Enter captured details..." required style="height: 100px;"></textarea>
-                    </div>
-                    <button type="submit" class="btn-primary" style="background: #8b5cf6;">SUBMIT CAPTURE TO MEMORY</button>
-                </form>
+                </div>
             </div>
         </div>
 
@@ -1279,20 +1531,23 @@
 
     <!-- ==================== JAVASCRIPT LOGIC ==================== -->
     <script>
-        /* --- TAB SWITCHING --- */
+        /* --- TAB SWITCHING (Realigned around Knowledge Lifecycle) --- */
         function activateTab(tabId) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
             const tabMap = {
+                'intelligenceTab': 'tabHeaderIntelligence',
                 'askTab': 'tabHeaderAsk',
-                'gapsTab': 'tabHeaderGaps',
                 'researchTab': 'tabHeaderResearch',
-                'contradictionsTab': 'tabHeaderContradictions',
-                'textTab': 'tabHeaderText',
-                'fileTab': 'tabHeaderFile',
+                'decisionsTab': 'tabHeaderDecisions',
                 'memoryTab': 'tabHeaderMemory',
-                'graphTab': 'tabHeaderGraph'
+                'graphTab': 'tabHeaderGraph',
+                'captureTab': 'tabHeaderCapture',
+                // Legacy mappings for backwards compatibility
+                'contradictionsTab': 'tabHeaderDecisions',
+                'textTab': 'tabHeaderCapture',
+                'fileTab': 'tabHeaderCapture'
             };
 
             const headerId = tabMap[tabId];
@@ -1303,12 +1558,188 @@
                 document.getElementById(tabId).classList.add('active');
             }
 
-            if (tabId === 'gapsTab') loadProactiveGaps();
-            if (tabId === 'fileTab') fetchInboxStatus();
-            if (tabId === 'contradictionsTab') { loadContradictions(); loadDecisionsList(); }
+            if (tabId === 'intelligenceTab') loadIntelligenceDashboard();
+            if (tabId === 'decisionsTab' || tabId === 'contradictionsTab') { loadDecisionsList(); loadContradictions(); }
             if (tabId === 'researchTab') loadResearchHistory();
-            if (tabId === 'memoryTab') fetchMemoryOverview();
+            if (tabId === 'memoryTab') loadMemoryDashboard();
             if (tabId === 'graphTab') { initGraph(); loadYamlTree(); }
+            if (tabId === 'captureTab' || tabId === 'fileTab') fetchInboxStatus();
+        }
+
+        /* --- INTELLIGENCE OS HOMEPAGE LOGIC --- */
+        async function loadIntelligenceDashboard() {
+            try {
+                const res = await fetch('/api/v1/intelligence/dashboard');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const data = await res.json();
+
+                // 1. Pillar 1: Recent Learning
+                const actList = document.getElementById('homeRecentActivityList');
+                if (actList && data.recent_activity) {
+                    actList.innerHTML = `
+                        <div style="margin-bottom: 0.6rem; padding: 0.6rem; background: rgba(0,0,0,0.25); border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                                <strong style="color: #fff;">📚 פתקים ומפגשי מחקר פעילים</strong>
+                                <span class="badge" style="background: rgba(56,189,248,0.2); color: #38bdf8;">${data.recent_activity.research_sessions_count} סשנים</span>
+                            </div>
+                            <div style="font-size: 0.8rem; color: #94a3b8;">כולל 42 פתקי מחקר מדעי בוטיראט, קטואדפטציה ושלמות רירית המעי.</div>
+                        </div>
+                        <div style="margin-bottom: 0.6rem; padding: 0.6rem; background: rgba(0,0,0,0.25); border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                                <strong style="color: #fff;">⚖️ החלטות ארכיטקטוניות מחייבות</strong>
+                                <span class="badge" style="background: rgba(16,185,129,0.2); color: #34d399;">${data.recent_activity.decisions_count} החלטות</span>
+                            </div>
+                            <div style="font-size: 0.8rem; color: #94a3b8;">זיכרון קנוני ב-Obsidian, חיפוש RAG היברידי ומקורות PubMed.</div>
+                        </div>
+                        <div style="padding: 0.6rem; background: rgba(0,0,0,0.25); border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                                <strong style="color: #fff;">⚡ סתירות פתוחות תחת בדיקה</strong>
+                                <span class="badge" style="background: rgba(245,158,11,0.2); color: #fbbf24;">${data.recent_activity.active_contradictions_count} פעילה</span>
+                            </div>
+                            <div style="font-size: 0.8rem; color: #94a3b8;">בוטיראט: שלמות הרירית מול מוות תאי במבחנה בריכוז עודף.</div>
+                        </div>
+                    `;
+                }
+
+                // 2. Pillar 2: Timeline
+                const timeList = document.getElementById('homeTimelineList');
+                if (timeList && data.timeline) {
+                    timeList.innerHTML = data.timeline.map(t => `
+                        <div style="display: flex; gap: 0.75rem; margin-bottom: 0.7rem; align-items: flex-start;">
+                            <span class="badge" style="background: #1e293b; color: #94a3b8; font-size: 0.75rem; padding: 0.2rem 0.5rem; min-width: 80px; text-align: center;">${t.date}</span>
+                            <div style="flex: 1; font-size: 0.84rem; color: #e2e8f0; line-height: 1.4;">
+                                ${t.event}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+
+                // 3. Pillar 3: Proactive Intelligence Feed
+                const feedList = document.getElementById('homeProactiveFeedList');
+                if (feedList && data.proactive_feed) {
+                    feedList.innerHTML = data.proactive_feed.map(f => `
+                        <div style="padding: 0.7rem; background: rgba(0,0,0,0.25); border-radius: 8px; margin-bottom: 0.6rem; border-right: 3px solid #f59e0b;">
+                            <div style="font-weight: 700; color: #fff; font-size: 0.88rem; margin-bottom: 0.25rem;">${f.title}</div>
+                            <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.45rem;">${f.description}</div>
+                            <button type="button" class="btn-secondary" style="padding: 0.25rem 0.65rem; font-size: 0.76rem; background: rgba(245,158,11,0.15); border-color: #f59e0b; color: #fbbf24;" onclick="activateTab('${f.action_tab}')">
+                                ${f.action_text}
+                            </button>
+                        </div>
+                    `).join('');
+                }
+
+                // 4. Active Projects Grid
+                const projGrid = document.getElementById('homeActiveProjectsGrid');
+                if (projGrid && data.active_projects) {
+                    projGrid.innerHTML = data.active_projects.map(p => `
+                        <div class="card" style="margin: 0; background: rgba(15, 23, 42, 0.85); border-top: 3px solid ${p.color}; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                                    <h4 style="margin: 0; color: #fff; font-size: 1.05rem;">${p.name}</h4>
+                                    <span class="badge" style="background: rgba(255,255,255,0.06); color: ${p.color}; border: 1px solid ${p.color}; font-size: 0.72rem;">${p.badge}</span>
+                                </div>
+                                <div style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 0.75rem;">
+                                    ${p.summary}
+                                </div>
+                                <div style="font-size: 0.76rem; color: #94a3b8; margin-bottom: 0.35rem;">
+                                    <strong style="color: #cbd5e1;">נושאים פתוחים:</strong> ${p.open_issues}
+                                </div>
+                                <div style="font-size: 0.76rem; color: #94a3b8; margin-bottom: 0.85rem;">
+                                    <strong style="color: ${p.color};">הצעד הבא:</strong> ${p.next_action}
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.6rem;">
+                                <span style="font-size: 0.72rem; color: #64748b;">עודכן: ${p.last_updated}</span>
+                                <button type="button" class="btn-secondary" style="padding: 0.25rem 0.65rem; font-size: 0.78rem;" onclick="activateTab('graphTab')">
+                                    חקר קשרים ➔
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.warn('Could not load intelligence dashboard:', err);
+            }
+        }
+
+        function executeHomeSearch() {
+            const input = document.getElementById('homeQuickQueryInput');
+            const query = input ? input.value.trim() : '';
+            if (!query) {
+                if (input) input.focus();
+                return;
+            }
+            activateTab('askTab');
+            const askInput = document.getElementById('ragQuestion');
+            if (askInput) {
+                askInput.value = query;
+                document.getElementById('ragQueryForm').dispatchEvent(new Event('submit'));
+            }
+        }
+
+        function setAndRunHomePrompt(text) {
+            const input = document.getElementById('homeQuickQueryInput');
+            if (input) input.value = text;
+            executeHomeSearch();
+        }
+
+        /* --- DECISION MANAGEMENT MODAL LOGIC --- */
+        function openNewDecisionModal() {
+            document.getElementById('newDecisionModal').style.display = 'flex';
+        }
+
+        function closeNewDecisionModal() {
+            document.getElementById('newDecisionModal').style.display = 'none';
+        }
+
+        async function saveNewDecision() {
+            const title = document.getElementById('modalDecisionTitle').value.trim();
+            const decision = document.getElementById('modalDecisionText').value.trim();
+            const reason = document.getElementById('modalDecisionReason').value.trim();
+            const alternatives = document.getElementById('modalDecisionAlternatives').value.trim();
+            const tradeoffs = document.getElementById('modalDecisionTradeoffs').value.trim();
+            const domain = document.getElementById('modalDecisionDomain').value.trim() || 'llm_wiki';
+            const signer = document.getElementById('modalDecisionSigner').value.trim() || 'Moshe';
+
+            if (!title || !decision || !reason) {
+                alert('נא למלא כותרת, הצהרת החלטה ונימוק.');
+                return;
+            }
+
+            try {
+                const fd = new FormData();
+                fd.append('title', title);
+                fd.append('decision', decision);
+                fd.append('reason', reason);
+                fd.append('alternatives', alternatives);
+                fd.append('tradeoffs', tradeoffs);
+                fd.append('domain', domain);
+                fd.append('resolved_by', signer);
+
+                const res = await fetch('/api/v1/decisions/create', { method: 'POST', body: fd });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const data = await res.json();
+                closeNewDecisionModal();
+                alert(data.message || 'ההחלטה נשמרה בהצלחה בכספת!');
+                loadDecisionsList();
+                loadIntelligenceDashboard();
+            } catch (err) {
+                alert('שגיאה בשמירת החלטה: ' + err.message);
+            }
+        }
+
+        /* --- MEMORY DASHBOARD LOGIC --- */
+        async function loadMemoryDashboard() {
+            fetchMemoryOverview();
+            try {
+                const res = await fetch('/api/v1/memory/overview');
+                const data = await res.json();
+                const pendingEl = document.getElementById('memCountPending');
+                if (pendingEl) {
+                    const count = data.recent_captures_count || 0;
+                    pendingEl.textContent = `${count} פריטים`;
+                }
+            } catch(e){}
         }
 
         /* --- BI-DIRECTIONAL CONVERSATIONAL VOICE MODE (שימוש בקול לשני הכיוונים) --- */

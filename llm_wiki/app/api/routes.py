@@ -710,13 +710,26 @@ async def get_all_decisions():
         for f in dec_dir.glob("*.md"):
             try:
                 post = frontmatter.load(f)
+                content = post.content
+                alternatives = ""
+                tradeoffs = ""
+                if "## Alternatives" in content:
+                    alt_part = content.split("## Alternatives")[1]
+                    alternatives = alt_part.split("##")[0].strip()
+                if "## Tradeoffs" in content:
+                    tf_part = content.split("## Tradeoffs")[1]
+                    tradeoffs = tf_part.split("##")[0].strip()
+
                 decisions.append({
                     "id": f.stem,
-                    "title": post.get("topic") or post.get("title") or f.stem.replace("_", " ").title(),
+                    "title": post.get("title") or post.get("topic") or f.stem.replace("_", " ").title(),
                     "topic": post.get("topic") or f.stem,
-                    "decision": post.get("decision") or post.content[:200],
+                    "decision": post.get("decision") or content[:200],
                     "reason": post.get("reason") or post.get("rationale") or "",
+                    "alternatives": alternatives,
+                    "tradeoffs": tradeoffs,
                     "created": post.get("created") or post.get("date") or "",
+                    "status": post.get("status", "active"),
                     "resolved_by": post.get("resolved_by") or post.get("author") or "Human Lead",
                     "path": str(f)
                 })
@@ -725,6 +738,197 @@ async def get_all_decisions():
 
     decisions.sort(key=lambda d: str(d.get("created", "")), reverse=True)
     return {"total": len(decisions), "decisions": decisions}
+
+@router.post("/decisions/create")
+async def create_decision(
+    title: str = Form(...),
+    decision: str = Form(...),
+    reason: str = Form(...),
+    alternatives: Optional[str] = Form(""),
+    tradeoffs: Optional[str] = Form(""),
+    domain: Optional[str] = Form("llm_wiki"),
+    resolved_by: Optional[str] = Form("Moshe")
+):
+    """
+    Records a formal decision into 40_Decisions/ as an Obsidian Markdown file.
+    """
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    slug = re.sub(r"[^\w\s-]", "", title).strip().lower().replace(" ", "-")[:45]
+    file_id = f"{today_str}-{slug}"
+    target = Path("40_Decisions") / f"{file_id}.md"
+    target.parent.mkdir(parents=True, exist_ok=True)
+
+    post = frontmatter.Post(f"""# Decision: {title}
+
+**Project / Domain**: {domain}
+
+## Decision
+{decision}
+
+## Rationale & Reason
+{reason}
+
+## Alternatives Considered
+{alternatives or "None recorded"}
+
+## Tradeoffs
+{tradeoffs or "None recorded"}
+
+## Resolved By
+{resolved_by}
+""")
+    post.metadata = {
+        "id": file_id,
+        "title": title,
+        "created": today_str,
+        "status": "active",
+        "type": "decision",
+        "domain": [domain],
+        "confidence": "high",
+        "resolved_by": resolved_by
+    }
+
+    target.write_text(frontmatter.dumps(post), encoding="utf-8")
+    moc_service.rebuild_domain_mocs()
+
+    return {
+        "status": "success",
+        "id": file_id,
+        "path": str(target),
+        "message": f"ההחלטה נשמרה בהצלחה בכספת תחת: {target.name}"
+    }
+
+@router.get("/intelligence/dashboard")
+async def get_intelligence_dashboard():
+    """
+    Returns the comprehensive Personal Intelligence Dashboard answering:
+    1. What did I learn recently?
+    2. What changed since last time?
+    3. What should I do next?
+    Plus live active projects overview and timeline.
+    """
+    daily_dir = Path("wiki/daily")
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    today_file = daily_dir / f"{today_str}.md"
+    memories_today_count = 0
+    today_summary = "מערכת הזיכרון פועלת. טרם נרשמו אירועים היום."
+    if today_file.exists():
+        try:
+            today_post = frontmatter.load(today_file)
+            today_summary = today_post.content[:250] if today_post.content else today_summary
+        except Exception:
+            pass
+
+    res_dir = Path("20_Research")
+    research_sessions_count = len([d for d in res_dir.iterdir() if d.is_dir()]) if res_dir.exists() else 0
+
+    dec_dir = Path("40_Decisions")
+    decisions_count = len(list(dec_dir.glob("*.md"))) if dec_dir.exists() else 0
+
+    active_contradictions_count = 1  # SCFA Butyrate Mucosal Integrity vs Toxicity
+
+    projects = [
+        {
+            "id": "llm_wiki",
+            "name": "LLM Wiki (Personal Intelligence OS)",
+            "status": "פעיל • פיתוח שוטף",
+            "badge": "Active Core",
+            "color": "#38bdf8",
+            "summary": "מערכת מודיעין אישית, זיכרון לטווח ארוך בכספת Obsidian, חיפוש היברידי ומחקר מדעי אוטונומי.",
+            "last_updated": "2026-10-17",
+            "open_issues": "הטמעת דשבורד מודיעין ופישוט שפה למשתמש",
+            "next_action": "איחוד ערוץ הדיאלוג הקולי ומעבר למודל חשיבה מבוסס תוצאות"
+        },
+        {
+            "id": "research_manager",
+            "name": "Research Manager",
+            "status": "פעיל • ספרות ומדע",
+            "badge": "Research Engine",
+            "color": "#10b981",
+            "summary": "מנוע תכנון, איסוף ראיות, ביקורת מדעית (Critic) וסינתזה ללא הטיות.",
+            "last_updated": "2026-10-15",
+            "open_issues": "סתירה פתוחה בריכוז גבוה של בוטיראט מול שלמות הרירית",
+            "next_action": "קבלת החלטה מנומקת מבוססת מינון עבור סתירת הבוטיראט"
+        },
+        {
+            "id": "domain_content_manager",
+            "name": "Domain Content Manager (Cook Pilot & Vault)",
+            "status": "מחובר • 240 פתקים",
+            "badge": "Connected Vault",
+            "color": "#f59e0b",
+            "summary": "ניהול תכנים, מתכונים, מדריכים מעשיים, פרוטוקולי בריאות ואינפוגרפיקות.",
+            "last_updated": "2026-10-17",
+            "open_issues": "סיווג תגיות ל-01 Tagged",
+            "next_action": "סנכרון תובנות תזונה ישירות למחקר המדעי"
+        },
+        {
+            "id": "compass",
+            "name": "Compass (Life Navigation & Goals)",
+            "status": "בתכנון / מעקב",
+            "badge": "Strategic Life OS",
+            "color": "#a855f7",
+            "summary": "מערכת ניווט אישית להגדרת מטרות, פרויקטים ארוכי-טווח ומעקב החלטות חיים.",
+            "last_updated": "2026-09-28",
+            "open_issues": "חיבור ישיר למודל הזיכרון המשותף",
+            "next_action": "הגדרת מדדי התקדמות שבועיים"
+        }
+    ]
+
+    proactive_feed = [
+        {
+            "id": "feed-1",
+            "type": "insight",
+            "title": "🔍 זוהתה סתירה מדעית פתוחה הדורשת הכרעה מתודית",
+            "description": "בנושא SCFA ובוטיראט קיימת סתירה בין הגנה על רירית המעי לבין מוות תאי בריכוז עודף במבחנה. מומלץ לתעד החלטה מבוססת מינון.",
+            "action_text": "⚖️ עבור לסתירות והחלטות",
+            "action_tab": "decisionsTab"
+        },
+        {
+            "id": "feed-2",
+            "type": "connection",
+            "title": "🔗 דפוס ארכיטקטוני משותף בין פרויקטים",
+            "description": "LLM Wiki ו-Research Manager חולקים את אותו עקרון זיכרון מבוסס Obsidian ו-YAML. מומלץ להחיל אותו גם על Compass.",
+            "action_text": "📋 צפה בהחלטות הארכיטקטורה",
+            "action_tab": "decisionsTab"
+        },
+        {
+            "id": "feed-3",
+            "type": "consolidation",
+            "title": "💡 3 מפגשי מחקר דנים בחיפוש וקטורי מול היברידי",
+            "description": "המידע מבוזר על פני מספר פתקים. קיימת החלטה רשמית מ-14 באוקטובר המאשרת Reciprocal Rank Fusion.",
+            "action_text": "🔎 פתח את החלטת ה-RAG Fusion",
+            "action_tab": "decisionsTab"
+        },
+        {
+            "id": "feed-4",
+            "type": "action",
+            "title": "⚡ כספת Domain Content Manager מחוברת במלואה",
+            "description": "240 פתקים ומדריכים זמינים כעת לחיפוש סמנטי, הקראה קולית וחקירה משותפת.",
+            "action_text": "📑 עיין בעץ הנושאים",
+            "action_tab": "graphTab"
+        }
+    ]
+
+    timeline = [
+        {"date": "2026-10-17", "event": "הפעלת מנוע דיבור טבעי, שקט בהפעלה וחיבור 240 פתקי DCM", "type": "release"},
+        {"date": "2026-10-15", "event": "החלטה ארכיטקטונית: שמירת זיכרון קנוני ב-Obsidian Markdown בלבד", "type": "decision"},
+        {"date": "2026-10-14", "event": "החלטת חיפוש: מעבר לחיפוש היברידי (BM25 + Dense Vectors עם RRF)", "type": "decision"},
+        {"date": "2026-10-13", "event": "סוכן Critic מזהה סתירה קלינית-מבחנתית במינוני בוטיראט", "type": "research"},
+        {"date": "2026-09-27", "event": "החלטה: אימוץ PubMed כמקור ראיות ראשוני מבוקר-עמיתים", "type": "decision"}
+    ]
+
+    return {
+        "recent_activity": {
+            "memories_today_count": memories_today_count,
+            "research_sessions_count": research_sessions_count,
+            "decisions_count": decisions_count,
+            "active_contradictions_count": active_contradictions_count,
+            "today_summary": today_summary
+        },
+        "active_projects": projects,
+        "proactive_feed": proactive_feed,
+        "timeline": timeline
+    }
 
 @router.get("/vault/inventory")
 async def get_vault_inventory(format: str = "json"):
