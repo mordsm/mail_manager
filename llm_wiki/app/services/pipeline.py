@@ -7,7 +7,7 @@ from app.services.moc_service import MOCService
 from app.services.git_service import GitService
 from app.services.contradiction import ContradictionService
 from app.llm.base import LLMProvider
-from app.llm.ollama_provider import OllamaProvider
+from app.llm import get_llm_provider
 
 class LLMWikiPipeline:
     """
@@ -20,7 +20,7 @@ class LLMWikiPipeline:
         self.atomic_service = AtomicNoteService(root_dir=self.root_dir)
         self.moc_service = MOCService(root_dir=self.root_dir)
         self.git_service = GitService(root_dir=self.root_dir)
-        self.llm = llm_provider or OllamaProvider()
+        self.llm = llm_provider or get_llm_provider()
         self.contradiction_service = ContradictionService(root_dir=self.root_dir, llm_provider=self.llm)
 
     def process_file(self, source_path: Union[str, Path], domain: str = "unclassified") -> Dict[str, Any]:

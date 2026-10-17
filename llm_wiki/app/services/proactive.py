@@ -89,8 +89,8 @@ class ProactiveGapFillerService:
                 "title": target,
                 "source": bl["source_note"],
                 "domain": "research" if "research" in bl["source_note"].lower() else "personal",
-                "priority": "HIGH",
-                "description": f"Missing concept note [[{target}]] referenced in {bl['source_note']}",
+                "priority": "LOW",
+                "description": f"קישור למושג [[{target}]] שטרם נוצר לו פתק ייעודי (מוזכר ב-{bl['source_note']})",
                 "suggested_query": f"Synthesize core scientific concepts, definitions, and mechanisms for: {target}"
             })
 

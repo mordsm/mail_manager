@@ -5,7 +5,7 @@ from datetime import datetime
 import frontmatter
 
 from app.llm.base import LLMProvider
-from app.llm.ollama_provider import OllamaProvider
+from app.llm import get_llm_provider
 from app.services.contradiction import ContradictionService
 from app.schemas.claim import ContradictionModel, ClaimModel
 
@@ -17,7 +17,7 @@ class EvidenceCriticService:
     """
     def __init__(self, root_dir: Union[str, Path] = ".", llm_provider: Optional[LLMProvider] = None):
         self.root_dir = Path(root_dir)
-        self.llm = llm_provider or OllamaProvider()
+        self.llm = llm_provider or get_llm_provider()
         self.contradiction_service = ContradictionService(root_dir=self.root_dir)
 
     def critique_research_topic(self, topic_path: Union[str, Path]) -> Dict[str, Any]:

@@ -45,7 +45,7 @@ class HybridRAGService:
     def __init__(self, root_dir: Union[str, Path] = ".", llm_provider: Optional[LLMProvider] = None):
         self.root_dir = Path(root_dir)
         self.parser = MarkdownParser()
-        self.llm = llm_provider or OllamaProvider()
+        self.llm = llm_provider or get_llm_provider()
         self.vector_service = VectorIndexService(root_dir=self.root_dir)
         self.taxonomy = SubjectTaxonomyService(root_dir=self.root_dir)
 
@@ -153,15 +153,10 @@ class HybridRAGService:
         """
         fused_map: Dict[tuple, Dict[str, Any]] = {}
 
-        # 0. Check for Vault Overview Query
+        # 0. Check for Vault Overview Query (Fast MOC path)
         if self.is_vault_overview_query(query):
             overview_blocks = self.get_vault_overview_blocks()
-            for b in overview_blocks:
-                key = (str(b.note_path), b.block_id)
-                fused_map[key] = {
-                    "block": b,
-                    "score": 100.0
-                }
+            return [{"block": b, "score": 100.0} for b in overview_blocks]
 
         target_domains = ["personal", "research", "business", "competitive", "development"] if domain.lower() in ["all", "global"] else [domain]
         query_terms = [t.lower() for t in re.findall(r"\w+", query) if len(t) > 1]

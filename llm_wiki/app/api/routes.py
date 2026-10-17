@@ -63,7 +63,8 @@ def normalize_domain(domain: str) -> str:
 @router.post("/ingest/file")
 async def ingest_file(
     file: UploadFile = File(...),
-    domain: str = Form("unclassified")
+    domain: str = Form("unclassified"),
+    subsubject: Optional[str] = Form(None)
 ):
     target_domain = normalize_domain(domain)
     with tempfile.NamedTemporaryFile(delete=False, suffix=Path(file.filename).suffix) as tmp:
@@ -72,6 +73,8 @@ async def ingest_file(
 
     try:
         result = pipeline.process_file(tmp_path, domain=target_domain)
+        if subsubject and subsubject != "all":
+            result["subsubject"] = subsubject
         return result
     finally:
         if tmp_path.exists():
@@ -82,11 +85,14 @@ async def ingest_text(
     content: str = Form(...),
     title: Optional[str] = Form(None),
     domain: Optional[str] = Form("research"),
+    subsubject: Optional[str] = Form(None),
     direct: bool = Form(True),
     append: bool = Form(False)
 ):
     target_domain = normalize_domain(domain)
     result = pipeline.smart_ingest(content, title=title, domain=target_domain, direct=direct, append=append)
+    if subsubject and subsubject != "all":
+        result["subsubject"] = subsubject
     return result
 
 @router.post("/query")

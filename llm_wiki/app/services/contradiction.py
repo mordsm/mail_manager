@@ -7,7 +7,7 @@ from typing import Union, Optional, List, Dict, Any
 from datetime import date
 from app.schemas.claim import ContradictionModel, ClaimModel
 from app.llm.base import LLMProvider
-from app.llm.ollama_provider import OllamaProvider
+from app.llm import get_llm_provider
 
 class ContradictionService:
     """
@@ -17,7 +17,7 @@ class ContradictionService:
     """
     def __init__(self, root_dir: Union[str, Path] = ".", llm_provider: Optional[LLMProvider] = None):
         self.root_dir = Path(root_dir)
-        self.llm = llm_provider or OllamaProvider()
+        self.llm = llm_provider or get_llm_provider()
 
     def record_contradiction(self, model: ContradictionModel) -> Path:
         slug = "".join(c.lower() if c.isalnum() or c in " -_" else "" for c in model.topic).strip().replace(" ", "-")

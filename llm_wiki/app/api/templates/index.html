@@ -729,7 +729,7 @@
             <div class="tab" id="tabHeaderResearch" onclick="activateTab('researchTab')">🔬 מחקר מדעי מעמיק (Live Research)</div>
             <div class="tab" id="tabHeaderContradictions" onclick="activateTab('contradictionsTab')">⚡ סתירות והחלטות</div>
             <div class="tab" id="tabHeaderMemory" onclick="activateTab('memoryTab')">🧠 זיכרון מערכת</div>
-            <div class="tab" id="tabHeaderGaps" onclick="activateTab('gapsTab')">🛠️ תקינות קישורים (Vault Health)</div>
+            <div class="tab" id="tabHeaderGaps" onclick="activateTab('gapsTab')">🔗 קישורים להשלמה (Links)</div>
         </div>
 
         <!-- ==================== TAB 1: ASK WIKI (HYBRID RAG) ==================== -->
@@ -988,15 +988,19 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="domainSelectText">Target Domain</label>
-                    <select id="domainSelectText">
-                        <option value="auto">Auto classify</option>
-                        <option value="Personal">Personal</option>
-                        <option value="Research & Technology" selected>Research & Technology</option>
-                        <option value="Business & Operations">Business & Operations</option>
-                        <option value="Competitive Analysis">Competitive Analysis</option>
-                    </select>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="domainSelectText">📂 תחום ראשי (Domain)</label>
+                        <select id="domainSelectText" onchange="onTextDomainChange()">
+                            <!-- Populated dynamically from taxonomy -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="subsubjectSelectText">📑 תת-נושא מוגדר (Sub-Subject)</label>
+                        <select id="subsubjectSelectText">
+                            <option value="all">🔍 כללי לתחום</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -1048,15 +1052,19 @@
                     <div id="fileStatus" style="margin-top: 12px; font-weight: bold; color: var(--accent-cyan); font-size: 1rem; pointer-events: none;">No file selected</div>
                 </div>
 
-                <div class="form-group">
-                    <label for="domainSelectFile">Target Domain</label>
-                    <select id="domainSelectFile">
-                        <option value="auto">Auto classify</option>
-                        <option value="Personal">Personal</option>
-                        <option value="Research & Technology" selected>Research & Technology</option>
-                        <option value="Business & Operations">Business & Operations</option>
-                        <option value="Competitive Analysis">Competitive Analysis</option>
-                    </select>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="domainSelectFile">📂 תחום ראשי (Domain)</label>
+                        <select id="domainSelectFile" onchange="onFileDomainChange()">
+                            <!-- Populated dynamically from taxonomy -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="subsubjectSelectFile">📑 תת-נושא מוגדר (Sub-Subject)</label>
+                        <select id="subsubjectSelectFile">
+                            <option value="all">🔍 כללי לתחום</option>
+                        </select>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn-primary">INGEST FILE</button>
@@ -1382,43 +1390,53 @@
                 .replace(/`[^`]+`/g, '')
                 // 2. Remove URLs & file paths
                 .replace(/https?:\/\/\S+/g, '')
-                .replace(/[a-zA-Z0-9_\-\\]+\.(?:md|py|json|yaml|txt|docx|pdf)/gi, '')
-                // 3. Wikilinks [[target|label]] -> label, [[target]] -> target
+                .replace(/[a-zA-Z0-9_\-\\/]+\.(?:md|py|json|yaml|txt|docx|pdf)/gi, '')
+                // 3. Remove block citations e.g. [Title ^block-xxxx] or [^block-xxxx]
+                .replace(/\[[^\]]*\^[a-zA-Z0-9_\-]+[^\]]*\]/g, '')
+                // 4. Wikilinks [[target|label]] -> label, [[target]] -> target
                 .replace(/\[\[(?:[^|\]]*\|)?([^\]]+)\]\]/g, '$1')
-                // 4. Citation brackets like [1], [2], [ref-xxx], [^block-xxx]
-                .replace(/\[\^?[a-zA-Z0-9_\-]+\]/g, '')
-                // 5. Remove any remaining square or curly brackets [ ] { }
-                .replace(/[\[\]{}]/g, ' ')
-                // 6. Parentheses: remove ( and ) symbols, keep the words inside without saying "פתח סוגריים"
-                .replace(/\(([^)]*)\)/g, ' $1 ')
-                .replace(/[()]/g, ' ')
-                // 7. Colons & Semicolons: replace with a gentle comma so voice pauses naturally rather than saying "נקודתיים"
+                // 5. Remove any brackets and citations like [1], [2], [ref]
+                .replace(/\[[^\]]*\]/g, ' ')
+                // 6. Parentheses: strip parenthesis symbols ( ) completely without pronouncing "פתח סוגריים"
+                // If it's a file path or citation in parentheses, remove it entirely
+                .replace(/\([a-zA-Z0-9_\-/\\]+\)/g, ' ')
+                .replace(/[\(\)\[\]\{\}\<\>]/g, ' ')
+                // 7. Strip number dots at start of lines (e.g. "1. " -> "ראשית, ", "2. " -> "שנית, " or remove dot)
+                .replace(/(\d+)\.\s+/g, '$1, ')
+                // 8. Colons & Semicolons: replace with comma so voice creates a natural pause instead of saying "נקודתיים"
                 .replace(/[:;]/g, ', ')
-                // 8. Quotes & apostrophes: remove entirely
+                // 9. Quotes & apostrophes: remove
                 .replace(/["'״׳“”„«»]/g, '')
-                // 9. Slashes: ו/או -> או, others to space
-                .replace(/ו\/או/g, 'או')
+                // 10. Slashes & hyphens: replace with space so it doesn't say "מקף" or "לוכסן"
+                .replace(/ו\/או/g, ' או ')
                 .replace(/[\/\\]/g, ' ')
-                // 10. Asterisks, hashes, backticks, tildes, carets, underscores
-                .replace(/[*#`~^_]/g, '')
-                // 11. List bullets & dashes: replace - and • with space so voice doesn't say "מקף"
-                .replace(/^\s*[-+*•–—]\s+/gm, '')
                 .replace(/[\-–—]/g, ' ')
-                // 12. Ellipsis (...) -> replace with a clean period
-                .replace(/\.{2,}/g, '. ')
-                // 13. Clean multiple commas or periods
-                .replace(/,\s*,+/g, ',')
-                .replace(/\.\s*\.+/g, '.')
-                .replace(/,\s*\./g, '.')
-                // 14. Convert newlines to sentence pauses
-                .replace(/\n+/g, '. ')
+                // 11. Markdown symbols, bullets, asterisks, hashes
+                .replace(/^#+\s+/gm, '')
+                .replace(/^\s*[-+*•]\s+/gm, '')
+                .replace(/[*~^_#|]/g, '')
+                // 12. Common abbreviations that trigger "נקודה": e.g., i.e., וכו', וכד'
+                .replace(/e\.g\./gi, 'למשל')
+                .replace(/i\.e\./gi, 'כלומר')
+                .replace(/וכו'\.?/g, 'וכולי')
+                .replace(/וכד'\.?/g, 'וכדומה')
+                // 13. Multiple dots (...) -> single natural comma
+                .replace(/\.{2,}/g, ', ')
+                // 14. Convert newlines to commas or gentle pauses
+                .replace(/\n+/g, ', ')
+                // 15. Clean up multiple commas or periods
+                .replace(/,\s*,+/g, ', ')
+                .replace(/\.\s*\.+/g, '. ')
+                .replace(/,\s*\./g, '. ')
+                // 16. Remove trailing periods or dots at the very end so voice doesn't vocalize "נקודה" at finish
+                .replace(/[\.,\s]+$/, '')
                 .replace(/\s+/g, ' ')
                 .trim();
 
             if (cleaned.length > 550) {
                 const cut = cleaned.substring(0, 550);
-                const lastDot = cut.lastIndexOf('.');
-                cleaned = (lastDot > 250 ? cut.substring(0, lastDot + 1) : cut) + ' התשובה המלאה מופיעה על המסך.';
+                const lastComma = Math.max(cut.lastIndexOf(','), cut.lastIndexOf('.'));
+                cleaned = (lastComma > 250 ? cut.substring(0, lastComma) : cut) + ', התשובה המלאה מופיעה על המסך.';
             }
 
             return cleaned;
@@ -1767,13 +1785,51 @@
         /* --- TAXONOMY & SUB-SUBJECTS MANAGEMENT --- */
         let cachedTaxonomy = null;
 
+        function populateSubDropdown(domainSelectId, subSelectId) {
+            const domainSelect = document.getElementById(domainSelectId);
+            const subSelect = document.getElementById(subSelectId);
+            if (!subSelect) return;
+
+            const selectedSubject = domainSelect ? domainSelect.value : 'all';
+            subSelect.innerHTML = '';
+
+            if (selectedSubject === 'all' || selectedSubject === 'auto' || !cachedTaxonomy || !cachedTaxonomy[selectedSubject]) {
+                subSelect.innerHTML = '<option value="all">🔍 כללי לתחום</option>';
+                return;
+            }
+
+            const subjectData = cachedTaxonomy[selectedSubject];
+            const subs = subjectData.subsubjects || {};
+
+            let subOptsHtml = '<option value="all">🔍 כללי ל-' + (subjectData.title_he || subjectData.title) + '</option>';
+            for (const [subKey, subInfo] of Object.entries(subs)) {
+                if (subKey === 'all') continue;
+                const subTitle = subInfo.title_he || subInfo.title || subKey;
+                subOptsHtml += `<option value="${subKey}">${subTitle}</option>`;
+            }
+
+            subSelect.innerHTML = subOptsHtml;
+        }
+
+        function onSubjectChange() {
+            populateSubDropdown('ragDomain', 'ragSubSubject');
+        }
+
+        function onTextDomainChange() {
+            populateSubDropdown('domainSelectText', 'subsubjectSelectText');
+        }
+
+        function onFileDomainChange() {
+            populateSubDropdown('domainSelectFile', 'subsubjectSelectFile');
+        }
+
         async function loadTaxonomy(showToast = false) {
             try {
                 const res = await fetch('/api/v1/taxonomy');
                 if (!res.ok) return;
                 cachedTaxonomy = await res.json();
                 
-                // Populate main subjects
+                // Populate main subjects in Ask tab
                 const domainSelect = document.getElementById('ragDomain');
                 if (domainSelect && cachedTaxonomy) {
                     const currentVal = domainSelect.value || 'all';
@@ -1788,8 +1844,25 @@
                         domainSelect.value = currentVal;
                     }
                 }
+
+                // Populate main subjects in Text and File ingestion tabs
+                ['domainSelectText', 'domainSelectFile'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && cachedTaxonomy) {
+                        const cur = el.value || 'research';
+                        let html = '';
+                        for (const [key, subj] of Object.entries(cachedTaxonomy)) {
+                            const title = subj.title_he || subj.title || key;
+                            html += `<option value="${key}">${title}</option>`;
+                        }
+                        el.innerHTML = html;
+                        if (cachedTaxonomy[cur]) el.value = cur;
+                    }
+                });
                 
                 onSubjectChange();
+                onTextDomainChange();
+                onFileDomainChange();
 
                 if (showToast) {
                     showStatus('✅ מבנה הנושאים ותתי-הנושאים סונכרן בהצלחה מתוך config/subjects.yaml');
@@ -1797,32 +1870,6 @@
             } catch (err) {
                 console.warn('Could not load subjects taxonomy:', err);
             }
-        }
-
-        function onSubjectChange() {
-            const domainSelect = document.getElementById('ragDomain');
-            const subSelect = document.getElementById('ragSubSubject');
-            if (!subSelect) return;
-
-            const selectedSubject = domainSelect ? domainSelect.value : 'all';
-            subSelect.innerHTML = '';
-
-            if (selectedSubject === 'all' || !cachedTaxonomy || !cachedTaxonomy[selectedSubject]) {
-                subSelect.innerHTML = '<option value="all">🔍 כל תתי-הנושאים (ללא סינון נוסף)</option>';
-                return;
-            }
-
-            const subjectData = cachedTaxonomy[selectedSubject];
-            const subs = subjectData.subsubjects || {};
-
-            let subOptsHtml = '<option value="all">🔍 כל תתי-הנושאים של ' + (subjectData.title_he || subjectData.title) + '</option>';
-            for (const [subKey, subInfo] of Object.entries(subs)) {
-                if (subKey === 'all') continue;
-                const subTitle = subInfo.title_he || subInfo.title || subKey;
-                subOptsHtml += `<option value="${subKey}">${subTitle}</option>`;
-            }
-
-            subSelect.innerHTML = subOptsHtml;
         }
 
         /* --- ASK WIKI (HYBRID RAG) HANDLER --- */
@@ -2128,6 +2175,8 @@
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
             formData.append('domain', document.getElementById('domainSelectFile').value);
+            const subFile = document.getElementById('subsubjectSelectFile');
+            if (subFile) formData.append('subsubject', subFile.value);
 
             showStatus('⏳ PROCESSING FILE INGESTION (Extracting & Synthesizing)...');
             try {
@@ -2145,6 +2194,8 @@
             formData.append('title', document.getElementById('noteTitle').value);
             formData.append('content', document.getElementById('noteContent').value);
             formData.append('domain', document.getElementById('domainSelectText').value);
+            const subText = document.getElementById('subsubjectSelectText');
+            if (subText) formData.append('subsubject', subText.value);
 
             showStatus('⏳ PROCESSING NOTE INGESTION...');
             try {
@@ -2374,15 +2425,16 @@
             const height = canvas.height;
             for (let i = 0; i < nodes.length; i++) {
                 const n = nodes[i];
-                const angle = (i / nodes.length) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
-                const radius = 120 + Math.random() * (width * 0.85);
+                const angle = (i / nodes.length) * Math.PI * 2 + (Math.random() - 0.5) * 0.6;
+                const radius = 200 + Math.random() * (width * 0.85);
                 n.x = width / 2 + Math.cos(angle) * radius;
                 n.y = height / 2 + Math.sin(angle) * (radius * 0.75);
                 n.vx = 0;
                 n.vy = 0;
             }
             fitGraphView();
-            wakeGraph(1.0);
+            alpha = 0.5;
+            if (!animationFrameId) simulateGraph();
         }
 
         async function loadGraphData() {
@@ -2404,14 +2456,14 @@
                 const nodeMap = {};
                 nodes = graphData.nodes.map((n, idx) => {
                     const angle = (idx / (graphData.nodes.length || 1)) * Math.PI * 2;
-                    const r = 90 + Math.random() * (width * 0.65);
+                    const r = 200 + Math.random() * (width * 0.75);
                     const node = {
                         ...n,
                         x: width / 2 + Math.cos(angle) * r,
                         y: height / 2 + Math.sin(angle) * (r * 0.75),
                         vx: 0,
                         vy: 0,
-                        radius: Math.max(5, Math.min(18, 5 + (n.degree || 0) * 1.5)),
+                        radius: Math.max(6, Math.min(18, 6 + (n.degree || 0) * 1.5)),
                         color: getGroupColor(n.group)
                     };
                     nodeMap[node.id] = node;
@@ -2425,7 +2477,8 @@
 
                 transform = { x: 0, y: 0, k: 0.8 };
                 if (animationFrameId) cancelAnimationFrame(animationFrameId);
-                alpha = 1.0;
+                fitGraphView();
+                alpha = 0.7;
                 simulateGraph();
             } catch (err) {
                 document.getElementById('graphStats').textContent = 'Failed to load graph: ' + err.message;
@@ -2446,12 +2499,12 @@
                 return; // Cold equilibrium: zero velocity, zero trembling, 0% CPU!
             }
 
-            const repulsion = 3200;
-            const springLen = 140;
-            const springK = 0.035;
-            const centerGravity = 0.0008;
-            const damping = 0.75;
-            const maxV = 6.0;
+            const repulsion = 2200;
+            const springLen = 160;
+            const springK = 0.02;
+            const centerGravity = 0.0006;
+            const damping = 0.52; // High damping absorbs oscillation quickly without shaking!
+            const maxV = 2.5;
 
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
@@ -2466,8 +2519,8 @@
                     const n2 = nodes[j];
                     const dx = n2.x - n1.x;
                     const dy = n2.y - n1.y;
-                    const distSq = dx * dx + dy * dy + 25;
-                    if (distSq > 220000) continue; // Distance cutoff
+                    const distSq = dx * dx + dy * dy + 400; // Softening radius eliminates jitter
+                    if (distSq > 220000) continue;
                     const dist = Math.sqrt(distSq);
                     const force = (repulsion / distSq) * alpha;
                     const fx = (dx / dist) * force;
@@ -2514,7 +2567,7 @@
                 n.y += n.vy;
             }
 
-            alpha *= 0.985; // Cool down temperature
+            alpha *= 0.965; // Cool down temperature smoothly
 
             renderGraph();
             animationFrameId = requestAnimationFrame(simulateGraph);
@@ -2554,11 +2607,14 @@
             ctx.restore();
         }
 
+        let dragStartPos = { x: 0, y: 0 };
+
         function setupGraphEvents() {
             canvas.addEventListener('mousedown', (e) => {
                 const rect = canvas.getBoundingClientRect();
                 const mouseX = (e.clientX - rect.left - transform.x) / transform.k;
                 const mouseY = (e.clientY - rect.top - transform.y) / transform.k;
+                dragStartPos = { x: e.clientX, y: e.clientY };
 
                 let clicked = null;
                 for (const n of nodes) {
@@ -2573,8 +2629,7 @@
                     draggedNode = clicked;
                     draggedNode.vx = 0;
                     draggedNode.vy = 0;
-                    wakeGraph(0.25);
-                    openNoteDrawer(clicked.id, clicked.label);
+                    wakeGraph(0.12);
                 } else {
                     isDragging = true;
                     dragStart = { x: e.clientX - transform.x, y: e.clientY - transform.y };
@@ -2591,7 +2646,8 @@
                     draggedNode.y = mouseY;
                     draggedNode.vx = 0;
                     draggedNode.vy = 0;
-                    wakeGraph(0.2);
+                    alpha = Math.max(alpha, 0.08); // Gentle wake, doesn't shake or tremble
+                    renderGraph();
                 } else if (isDragging) {
                     transform.x = e.clientX - dragStart.x;
                     transform.y = e.clientY - dragStart.y;
@@ -2609,12 +2665,17 @@
                 }
             });
 
-            window.addEventListener('mouseup', () => {
+            window.addEventListener('mouseup', (e) => {
                 if (draggedNode) {
+                    const distMoved = Math.hypot(e.clientX - dragStartPos.x, e.clientY - dragStartPos.y);
+                    if (distMoved < 6) {
+                        // Quick click without drag: open drawer!
+                        openNoteDrawer(draggedNode.id, draggedNode.label);
+                    }
                     draggedNode.vx = 0;
                     draggedNode.vy = 0;
                     draggedNode = null;
-                    wakeGraph(0.1);
+                    alpha = 0.04;
                 }
                 isDragging = false;
             });
