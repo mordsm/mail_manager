@@ -1,6 +1,6 @@
 # Personal Map of Content (MOC)
 
-**Domain**: `personal` | **Last Synthesized**: 2026-10-17
+**Domain**: `personal` | **Last Synthesized**: 2026-10-18
 
 > Navigation map generated per AGENTS.md MOC specification.
 

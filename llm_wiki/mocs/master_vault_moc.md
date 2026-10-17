@@ -1,6 +1,6 @@
 # Master Vault Map of Content (MOC)
 
-**Generated**: 2026-10-17
+**Generated**: 2026-10-18
 
 ## Domain Maps of Content
 - [[personal_moc]] — 1 active notes

@@ -1,9 +1,9 @@
 # LLM Wiki Knowledge Gap & Integrity Report
 
-- **Total Wiki Notes Analyzed**: 62
+- **Total Wiki Notes Analyzed**: 64
 - **Broken Links Detected**: 91
-- **Orphan Notes**: 32
-- **Missing Frontmatter**: 16
+- **Orphan Notes**: 34
+- **Missing Frontmatter**: 18
 
 ## Broken Links
 - Note `wiki\business\index.md` links to missing target `[[business_moc]]`
@@ -103,6 +103,8 @@
 - Note `[[2026-09-28]]` has 0 incoming links.
 - Note `[[2026-10-13]]` has 0 incoming links.
 - Note `[[2026-10-14]]` has 0 incoming links.
+- Note `[[2026-10-15]]` has 0 incoming links.
+- Note `[[2026-10-17]]` has 0 incoming links.
 - Note `[[topic_index]]` has 0 incoming links.
 - Note `[[fastapi-routing]]` has 0 incoming links.
 - Note `[[development-session-api-test-capture]]` has 0 incoming links.

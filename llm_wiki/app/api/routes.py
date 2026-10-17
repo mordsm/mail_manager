@@ -98,6 +98,7 @@ async def ingest_text(
 
 @router.post("/query")
 @router.post("/rag/query")
+@router.post("/ask")
 async def query_wiki(
     query: str = Form(...),
     domain: str = Form("all"),

@@ -1,6 +1,6 @@
 vault_name: LLM Wiki & Connected Vaults
-timestamp: '2026-10-17T22:12:56.686157'
-total_notes: 312
+timestamp: '2026-10-17T23:26:16.540949'
+total_notes: 315
 connected_external_vaults:
 - name: domain_content_manager
   path: 10_Projects/domain_content_manager
@@ -227,9 +227,12 @@ deep_research_sessions:
     files:
     - overview.md
 decisions:
-  total: 1
+  total: 4
   records:
   - 2026-09-27_primary_evidence_source
+  - 2026-10-14-rag-fusion-architecture
+  - 2026-10-15-obsidian-first-principle
+  - 2026-10-17-personal-intelligence-os-architecture
 mocs:
 - auto-classify-overview
 - business_moc
