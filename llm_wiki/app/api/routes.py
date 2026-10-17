@@ -616,6 +616,116 @@ async def create_uncreated_note(
         "message": f"פתק חדש נוצר בהצלחה: {target_file}"
     }
 
+@router.post("/wiki/note/save")
+async def save_wiki_note(
+    path: str = Form(...),
+    content: str = Form(...),
+    title: Optional[str] = Form(None),
+    domain: Optional[str] = Form(None),
+    tags: Optional[str] = Form(None)
+):
+    """
+    Saves and updates a Markdown note in the vault, preserving YAML frontmatter
+    and updating the timestamp. Also triggers MOC sync.
+    """
+    target = Path(path)
+    if not target.exists():
+        target = Path(".") / path
+        if not target.exists():
+            raise HTTPException(status_code=404, detail=f"Target file not found: {path}")
+
+    try:
+        post = frontmatter.load(target)
+    except Exception:
+        post = frontmatter.Post("")
+
+    post.content = content
+    if title:
+        post.metadata["title"] = title
+    if domain:
+        post.metadata["domain"] = domain
+    if tags:
+        tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+        post.metadata["tags"] = tag_list
+    post.metadata["updated"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    target.write_text(frontmatter.dumps(post), encoding="utf-8")
+    moc_service.rebuild_domain_mocs()
+
+    return {
+        "status": "success",
+        "path": str(target),
+        "title": post.metadata.get("title", target.stem),
+        "message": "הפתק נשמר ועודכן בהצלחה בכספת!"
+    }
+
+@router.post("/wiki/note/upload-media")
+async def upload_note_media(
+    file: UploadFile = File(...)
+):
+    """
+    Uploads an image, video, or audio file, saves it into attachments/,
+    and returns Markdown / HTML embed code to insert into the note editor.
+    """
+    attachments_dir = Path("attachments")
+    attachments_dir.mkdir(parents=True, exist_ok=True)
+
+    clean_stem = re.sub(r"[^\w\s-]", "", Path(file.filename).stem).strip().replace(" ", "_")
+    suffix = Path(file.filename).suffix.lower()
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    target_filename = f"{clean_stem}_{timestamp}{suffix}"
+    target_path = attachments_dir / target_filename
+
+    with open(target_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    url = f"/attachments/{target_filename}"
+    is_video = suffix in [".mp4", ".webm", ".mov", ".m4v"]
+    is_image = suffix in [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"]
+
+    if is_video:
+        embed_code = f'\n<video src="{url}" controls style="max-width: 100%; border-radius: 8px; margin: 0.75rem 0;"></video>\n'
+    elif is_image:
+        embed_code = f"\n![{clean_stem}]({url})\n"
+    else:
+        embed_code = f"\n[{target_filename}]({url})\n"
+
+    return {
+        "status": "success",
+        "filename": target_filename,
+        "url": url,
+        "embed_code": embed_code,
+        "is_video": is_video,
+        "is_image": is_image
+    }
+
+@router.get("/memory/decisions/all")
+async def get_all_decisions():
+    """
+    Retrieves all architectural and research decisions from 40_Decisions/*.md.
+    """
+    dec_dir = Path("40_Decisions")
+    decisions = []
+    if dec_dir.exists():
+        for f in dec_dir.glob("*.md"):
+            try:
+                post = frontmatter.load(f)
+                decisions.append({
+                    "id": f.stem,
+                    "title": post.get("topic") or post.get("title") or f.stem.replace("_", " ").title(),
+                    "topic": post.get("topic") or f.stem,
+                    "decision": post.get("decision") or post.content[:200],
+                    "reason": post.get("reason") or post.get("rationale") or "",
+                    "created": post.get("created") or post.get("date") or "",
+                    "resolved_by": post.get("resolved_by") or post.get("author") or "Human Lead",
+                    "path": str(f)
+                })
+            except Exception:
+                pass
+
+    decisions.sort(key=lambda d: str(d.get("created", "")), reverse=True)
+    return {"total": len(decisions), "decisions": decisions}
+
 @router.get("/vault/inventory")
 async def get_vault_inventory(format: str = "json"):
     """

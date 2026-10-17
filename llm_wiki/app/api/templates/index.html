@@ -735,6 +735,10 @@
                     <option value="1.15">1.15x</option>
                     <option value="1.3">1.3x</option>
                 </select>
+                <label for="voiceEngineSelect" style="margin: 0; font-size: 0.85rem; color: #94a3b8;">🗣️ קול / Voice:</label>
+                <select id="voiceEngineSelect" class="voice-lang-select" style="max-width: 170px;">
+                    <option value="">טוען קולות טבעיים...</option>
+                </select>
                 <button type="button" id="headerDialogueBtn" class="dialogue-toggle-btn" onclick="toggleContinuousDialogue()">
                     🎙️ שיחה רציפה: כבוי
                 </button>
@@ -999,6 +1003,22 @@
             <div id="contradictionsContainer">
                 <p style="color: var(--text-muted);">Loading contradictions from vault...</p>
             </div>
+
+            <!-- Formal Decisions Section (40_Decisions) -->
+            <div style="margin-top: 2.25rem; border-top: 1px solid var(--border-glass); padding-top: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;">
+                    <div>
+                        <h3 style="margin: 0; color: #38bdf8; font-size: 1.25rem;">📜 החלטות מחייבות שנקבעו בכספת (40_Decisions)</h3>
+                        <p style="margin: 0.25rem 0 0 0; color: var(--text-muted); font-size: 0.88rem;">
+                            כל ההחלטות הארכיטקטוניות והמדעיות שנחתמו על ידי המנהל ומחייבות את כל סוכני המחקר.
+                        </p>
+                    </div>
+                    <button class="btn-secondary" onclick="loadDecisionsList()" style="padding: 0.4rem 0.85rem; font-size: 0.85rem; background: rgba(56,189,248,0.15); border-color: #38bdf8; color: #38bdf8;">🔄 רענן החלטות</button>
+                </div>
+                <div id="decisionsListContainer">
+                    <p style="color: var(--text-muted);">טוען החלטות מהכספת...</p>
+                </div>
+            </div>
         </div>
 
         <!-- ==================== TAB 4: NOTE / TEXT INGESTION ==================== -->
@@ -1153,15 +1173,16 @@
             </div>
         </div>
 
-        <!-- ==================== TAB 7: KNOWLEDGE GRAPH ==================== -->
+        <!-- ==================== TAB 7: KNOWLEDGE GRAPH & YAML TOPICS ==================== -->
         <div id="graphTab" class="tab-content">
             <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; align-items: center; flex-wrap: wrap;">
-                <input type="text" id="graphSearchInput" placeholder="🔍 Search note by title or domain..." oninput="filterGraph()" style="flex: 1; min-width: 200px;">
-                <button onclick="openVaultYamlModal()" class="btn-secondary" style="background: rgba(56, 189, 248, 0.2); border: 1px solid #38bdf8; color: #38bdf8; font-weight: 600;">📋 הצג מבנה כספת כ-YAML</button>
-                <button onclick="rebuildMOCs()" class="btn-secondary" style="background: #10b981; color: #fff; font-weight: 600;">⚡ Rebuild Maps of Content (MOCs)</button>
-                <button onclick="loadGraphData()" class="btn-secondary" style="background: #0284c7; color: #fff;">🔄 Reset Graph</button>
+                <input type="text" id="graphSearchInput" placeholder="🔍 חפש נושא או פתק במפה או בעץ..." oninput="filterGraphAndTree()" style="flex: 1; min-width: 200px;">
+                <button onclick="openVaultYamlModal()" class="btn-secondary" style="background: rgba(56, 189, 248, 0.2); border: 1px solid #38bdf8; color: #38bdf8; font-weight: 600;">📋 ייצוא YAML מלא</button>
+                <button onclick="rebuildMOCs()" class="btn-secondary" style="background: #10b981; color: #fff; font-weight: 600;">⚡ סנכרן מפות תוכן (MOCs)</button>
+                <button onclick="loadGraphData(); loadYamlTree();" class="btn-secondary" style="background: #0284c7; color: #fff;">🔄 רענן מפה ועץ</button>
             </div>
 
+            <!-- Legend -->
             <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem; font-size: 0.85rem; color: #94a3b8;">
                 <div style="display: flex; align-items: center; gap: 0.35rem;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #06b6d4; display: inline-block;"></span> Domain Content Manager</div>
                 <div style="display: flex; align-items: center; gap: 0.35rem;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #38bdf8; display: inline-block;"></span> Projects (10_Projects)</div>
@@ -1172,44 +1193,84 @@
                 <div style="display: flex; align-items: center; gap: 0.35rem;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #64748b; display: inline-block;"></span> 🔗 מושגים שטרם נכתבו</div>
             </div>
 
-            <div id="graphContainer" style="position: relative;">
-                <canvas id="graphCanvas"></canvas>
+            <!-- Split Layout: Graph Canvas (60%) + YAML Topics Tree (40%) -->
+            <div class="graph-split-container" style="display: flex; gap: 1rem; height: calc(100vh - 250px); min-height: 580px; position: relative;">
+                
+                <!-- Graph Canvas Side -->
+                <div id="graphContainer" style="flex: 1.35; position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-glass); background: #080d1a;">
+                    <canvas id="graphCanvas"></canvas>
 
-                <!-- Floating Interactive Controls -->
-                <div class="graph-toolbar">
-                    <button type="button" onclick="spreadGraphWide()" class="graph-tool-btn" title="פיזור רחב של כל הצמתים על פני שטח נרחב">↔️ פיזור רחב (Spread Wide)</button>
-                    <button type="button" onclick="zoomGraph(1.25)" class="graph-tool-btn" title="הגדל תצוגה">➕ הגדל</button>
-                    <button type="button" onclick="zoomGraph(0.8)" class="graph-tool-btn" title="הקטן תצוגה">➖ הקטן</button>
-                    <button type="button" onclick="fitGraphView()" class="graph-tool-btn" title="מרכז את הגרף למסך">🎯 מרכז תצוגה</button>
-                    <button type="button" onclick="togglePhysicsPause()" id="pausePhysicsBtn" class="graph-tool-btn" title="הקפא או הפעל תנועה">⏸️ הקפא תנועה</button>
+                    <!-- Floating Interactive Controls -->
+                    <div class="graph-toolbar">
+                        <button type="button" onclick="spreadGraphWide()" class="graph-tool-btn" title="פיזור רחב של כל הצמתים">↔️ פיזור רחב</button>
+                        <button type="button" onclick="zoomGraph(1.25)" class="graph-tool-btn" title="הגדל">➕ הגדל</button>
+                        <button type="button" onclick="zoomGraph(0.8)" class="graph-tool-btn" title="הקטן">➖ הקטן</button>
+                        <button type="button" onclick="fitGraphView()" class="graph-tool-btn" title="מרכז">🎯 מרכז</button>
+                        <button type="button" onclick="togglePhysicsPause()" id="pausePhysicsBtn" class="graph-tool-btn">⏸️ הקפא</button>
+                    </div>
                 </div>
 
-                <!-- Interactive Note Preview Drawer -->
-                <div id="graphNoteDrawer" style="position: absolute; top: 0; right: -430px; width: 410px; height: 100%; background: rgba(15, 23, 42, 0.96); backdrop-filter: blur(20px); border-left: 1px solid rgba(255,255,255,0.15); box-shadow: -15px 0 35px rgba(0,0,0,0.7); transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1); padding: 1.5rem; overflow-y: auto; z-index: 50; display: flex; flex-direction: column;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
-                        <div>
+                <!-- YAML Topics Tree Side -->
+                <div id="yamlTopicsPanel" style="flex: 0.95; background: #090e1a; border: 1px solid var(--border-glass); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden;">
+                    <div style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-glass); background: rgba(255,255,255,0.03); display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 700; color: #38bdf8; font-size: 0.92rem;">📑 עץ נושאים ופתקים (YAML Explorer)</span>
+                        <span id="yamlTreeCountBadge" class="badge" style="background: rgba(56,189,248,0.15); color: #38bdf8;">טוען...</span>
+                    </div>
+                    <div id="yamlTreeContainer" style="flex: 1; overflow-y: auto; padding: 0.75rem 1rem; font-family: monospace; font-size: 0.86rem; line-height: 1.6;">
+                        <p style="color: var(--text-muted);">טוען עץ נושאים...</p>
+                    </div>
+                </div>
+
+                <!-- Interactive Note Inspector & Full Markdown Editor Drawer -->
+                <div id="graphNoteDrawer" style="position: absolute; top: 0; right: -530px; width: 510px; height: 100%; background: rgba(15, 23, 42, 0.97); backdrop-filter: blur(25px); border-left: 1px solid rgba(56, 189, 248, 0.3); box-shadow: -20px 0 45px rgba(0,0,0,0.85); transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1); padding: 1.25rem; overflow-y: auto; z-index: 60; display: flex; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                        <div style="flex: 1; margin-right: 0.5rem;">
                             <span id="drawerDomainBadge" class="badge" style="background: #38bdf8; margin-bottom: 0.35rem;">Domain</span>
-                            <h3 id="drawerNoteTitle" style="margin: 0; color: #fff; font-size: 1.25rem; line-height: 1.3;">Note Title</h3>
+                            <input type="text" id="drawerTitleInput" style="width: 100%; font-size: 1.15rem; font-weight: 700; color: #fff; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 4px 8px;" placeholder="כותרת הפתק">
                         </div>
                         <button onclick="closeNoteDrawer()" style="background: transparent; border: none; color: #94a3b8; font-size: 1.4rem; cursor: pointer; padding: 0.2rem 0.5rem;">✕</button>
                     </div>
-                    <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.85rem;"><code id="drawerNotePath">path/to/note.md</code></div>
+                    <div style="font-size: 0.78rem; color: #64748b; margin-bottom: 0.65rem;"><code id="drawerNotePath">path/to/note.md</code></div>
 
-                    <div id="drawerLinksSection" style="margin-bottom: 0.85rem;">
-                        <div style="font-size: 0.82rem; font-weight: bold; color: var(--accent-cyan); margin-bottom: 0.35rem;">🔗 Outbound Links</div>
-                        <div id="drawerOutboundLinks" style="display: flex; gap: 0.35rem; flex-wrap: wrap;"></div>
+                    <!-- Links Summary -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.65rem;">
+                        <div style="background: rgba(0,0,0,0.25); padding: 0.5rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                            <div style="font-size: 0.76rem; font-weight: bold; color: var(--accent-cyan); margin-bottom: 0.25rem;">🔗 קישורים יוצאים</div>
+                            <div id="drawerOutboundLinks" style="display: flex; gap: 0.25rem; flex-wrap: wrap; max-height: 50px; overflow-y: auto;"></div>
+                        </div>
+                        <div style="background: rgba(0,0,0,0.25); padding: 0.5rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                            <div style="font-size: 0.76rem; font-weight: bold; color: #a855f7; margin-bottom: 0.25rem;">⬅️ קישורים נכנסים (Backlinks)</div>
+                            <div id="drawerBacklinks" style="display: flex; gap: 0.25rem; flex-wrap: wrap; max-height: 50px; overflow-y: auto;"></div>
+                        </div>
                     </div>
 
-                    <div id="drawerBacklinksSection" style="margin-bottom: 0.85rem;">
-                        <div style="font-size: 0.82rem; font-weight: bold; color: #a855f7; margin-bottom: 0.35rem;">⬅️ Inbound Backlinks</div>
-                        <div id="drawerBacklinks" style="display: flex; gap: 0.35rem; flex-wrap: wrap;"></div>
+                    <!-- Toolbar for Note Editing & Media Upload -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.5rem;">
+                        <span style="font-size: 0.82rem; font-weight: bold; color: #cbd5e1;">📝 עריכת תוכן הפתק (Markdown)</span>
+                        <div style="display: flex; gap: 0.4rem;">
+                            <input type="file" id="drawerMediaUpload" accept="image/*,video/*" style="display: none;" onchange="uploadDrawerMedia(this)">
+                            <button type="button" class="btn-secondary" style="padding: 0.3rem 0.75rem; font-size: 0.8rem; background: rgba(56, 189, 248, 0.15); border-color: #38bdf8; color: #38bdf8;" onclick="document.getElementById('drawerMediaUpload').click()">
+                                📷 הוסף תמונה / סרטון
+                            </button>
+                        </div>
                     </div>
 
-                    <div style="font-size: 0.85rem; font-weight: bold; color: #cbd5e1; margin-bottom: 0.35rem;">📄 Content Preview</div>
-                    <div id="drawerContentBody" dir="auto" style="flex: 1; background: rgba(0,0,0,0.35); border-radius: 8px; padding: 1rem; font-size: 0.9rem; line-height: 1.6; color: #e2e8f0; white-space: pre-wrap; overflow-y: auto; border: 1px solid rgba(255,255,255,0.06);"></div>
+                    <!-- Content Editor Textarea -->
+                    <textarea id="drawerContentEditor" dir="auto" style="flex: 1; min-height: 240px; background: #070b14; border-radius: 8px; padding: 0.85rem; font-size: 0.88rem; line-height: 1.6; color: #e2e8f0; font-family: monospace; resize: vertical; border: 1px solid rgba(255,255,255,0.12); margin-bottom: 0.75rem;"></textarea>
+
+                    <div id="drawerUncreatedActions" style="display: none; margin-bottom: 0.75rem;"></div>
+
+                    <!-- Save & Actions Bar -->
+                    <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                        <button type="button" class="btn-secondary" style="padding: 0.5rem 1rem;" onclick="closeNoteDrawer()">סגור</button>
+                        <button type="button" class="btn-primary" id="drawerSaveBtn" style="background: #16a34a; padding: 0.5rem 1.25rem; width: auto;" onclick="saveDrawerNote()">
+                            💾 שמור שינויים בכספת
+                        </button>
+                    </div>
                 </div>
+
             </div>
-            <p id="graphStats" style="color: #94a3b8; font-size: 0.9rem; margin-top: 0.5rem;">Loading graph...</p>
+            <p id="graphStats" style="color: #94a3b8; font-size: 0.9rem; margin-top: 0.5rem;">טוען מפת קשרים ועץ נושאים...</p>
         </div>
 
         <!-- Global Status Box -->
@@ -1244,10 +1305,10 @@
 
             if (tabId === 'gapsTab') loadProactiveGaps();
             if (tabId === 'fileTab') fetchInboxStatus();
-            if (tabId === 'contradictionsTab') loadContradictions();
+            if (tabId === 'contradictionsTab') { loadContradictions(); loadDecisionsList(); }
             if (tabId === 'researchTab') loadResearchHistory();
             if (tabId === 'memoryTab') fetchMemoryOverview();
-            if (tabId === 'graphTab') initGraph();
+            if (tabId === 'graphTab') { initGraph(); loadYamlTree(); }
         }
 
         /* --- BI-DIRECTIONAL CONVERSATIONAL VOICE MODE (שימוש בקול לשני הכיוונים) --- */
@@ -1307,9 +1368,7 @@
                     mainBtn.classList.add('active');
                 }
                 activateTab('askTab');
-                speakCleanText('מצב שיחה קולי דו-כיווני הופעל. אני מקשיב לשאלתך.', () => {
-                    startDialogueListening();
-                });
+                startDialogueListening();
             } else {
                 if (headerBtn) {
                     headerBtn.textContent = '🎙️ שיחה רציפה: כבוי';
@@ -1405,6 +1464,56 @@
             }
         }
 
+        let availableVoices = [];
+
+        function populateVoiceList() {
+            if (!('speechSynthesis' in window)) return;
+            availableVoices = window.speechSynthesis.getVoices();
+            const voiceSelect = document.getElementById('voiceEngineSelect');
+            if (!voiceSelect || availableVoices.length === 0) return;
+
+            const prevSelection = voiceSelect.value;
+            voiceSelect.innerHTML = '';
+
+            // Sort voices: Hebrew first, then English, prioritizing Natural/Online/Google/Neural
+            const sorted = [...availableVoices].sort((a, b) => {
+                const aHe = a.lang.toLowerCase().startsWith('he');
+                const bHe = b.lang.toLowerCase().startsWith('he');
+                if (aHe && !bHe) return -1;
+                if (!aHe && bHe) return 1;
+
+                const aNat = /natural|online|google|neural/i.test(a.name);
+                const bNat = /natural|online|google|neural/i.test(b.name);
+                if (aNat && !bNat) return -1;
+                if (!aNat && bNat) return 1;
+
+                return a.name.localeCompare(b.name);
+            });
+
+            sorted.forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = v.name;
+                const isNat = /natural|online|google|neural/i.test(v.name);
+                opt.textContent = `${isNat ? '🌟 ' : ''}${v.name} (${v.lang})`;
+                voiceSelect.appendChild(opt);
+            });
+
+            if (prevSelection && sorted.some(v => v.name === prevSelection)) {
+                voiceSelect.value = prevSelection;
+            } else {
+                // Auto-select best natural Hebrew voice
+                const best = sorted.find(v => v.lang.toLowerCase().startsWith('he') && /natural|online|google|neural/i.test(v.name)) 
+                          || sorted.find(v => v.lang.toLowerCase().startsWith('he'))
+                          || sorted[0];
+                if (best) voiceSelect.value = best.name;
+            }
+        }
+
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = populateVoiceList;
+            populateVoiceList();
+        }
+
         function cleanTextForSpeech(text) {
             if (!text) return '';
 
@@ -1422,7 +1531,6 @@
                 // 5. Remove any brackets and citations like [1], [2], [ref]
                 .replace(/\[[^\]]*\]/g, ' ')
                 // 6. Parentheses: strip parenthesis symbols ( ) completely without pronouncing "פתח סוגריים"
-                // If it's a file path or citation in parentheses, remove it entirely
                 .replace(/\([a-zA-Z0-9_\-/\\]+\)/g, ' ')
                 .replace(/[\(\)\[\]\{\}\<\>]/g, ' ')
                 // 7. Strip number dots at start of lines (e.g. "1. " -> "ראשית, ", "2. " -> "שנית, " or remove dot)
@@ -1482,6 +1590,21 @@
             const utterance = new SpeechSynthesisUtterance(text);
             const isHebrew = /[\u0590-\u05FF]/.test(text);
             utterance.lang = isHebrew ? 'he-IL' : 'en-US';
+
+            const voiceSelect = document.getElementById('voiceEngineSelect');
+            const selectedVoiceName = voiceSelect ? voiceSelect.value : null;
+
+            let matchedVoice = null;
+            if (selectedVoiceName && availableVoices.length > 0) {
+                matchedVoice = availableVoices.find(v => v.name === selectedVoiceName);
+            }
+            if (!matchedVoice && availableVoices.length > 0) {
+                matchedVoice = availableVoices.find(v => (isHebrew ? v.lang.toLowerCase().startsWith('he') : v.lang.toLowerCase().startsWith('en')) && /natural|online|google|neural/i.test(v.name))
+                            || availableVoices.find(v => isHebrew ? v.lang.toLowerCase().startsWith('he') : v.lang.toLowerCase().startsWith('en'));
+            }
+            if (matchedVoice) {
+                utterance.voice = matchedVoice;
+            }
 
             const rateSelect = document.getElementById('voiceRateSelect');
             utterance.rate = rateSelect ? parseFloat(rateSelect.value) : 1.0;
@@ -2146,6 +2269,56 @@
             }
         }
 
+        async function loadDecisionsList() {
+            const container = document.getElementById('decisionsListContainer');
+            if (!container) return;
+            container.innerHTML = '<p style="color: var(--text-muted);">טוען החלטות ארכיטקטוניות ומתודולוגיות מהכספת...</p>';
+
+            try {
+                const res = await fetch('/api/v1/memory/decisions/all');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const data = await res.json();
+
+                if (!data.decisions || data.decisions.length === 0) {
+                    container.innerHTML = `
+                        <div class="card" style="text-align: center; padding: 2rem; background: rgba(15,23,42,0.4);">
+                            <p style="color: var(--text-muted); margin: 0;">לא נמצאו רשומות החלטה בתיקיית <code>40_Decisions/</code>.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = data.decisions.map(d => `
+                    <div class="card" style="margin-bottom: 1rem; border: 1px solid rgba(56, 189, 248, 0.25); background: rgba(15, 23, 42, 0.7);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                            <div>
+                                <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; margin-left: 0.5rem;">⚖️ DECISION</span>
+                                <span class="badge" style="background: #334155; color: #cbd5e1;">${d.created || 'תאריך לא צוין'}</span>
+                                <h4 style="margin: 0.4rem 0 0.2rem 0; color: #38bdf8; font-size: 1.1rem;">${d.title}</h4>
+                            </div>
+                            <button class="btn-secondary" style="padding: 0.35rem 0.8rem; font-size: 0.8rem; background: rgba(56, 189, 248, 0.15); border-color: #38bdf8; color: #38bdf8;" onclick="activateTab('graphTab'); openNoteDrawer('${d.path}', '${d.title}')">
+                                ✏️ פתח וערוך החלטה בכספת
+                            </button>
+                        </div>
+                        <div style="margin-top: 0.6rem; padding: 0.75rem; background: rgba(0,0,0,0.3); border-radius: 6px; font-size: 0.92rem; line-height: 1.5; color: #e2e8f0;">
+                            <strong>ההחלטה:</strong> ${d.decision}
+                        </div>
+                        ${d.reason ? `
+                            <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #94a3b8;">
+                                <strong style="color: #cbd5e1;">נימוק ורציונל:</strong> ${d.reason}
+                            </div>
+                        ` : ''}
+                        <div style="margin-top: 0.5rem; font-size: 0.78rem; color: #64748b; display: flex; justify-content: space-between;">
+                            <span>קובץ מקור: <code>${d.path}</code></span>
+                            <span>נחתם ע"י: <strong>${d.resolved_by}</strong></span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                container.innerHTML = '<p style="color: #ef4444;">שגיאה בטעינת החלטות: ' + err.message + '</p>';
+            }
+        }
+
         /* --- NOTE & FILE INGESTION LOGIC --- */
         const dropzone = document.getElementById('dropzone');
         const fileInput = document.getElementById('fileInput');
@@ -2772,18 +2945,27 @@
             } catch (e) {}
         }
 
+        let currentDrawerNotePath = '';
+        let currentDrawerNoteDomain = 'research';
+
         async function openNoteDrawer(noteId, noteTitle) {
             const drawer = document.getElementById('graphNoteDrawer');
-            const titleEl = document.getElementById('drawerNoteTitle');
+            const titleInput = document.getElementById('drawerTitleInput');
             const pathEl = document.getElementById('drawerNotePath');
             const badgeEl = document.getElementById('drawerDomainBadge');
             const outboundEl = document.getElementById('drawerOutboundLinks');
             const backlinksEl = document.getElementById('drawerBacklinks');
-            const contentEl = document.getElementById('drawerContentBody');
+            const editor = document.getElementById('drawerContentEditor');
+            const uncreatedDiv = document.getElementById('drawerUncreatedActions');
+            const saveBtn = document.getElementById('drawerSaveBtn');
 
-            titleEl.textContent = noteTitle || noteId;
+            titleInput.value = noteTitle || noteId;
             pathEl.textContent = 'טוען פרטי פתק...';
-            contentEl.textContent = 'מאתר תוכן, מטא-דאטה וקישורים מקושרים...';
+            editor.value = 'טוען תוכן מהכספת...';
+            if (uncreatedDiv) {
+                uncreatedDiv.style.display = 'none';
+                uncreatedDiv.innerHTML = '';
+            }
             outboundEl.innerHTML = '';
             backlinksEl.innerHTML = '';
             drawer.style.right = '0px';
@@ -2793,26 +2975,30 @@
                 if (!res.ok) throw new Error('Note not found or unreadable');
                 const data = await res.json();
 
-                titleEl.textContent = data.title;
+                currentDrawerNotePath = data.path || noteId;
+                currentDrawerNoteDomain = data.domain || 'research';
+                titleInput.value = data.title;
                 pathEl.textContent = data.path || '(ערך מושגי שטרם נשמר כקובץ)';
                 badgeEl.textContent = data.is_uncreated ? '🔗 מושג מוזכר (טרם נכתב)' : (data.domain ? data.domain.toUpperCase() : 'WIKI');
                 badgeEl.style.background = data.is_uncreated ? 'rgba(239, 68, 68, 0.2)' : 'rgba(56, 189, 248, 0.2)';
                 badgeEl.style.borderColor = data.is_uncreated ? '#ef4444' : 'var(--accent-cyan)';
                 badgeEl.style.color = data.is_uncreated ? '#fca5a5' : 'var(--accent-cyan)';
 
+                editor.value = data.content || '';
+
                 if (data.is_uncreated) {
-                    contentEl.innerHTML = `
-                        <div style="line-height: 1.6; color: #cbd5e1; margin-bottom: 1.25rem;">
-                            ${data.content.replace(/\n/g, '<br>')}
-                        </div>
-                        <div style="padding: 1.1rem; background: rgba(14, 165, 233, 0.1); border: 1px dashed #38bdf8; border-radius: 10px; text-align: center;">
-                            <div style="font-weight: 700; color: #38bdf8; margin-bottom: 0.5rem;">רוצה להפוך מושג זה לפתק ידע מלא?</div>
-                            <p style="font-size: 0.82rem; color: #94a3b8; margin: 0 0 0.85rem 0;">הפתק ייווצר בכספת עם תגיות, ויקושרו אליו אוטומטית כל הפתקים הקיימים.</p>
-                            <button class="btn-primary" style="padding: 0.5rem 1.1rem; font-size: 0.88rem; background: #0284c7; width: auto;" onclick="createNoteFromStub('${encodeURIComponent(data.title)}')">⚡ צור פתק זה בכספת עכשיו</button>
-                        </div>
-                    `;
+                    if (uncreatedDiv) {
+                        uncreatedDiv.style.display = 'block';
+                        uncreatedDiv.innerHTML = `
+                            <div style="padding: 0.9rem; background: rgba(14, 165, 233, 0.1); border: 1px dashed #38bdf8; border-radius: 8px; text-align: center; margin-bottom: 0.5rem;">
+                                <div style="font-weight: 700; color: #38bdf8; margin-bottom: 0.35rem; font-size: 0.88rem;">רוצה להפוך מושג זה לפתק ידע מלא בכספת?</div>
+                                <button type="button" class="btn-primary" style="padding: 0.45rem 1rem; font-size: 0.82rem; background: #0284c7; width: auto;" onclick="createNoteFromStub('${encodeURIComponent(data.title)}')">⚡ צור פתק זה בכספת עכשיו</button>
+                            </div>
+                        `;
+                    }
+                    if (saveBtn) saveBtn.style.display = 'none';
                 } else {
-                    contentEl.textContent = data.content || 'No text content available.';
+                    if (saveBtn) saveBtn.style.display = 'inline-block';
                 }
 
                 if (data.outbound_links && data.outbound_links.length > 0) {
@@ -2820,7 +3006,7 @@
                         `<span class="badge" style="background: rgba(56,189,248,0.2); border: 1px solid rgba(56,189,248,0.4); color: #38bdf8; cursor: pointer;" onclick="openNoteDrawer('${l}', '${l}')">[[${l}]]</span>`
                     ).join('');
                 } else {
-                    outboundEl.innerHTML = '<span style="color: #64748b; font-size: 0.8rem;">None</span>';
+                    outboundEl.innerHTML = '<span style="color: #64748b; font-size: 0.8rem;">אין</span>';
                 }
 
                 if (data.backlinks && data.backlinks.length > 0) {
@@ -2828,10 +3014,94 @@
                         `<span class="badge" style="background: rgba(168,85,247,0.2); border: 1px solid rgba(168,85,247,0.4); color: #c084fc; cursor: pointer;" onclick="openNoteDrawer('${b.path}', '${b.title}')">[[${b.title}]]</span>`
                     ).join('');
                 } else {
-                    backlinksEl.innerHTML = '<span style="color: #64748b; font-size: 0.8rem;">None</span>';
+                    backlinksEl.innerHTML = '<span style="color: #64748b; font-size: 0.8rem;">אין</span>';
                 }
             } catch (err) {
-                contentEl.textContent = 'Could not load full note details: ' + err.message;
+                editor.value = 'Could not load full note details: ' + err.message;
+            }
+        }
+
+        async function saveDrawerNote() {
+            const saveBtn = document.getElementById('drawerSaveBtn');
+            const title = document.getElementById('drawerTitleInput').value.trim();
+            const content = document.getElementById('drawerContentEditor').value;
+
+            if (!currentDrawerNotePath) {
+                alert('לא נבחר פתק לשמירה.');
+                return;
+            }
+
+            const origText = saveBtn.textContent;
+            saveBtn.disabled = true;
+            saveBtn.textContent = '⏳ שומר בכספת...';
+
+            try {
+                const fd = new FormData();
+                fd.append('path', currentDrawerNotePath);
+                fd.append('title', title);
+                fd.append('content', content);
+                if (currentDrawerNoteDomain) fd.append('domain', currentDrawerNoteDomain);
+
+                const res = await fetch('/api/v1/wiki/note/save', {
+                    method: 'POST',
+                    body: fd
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || 'שגיאה בשמירת הפתק');
+                }
+
+                saveBtn.style.background = '#059669';
+                saveBtn.textContent = '✅ נשמר בהצלחה!';
+                setTimeout(() => {
+                    saveBtn.style.background = '#16a34a';
+                    saveBtn.textContent = origText;
+                    saveBtn.disabled = false;
+                }, 2200);
+
+                loadYamlTree();
+                loadGraphData();
+            } catch (err) {
+                alert('שגיאה בשמירה: ' + err.message);
+                saveBtn.disabled = false;
+                saveBtn.textContent = origText;
+            }
+        }
+
+        async function uploadDrawerMedia(inputEl) {
+            if (!inputEl.files || inputEl.files.length === 0) return;
+            const file = inputEl.files[0];
+
+            const editor = document.getElementById('drawerContentEditor');
+            const originalPos = editor.selectionStart || editor.value.length;
+
+            const fd = new FormData();
+            fd.append('file', file);
+
+            const prevPlaceholder = `\n⏳ מעלה קובץ מדיה [${file.name}]...\n`;
+            editor.value = editor.value.slice(0, originalPos) + prevPlaceholder + editor.value.slice(originalPos);
+
+            try {
+                const res = await fetch('/api/v1/wiki/note/upload-media', {
+                    method: 'POST',
+                    body: fd
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || 'העלאה נכשלה');
+                }
+
+                const data = await res.json();
+                const snippet = '\n' + (data.embed_code || data.markdown_embed || `![${file.name}](${data.url})`) + '\n';
+                editor.value = editor.value.replace(prevPlaceholder, snippet);
+                alert(`✅ הקובץ "${file.name}" הועלה בהצלחה והוטמע בפתק!`);
+            } catch (err) {
+                editor.value = editor.value.replace(prevPlaceholder, '');
+                alert('שגיאה בהעלאת קובץ מדיה: ' + err.message);
+            } finally {
+                inputEl.value = '';
             }
         }
 
@@ -2850,12 +3120,133 @@
                 alert(json.message);
                 openNoteDrawer(title, title);
                 loadGraphData();
+                loadYamlTree();
             } catch (e) {
                 alert('שגיאה ביצירת הפתק: ' + e.message);
             }
         }
 
-        /* --- VAULT YAML INVENTORY LOGIC --- */
+        /* --- YAML TOPICS EXPLORER TREE --- */
+        let vaultInventoryData = null;
+
+        async function loadYamlTree() {
+            const container = document.getElementById('yamlTreeContainer');
+            const badge = document.getElementById('yamlTreeCountBadge');
+            if (!container) return;
+
+            try {
+                const res = await fetch('/api/v1/vault/inventory?format=json');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                vaultInventoryData = await res.json();
+
+                if (badge) badge.textContent = `${vaultInventoryData.total_notes || 0} פתקים`;
+
+                let html = '';
+
+                // 1. External Connected Vaults
+                if (vaultInventoryData.connected_external_vaults && vaultInventoryData.connected_external_vaults.length > 0) {
+                    for (const ev of vaultInventoryData.connected_external_vaults) {
+                        html += `
+                            <div style="margin-bottom: 0.75rem;">
+                                <div style="font-weight: 700; color: #f59e0b; cursor: pointer; user-select: none;" onclick="toggleYamlNode('ev_${ev.name}')">
+                                    📁 <span style="color: #f59e0b;">connected_vault:</span> ${ev.name} <span class="badge" style="background: rgba(245,158,11,0.2); color: #fbbf24; font-size: 0.72rem;">${ev.total_notes} notes</span>
+                                </div>
+                                <div id="ev_${ev.name}" style="padding-right: 1.25rem; border-right: 2px solid rgba(245,158,11,0.3); margin-top: 0.35rem;">
+                        `;
+                        if (ev.subfolders) {
+                            for (const [folderName, count] of Object.entries(ev.subfolders)) {
+                                html += `
+                                    <div style="margin: 0.25rem 0; color: #cbd5e1;">
+                                        📂 <span style="color: #94a3b8;">${folderName}:</span> <span style="color: #64748b; font-size: 0.78rem;">(${count} פתקים)</span>
+                                    </div>
+                                `;
+                            }
+                        }
+                        html += `</div></div>`;
+                    }
+                }
+
+                // 2. Domains
+                if (vaultInventoryData.domains) {
+                    html += `<div style="font-weight: 700; color: #38bdf8; margin: 0.75rem 0 0.35rem 0;">📁 <span style="color: #38bdf8;">wiki_domains:</span></div>`;
+                    for (const [domainName, domainInfo] of Object.entries(vaultInventoryData.domains)) {
+                        html += `
+                            <div style="margin-bottom: 0.6rem; padding-right: 0.75rem;">
+                                <div style="font-weight: 600; color: #a855f7; cursor: pointer; user-select: none;" onclick="toggleYamlNode('dom_${domainName}')">
+                                    🗂️ <span style="color: #c084fc;">${domainName}:</span> <span class="badge" style="background: rgba(168,85,247,0.2); color: #c084fc; font-size: 0.72rem;">${domainInfo.total_notes || 0} פתקים</span>
+                                </div>
+                                <div id="dom_${domainName}" style="padding-right: 1.2rem; border-right: 2px solid rgba(168,85,247,0.3); margin-top: 0.25rem;">
+                        `;
+                        if (domainInfo.notes && domainInfo.notes.length > 0) {
+                            for (const n of domainInfo.notes) {
+                                const notePath = `wiki/${domainName}/${n}.md`;
+                                html += `
+                                    <div style="margin: 0.2rem 0; cursor: pointer; color: #e2e8f0;" onmouseover="this.style.color='#38bdf8'" onmouseout="this.style.color='#e2e8f0'" onclick="openNoteDrawer('${notePath}', '${n}')">
+                                        - 📄 <span style="text-decoration: underline dotted;">${n}</span>
+                                    </div>
+                                `;
+                            }
+                        } else {
+                            html += `<div style="color: #64748b; font-size: 0.78rem;">- (ריק)</div>`;
+                        }
+                        html += `</div></div>`;
+                    }
+                }
+
+                // 3. Decisions
+                if (vaultInventoryData.decisions && vaultInventoryData.decisions.records) {
+                    html += `
+                        <div style="margin-top: 0.75rem;">
+                            <div style="font-weight: 700; color: #10b981; cursor: pointer; user-select: none;" onclick="toggleYamlNode('yaml_decisions')">
+                                ⚖️ <span style="color: #34d399;">decisions:</span> <span class="badge" style="background: rgba(16,185,129,0.2); color: #34d399; font-size: 0.72rem;">${vaultInventoryData.decisions.total}</span>
+                            </div>
+                            <div id="yaml_decisions" style="padding-right: 1.2rem; border-right: 2px solid rgba(16,185,129,0.3); margin-top: 0.25rem;">
+                    `;
+                    for (const dec of vaultInventoryData.decisions.records) {
+                        const decPath = `40_Decisions/${dec}.md`;
+                        html += `
+                            <div style="margin: 0.2rem 0; cursor: pointer; color: #e2e8f0;" onmouseover="this.style.color='#34d399'" onmouseout="this.style.color='#e2e8f0'" onclick="openNoteDrawer('${decPath}', '${dec}')">
+                                - 📄 <span style="text-decoration: underline dotted;">${dec}</span>
+                            </div>
+                        `;
+                    }
+                    html += `</div></div>`;
+                }
+
+                // 4. MOCs
+                if (vaultInventoryData.mocs && vaultInventoryData.mocs.length > 0) {
+                    html += `
+                        <div style="margin-top: 0.75rem;">
+                            <div style="font-weight: 700; color: #38bdf8; cursor: pointer; user-select: none;" onclick="toggleYamlNode('yaml_mocs')">
+                                🗺️ <span style="color: #38bdf8;">maps_of_content (MOCs):</span> <span class="badge" style="background: rgba(56,189,248,0.2); color: #38bdf8; font-size: 0.72rem;">${vaultInventoryData.mocs.length}</span>
+                            </div>
+                            <div id="yaml_mocs" style="padding-right: 1.2rem; border-right: 2px solid rgba(56,189,248,0.3); margin-top: 0.25rem;">
+                    `;
+                    for (const moc of vaultInventoryData.mocs) {
+                        const mocPath = `mocs/${moc}.md`;
+                        html += `
+                            <div style="margin: 0.2rem 0; cursor: pointer; color: #e2e8f0;" onmouseover="this.style.color='#38bdf8'" onmouseout="this.style.color='#e2e8f0'" onclick="openNoteDrawer('${mocPath}', '${moc}')">
+                                - 📄 <span style="text-decoration: underline dotted;">${moc}</span>
+                            </div>
+                        `;
+                    }
+                    html += `</div></div>`;
+                }
+
+                container.innerHTML = html;
+            } catch (err) {
+                container.innerHTML = '<p style="color: #ef4444;">שגיאה בטעינת עץ הנושאים: ' + err.message + '</p>';
+            }
+        }
+
+        function toggleYamlNode(nodeId) {
+            const el = document.getElementById(nodeId);
+            if (el) {
+                el.style.display = (el.style.display === 'none') ? 'block' : 'none';
+            }
+        }
+
+        /* --- VAULT YAML INVENTORY MODAL LOGIC --- */
         let currentVaultYaml = '';
         async function openVaultYamlModal() {
             const modal = document.getElementById('vaultYamlModal');
@@ -2911,7 +3302,7 @@
         }
 
         function closeNoteDrawer() {
-            document.getElementById('graphNoteDrawer').style.right = '-430px';
+            document.getElementById('graphNoteDrawer').style.right = '-530px';
         }
 
         async function rebuildMOCs() {
