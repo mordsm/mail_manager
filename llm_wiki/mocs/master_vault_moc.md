@@ -4,11 +4,11 @@
 
 ## Domain Maps of Content
 - [[personal_moc]] — 1 active notes
-- [[research_moc]] — 58 active notes
+- [[research_moc]] — 76 active notes
 - [[business_moc]] — 0 active notes
 - [[competitive_moc]] — 0 active notes
 - [[development_moc]] — 3 active notes
-- [[domain_content_manager_moc]] — 241 notes (Domain Content Manager)
+- [[domain_content_manager_moc]] — 260 notes (Domain Content Manager)
 
 ## Active Projects (10_Projects)
 - [[domain_content_manager]]
