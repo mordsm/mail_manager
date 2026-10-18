@@ -17,6 +17,8 @@ class MarkdownParser:
 
         if path.suffix.lower() == ".docx":
             return self.parse_docx(path)
+        if path.suffix.lower() == ".pdf":
+            return self.parse_pdf(path)
 
         post = frontmatter.load(path)
         content = post.content
@@ -74,6 +76,30 @@ class MarkdownParser:
             "content": content,
             "wikilinks": self.extract_wikilinks(content),
             "tags": ["document", "docx"],
+        }
+
+    def parse_pdf(self, file_path: Union[str, Path]) -> Dict[str, Any]:
+        import fitz
+        path = Path(file_path)
+        paragraphs = []
+        try:
+            doc = fitz.open(path)
+            for page in doc:
+                text = page.get_text()
+                if text.strip():
+                    paragraphs.append(text.strip())
+        except Exception as e:
+            paragraphs = [f"Error extracting pdf: {e}"]
+
+        content = "\n\n".join(paragraphs)
+        return {
+            "path": str(path),
+            "filename": path.name,
+            "title": path.stem.replace("_", " ").title(),
+            "metadata": {"source_type": "pdf", "pages_count": len(paragraphs)},
+            "content": content,
+            "wikilinks": self.extract_wikilinks(content),
+            "tags": ["document", "pdf"],
         }
 
     def extract_wikilinks(self, text: str) -> List[Dict[str, str]]:

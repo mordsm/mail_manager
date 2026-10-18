@@ -11,3 +11,6 @@ system/db/*.db
 raw/**/*.docx
 raw/**/*.pdf
 *.docx
+wiki/assets/
+10_Projects/domain_content_manager
+

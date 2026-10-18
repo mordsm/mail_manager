@@ -1,11 +1,11 @@
 vault_name: LLM Wiki & Connected Vaults
-timestamp: '2026-10-17T23:26:16.540949'
-total_notes: 315
+timestamp: '2026-10-18T17:04:33.432763'
+total_notes: 372
 connected_external_vaults:
 - name: domain_content_manager
   path: 10_Projects/domain_content_manager
   source: c:\workspace\domain_content_manager\vault
-  total_notes: 240
+  total_notes: 260
   subfolders:
     00 Inbox:
       count: 216
@@ -39,7 +39,7 @@ connected_external_vaults:
       count: 0
       notes: []
     02 By Domain:
-      count: 23
+      count: 43
       notes:
       - מרק_כתום_מחזק_חיסון_עם_ג'ינג'ר,_כורכום_וחלב_קוקוס_0c2c3677
       - מרק_כתום_מחזק_חיסון_עם_ג'ינג'ר,_כורכום_וחלב_קוקוס_1523a96e
@@ -56,14 +56,16 @@ connected_external_vaults:
       - גידול_נענע,_לואיזה_ומנטה_בערוגות_ביתיות_ובאדניות_00b780a0
       - גידול_נענע,_לואיזה_ומנטה_בערוגות_ביתיות_ובאדניות_17f381dd
       - גידול_נענע,_לואיזה_ומנטה_בערוגות_ביתיות_ובאדניות_2784a972
-      - אינפוגרפיק_ציר_המעי-מוח_וייצור_סרוטונין_במערכת_העיכול_550d008d
-      - אינפוגרפיק_ציר_המעי-מוח_וייצור_סרוטונין_במערכת_העיכול_620f0470
-      - אינפוגרפיק_ציר_המעי-מוח_וייצור_סרוטונין_במערכת_העיכול_7eb8c50d
-      - אינפוגרפיק_ציר_המעי-מוח_וייצור_סרוטונין_במערכת_העיכול_fd0560e9
-      - טיפול_טבעי_בחיזוק_שורשי_השיער_ושיקום_הקרקפת_b26e4eb8
-      - פרוטוקול_מדיטציה_ומיינדפולנס_להפחתת_מתח_וחרדה_49373d27
-      - פרוטוקול_מדיטציה_ומיינדפולנס_להפחתת_מתח_וחרדה_ec0624ec
-      - פרוטוקול_מדיטציה_ומיינדפולנס_להפחתת_מתח_וחרדה_fc671ab4
+      - המדריך_העירוני_לגינון_00_מבוא_ותוכן
+      - המדריך_העירוני_לגינון_ביתי_טבעי_ספר_שלם
+      - המדריך_העירוני_לגינון_נספח_א_גינון_אנכי
+      - המדריך_העירוני_לגינון_נספח_ב_מאביקים_וחרקים_מועילים
+      - המדריך_העירוני_לגינון_נספח_ג_יומן_גינה
+      - המדריך_העירוני_לגינון_נספח_ד_היערכות_למזג_אוויר_קיצוני
+      - המדריך_העירוני_לגינון_נספח_ה_ערכת_כלים_ותחזוקה
+      - המדריך_העירוני_לגינון_פרק_01_תשתיות_מצע_ואדניות
+      - המדריך_העירוני_לגינון_פרק_02_בחירת_צמחים_וגילדות
+      - המדריך_העירוני_לגינון_פרק_03_השקיה_ופיזיולוגיית_שורש
     03 Outputs:
       count: 1
       notes:
@@ -72,6 +74,9 @@ connected_external_vaults:
       count: 0
       notes: []
 domains:
+  assets:
+    total_notes: 0
+    notes: []
   attachments:
     total_notes: 0
     notes: []
@@ -85,7 +90,7 @@ domains:
     total_notes: 0
     notes: []
   daily:
-    total_notes: 6
+    total_notes: 7
     notes:
     - '2026-09-27'
     - '2026-09-28'
@@ -93,6 +98,7 @@ domains:
     - '2026-10-14'
     - '2026-10-15'
     - '2026-10-17'
+    - '2026-10-18'
   development:
     total_notes: 3
     notes:
@@ -108,13 +114,47 @@ domains:
     notes:
     - morning-routine
   research:
-    total_notes: 42
+    total_notes: 76
     notes:
     - my-second-note
     - ollama-provides-local-llm-inference
     - short-cli-note-test
     - scfa-butyrate-mucosal-integrity-vs-high-dose-toxicity
     - critic_could_gut_inflammation_connect_autoimmune_disease_
+    - המדריך_העירוני_לגינון_00_מבוא_ותוכן
+    - המדריך_העירוני_לגינון_ביתי_טבעי_ספר_שלם
+    - המדריך_העירוני_לגינון_נספח_א_גינון_אנכי
+    - המדריך_העירוני_לגינון_נספח_ב_מאביקים_וחרקים_מועילים
+    - המדריך_העירוני_לגינון_נספח_ג_יומן_גינה
+    - המדריך_העירוני_לגינון_נספח_ד_היערכות_למזג_אוויר_קיצוני
+    - המדריך_העירוני_לגינון_נספח_ה_ערכת_כלים_ותחזוקה
+    - המדריך_העירוני_לגינון_פרק_01_תשתיות_מצע_ואדניות
+    - המדריך_העירוני_לגינון_פרק_02_בחירת_צמחים_וגילדות
+    - המדריך_העירוני_לגינון_פרק_03_השקיה_ופיזיולוגיית_שורש
+    - המדריך_העירוני_לגינון_פרק_04_תזונה_קומפוסט_ו_ipm
+    - המדריך_העירוני_לגינון_פרק_05_גידולים_מיוחדים
+    - המדריך_העירוני_לגינון_פרק_06_מזיקים_מחלות_ופתרון_תקלות
+    - המדריך_העירוני_לגינון_פרק_07_לוח_שנה_עונתי
+    - המדריך_העירוני_לגינון_פרק_08_אינדקס_32_צמחים
+    - המדריך_העירוני_לגינון_פרק_09_מילון_מושגים_אגרונומי
+    - המדריך_העירוני_לגינון_פרק_10_ריבוי_צמחים_וייחורים
+    - המדריך_העירוני_לגינון_פרק_11_אינדקס_נושאי_מהיר
+    - חיווט_מחדש_00_פתח_דבר_ומבוא
+    - חיווט_מחדש_ספר_שלם
+    - חיווט_מחדש_פרק_01
+    - חיווט_מחדש_פרק_02
+    - חיווט_מחדש_פרק_03
+    - חיווט_מחדש_פרק_04
+    - חיווט_מחדש_פרק_05
+    - חיווט_מחדש_פרק_06
+    - חיווט_מחדש_פרק_07
+    - חיווט_מחדש_פרק_08
+    - חיווט_מחדש_פרק_09
+    - חיווט_מחדש_פרק_10
+    - חיווט_מחדש_פרק_11
+    - חיווט_מחדש_פרק_12
+    - חיווט_מחדש_פרק_13
+    - חיווט_מחדש_פרק_14
     - llm-dialogue-session-chatgpt-research-on-butyrate
     - research-can-we-treat-it-using-stoping-the-inflamanation
     - research-could-gut-inflammation-connect-autoimmune-disease-and-parkin
@@ -166,6 +206,10 @@ projects:
     notes:
     - project_memory
 deep_research_sessions:
+  2026-10-18-optimal-ketone-levels-for-cognitive-resi:
+    has_overview: true
+    files:
+    - overview.md
   api_test_capture:
     has_overview: true
     files:
@@ -227,12 +271,13 @@ deep_research_sessions:
     files:
     - overview.md
 decisions:
-  total: 4
+  total: 5
   records:
   - 2026-09-27_primary_evidence_source
   - 2026-10-14-rag-fusion-architecture
   - 2026-10-15-obsidian-first-principle
   - 2026-10-17-personal-intelligence-os-architecture
+  - 2026-10-18-telegram-integration-for-llm-wiki
 mocs:
 - auto-classify-overview
 - business_moc
@@ -240,9 +285,11 @@ mocs:
 - development-overview
 - development_moc
 - domain_content_manager_moc
+- gardening_book_moc
 - master_vault_moc
 - personal-overview
 - personal_moc
 - research-overview
 - research_moc
+- rewiring_book_moc
 - wiki-moc

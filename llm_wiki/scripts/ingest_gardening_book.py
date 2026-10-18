@@ -246,3 +246,4 @@ if __name__ == "__main__":
     paras, img_count = extract_docx_content(SOURCE_DOCX)
     segment_and_write_gardening_book(paras, img_count)
     print("\n✅ Ingestion and structuring of Gardening Book completed successfully!")
+

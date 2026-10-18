@@ -1,3 +1,6 @@
+import re
+import zipfile
+import shutil
 from pathlib import Path
 from typing import Union, Dict, Any, Optional
 from app.services.inbox_service import InboxIngestionService
@@ -33,13 +36,18 @@ class LLMWikiPipeline:
 
         # 2. Parse Source Content
         parsed_data = {}
-        if raw_path.suffix.lower() in [".md", ".txt", ".docx"]:
+        if raw_path.suffix.lower() in [".md", ".txt", ".docx", ".pdf"]:
             parsed_data = self.parser.parse_file(raw_path)
             content = parsed_data.get("content", "")
         else:
             content = f"Source binary asset preserved at {raw_path.name}"
 
         target_domain = domain if domain != "unclassified" else "research"
+
+        # 2b. Check if content represents a multi-chapter book or manual
+        chapter_matches = list(re.finditer(r"(?m)^(?:##\s+)?(פרק\s+\d+|שער\s+[א-ת]|נספח\s+[א-ת]|Chapter\s+\d+[:\s—\-].*)", content))
+        if len(chapter_matches) >= 3 or (raw_path.suffix.lower() in [".docx", ".pdf"] and len(content) > 15000 and "פרק" in content):
+            return self._process_book(raw_path, content, target_domain, job.job_id)
 
         # 3. AI Extraction
         extraction = self.llm.extract_entities_and_claims(content, domain=target_domain)
@@ -194,6 +202,151 @@ class LLMWikiPipeline:
             "title": target_title,
             "note_path": str(note_path),
             "raw_path": str(raw_path) if raw_path else "Skipped (Direct Mode)"
+        }
+
+    def _process_book(self, raw_path: Path, content: str, target_domain: str, job_id: str) -> Dict[str, Any]:
+        """
+        Processes a multi-chapter book or extensive manual:
+        1. Cleans title and sets safe slug.
+        2. Extracts embedded images (from docx) into wiki/assets/{slug}/.
+        3. Saves full master book in wiki/{target_domain}/{slug}/.
+        4. Segments book into atomic chapter notes.
+        5. Generates dedicated Book MOC in mocs/{slug}_moc.md.
+        6. Updates domain MOC and creates Git commit.
+        """
+        clean_title = raw_path.stem.replace("_", " ").replace("-", " ").strip()
+        slug = re.sub(r'[^\w\-]+', '_', raw_path.stem).strip('_')
+        if not slug or slug.lower().startswith("tmp"):
+            lines = [l.strip() for l in content.splitlines() if l.strip()]
+            for line in lines[:5]:
+                candidate = re.sub(r"^#+\s*", "", line).strip()
+                if len(candidate) > 2 and len(candidate) < 60:
+                    clean_title = candidate
+                    slug = re.sub(r'[^\w\-]+', '_', clean_title).strip('_')
+                    break
+        if not slug:
+            slug = f"book_{job_id[:8]}"
+
+        # 1. Extract embedded images if docx
+        assets_dir = self.root_dir / f"wiki/assets/{slug}"
+        assets_dir.mkdir(parents=True, exist_ok=True)
+        image_count = 0
+        if raw_path.suffix.lower() == ".docx":
+            try:
+                with zipfile.ZipFile(raw_path) as z:
+                    for name in z.namelist():
+                        if name.startswith("word/media/"):
+                            img_name = Path(name).name
+                            target_img = assets_dir / img_name
+                            with open(target_img, "wb") as f_out, z.open(name) as f_in:
+                                shutil.copyfileobj(f_in, f_out)
+                            image_count += 1
+            except Exception:
+                pass
+
+        # 2. Directory structure
+        book_dir = self.root_dir / "wiki" / target_domain / slug
+        book_dir.mkdir(parents=True, exist_ok=True)
+
+        # 3. Master Full Book Note
+        full_book_filename = f"{slug}_ספר_שלם.md"
+        full_book_path = book_dir / full_book_filename
+        full_book_content = (
+            f"---\n"
+            f"title: \"{clean_title}\"\n"
+            f"type: book\n"
+            f"domain: {target_domain}\n"
+            f"tags: [book, {target_domain}, {slug}]\n"
+            f"source_raw: \"{raw_path.name}\"\n"
+            f"status: active\n"
+            f"---\n\n"
+            f"# {clean_title}\n\n"
+            f"{content}\n"
+        )
+        full_book_path.write_text(full_book_content, encoding="utf-8")
+
+        # 4. Segment into chapters
+        split_pattern = r"(?m)^(?=(?:##\s+)?(?:פרק\s+\d+|שער\s+[א-ת]|נספח\s+[א-ת]|תוכן\s*עניינים|Chapter\s+\d+|Appendix\s+[A-Z]))"
+        raw_chunks = re.split(split_pattern, content)
+        chunks = [c.strip() for c in raw_chunks if c.strip()]
+
+        chapter_notes = []
+        chapter_links = []
+
+        if len(chunks) > 1:
+            for idx, chunk in enumerate(chunks):
+                chunk_lines = [l for l in chunk.splitlines() if l.strip()]
+                first_line = chunk_lines[0] if chunk_lines else f"חלק {idx}"
+                ch_title = re.sub(r"^#+\s*", "", first_line).strip()
+                if not ch_title:
+                    ch_title = f"{clean_title} — חלק {idx}"
+
+                safe_ch_stem = re.sub(r'[\\/*?:"<>|]', "", ch_title)[:50].strip().replace(" ", "_")
+                ch_filename = f"{slug}_{idx:02d}_{safe_ch_stem}.md"
+                ch_path = book_dir / ch_filename
+
+                ch_note_content = (
+                    f"---\n"
+                    f"title: \"{ch_title}\"\n"
+                    f"book: \"{clean_title}\"\n"
+                    f"domain: {target_domain}\n"
+                    f"type: book_chapter\n"
+                    f"tags: [book, chapter, {target_domain}]\n"
+                    f"---\n\n"
+                    f"# {ch_title}\n\n"
+                    f"**ספר מקור:** [[{full_book_filename.replace('.md', '')}|{clean_title}]]\n\n"
+                    f"{chunk}\n"
+                )
+                ch_path.write_text(ch_note_content, encoding="utf-8")
+                chapter_notes.append(ch_path)
+                chapter_links.append(f"- [[{ch_path.stem}|{ch_title}]]")
+        else:
+            chapter_notes.append(full_book_path)
+            chapter_links.append(f"- [[{full_book_path.stem}|{clean_title}]]")
+
+        # 5. Dedicated Book MOC
+        mocs_dir = self.root_dir / "mocs"
+        mocs_dir.mkdir(parents=True, exist_ok=True)
+        book_moc_path = mocs_dir / f"{slug}_moc.md"
+        moc_content = (
+            f"---\n"
+            f"title: \"{clean_title} — תוכן ומפת פרקים (MOC)\"\n"
+            f"type: moc\n"
+            f"domain: {target_domain}\n"
+            f"tags: [moc, book, {target_domain}]\n"
+            f"---\n\n"
+            f"# {clean_title} — מפת נושאים ופרקים\n\n"
+            f"- **ספר שלם:** [[{full_book_filename.replace('.md', '')}]]\n"
+            f"- **פורמט מקור:** `{raw_path.name}`\n"
+            f"- **תחום:** `{target_domain}`\n"
+            f"- **פרקים שחולצו:** {len(chapter_notes)}\n"
+            f"- **תמונות שחולצו:** {image_count}\n\n"
+            f"## תוכן עניינים ופרקים\n\n"
+            + "\n".join(chapter_links)
+            + "\n"
+        )
+        book_moc_path.write_text(moc_content, encoding="utf-8")
+
+        # 6. Update Domain MOC & Log
+        moc_title = f"{target_domain.capitalize()} Overview"
+        self.moc_service.update_moc(moc_title, "Recent Ingestions", f"{slug}_moc")
+        self.moc_service.append_domain_log(target_domain, f"Ingested book: {clean_title} ({len(chapter_notes)} chapters, {image_count} images)")
+
+        # 7. Git commit
+        commit_msg = f"ingest({target_domain}): process book '{clean_title}' ({len(chapter_notes)} chapters)"
+        self.git_service.commit(commit_msg)
+
+        return {
+            "status": "COMPLETED",
+            "job_id": job_id,
+            "type": "book",
+            "title": clean_title,
+            "raw_path": str(raw_path),
+            "book_path": str(full_book_path),
+            "chapters_count": len(chapter_notes),
+            "chapters": [str(c) for c in chapter_notes],
+            "moc_path": str(book_moc_path),
+            "images_extracted": image_count
         }
 
 

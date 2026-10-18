@@ -5,4 +5,4 @@
 **Domain Log**: [[log]]
 
 ## Overview
-Total curated knowledge units: 58
+Total curated knowledge units: 76
