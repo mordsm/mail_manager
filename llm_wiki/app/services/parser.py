@@ -15,6 +15,9 @@ class MarkdownParser:
         if not path.exists():
             raise FileNotFoundError(f"File not found: {file_path}")
 
+        if path.suffix.lower() == ".docx":
+            return self.parse_docx(path)
+
         post = frontmatter.load(path)
         content = post.content
 
@@ -34,6 +37,43 @@ class MarkdownParser:
             "content": content,
             "wikilinks": wikilinks,
             "tags": tags,
+        }
+
+    def parse_docx(self, file_path: Union[str, Path]) -> Dict[str, Any]:
+        import zipfile
+        import xml.etree.ElementTree as ET
+
+        path = Path(file_path)
+        paragraphs = []
+        try:
+            with zipfile.ZipFile(path) as z:
+                xml_content = z.read("word/document.xml")
+                tree = ET.fromstring(xml_content)
+                for p in tree.iter("{http://schemas.openxmlformats.org/wordprocessingml/2006/main}p"):
+                    pStyle = p.find(".//{http://schemas.openxmlformats.org/wordprocessingml/2006/main}pStyle")
+                    style_val = pStyle.attrib.get("{http://schemas.openxmlformats.org/wordprocessingml/2006/main}val", "") if pStyle is not None else ""
+                    p_text = "".join([node.text for node in p.iter("{http://schemas.openxmlformats.org/wordprocessingml/2006/main}t") if node.text]).strip()
+                    if p_text:
+                        if "Heading1" in style_val or style_val == "1":
+                            paragraphs.append(f"\n## {p_text}\n")
+                        elif "Heading2" in style_val or style_val == "2":
+                            paragraphs.append(f"\n### {p_text}\n")
+                        elif "Heading3" in style_val or style_val == "3":
+                            paragraphs.append(f"\n#### {p_text}\n")
+                        else:
+                            paragraphs.append(p_text)
+        except Exception as e:
+            paragraphs = [f"Error extracting docx: {e}"]
+
+        content = "\n\n".join(paragraphs)
+        return {
+            "path": str(path),
+            "filename": path.name,
+            "title": path.stem.replace("_", " ").title(),
+            "metadata": {"source_type": "docx", "paragraphs_count": len(paragraphs)},
+            "content": content,
+            "wikilinks": self.extract_wikilinks(content),
+            "tags": ["document", "docx"],
         }
 
     def extract_wikilinks(self, text: str) -> List[Dict[str, str]]:

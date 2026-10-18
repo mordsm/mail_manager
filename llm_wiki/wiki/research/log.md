@@ -11,3 +11,5 @@
 - **2026-10-13**: Synced 20 research syntheses from Research Manager
 - **2026-10-13**: Synced 20 research syntheses from Research Manager
 - **2026-10-13**: Synced 20 research syntheses from Research Manager
+- **2026-10-18**: Ingested raw source: tmp227a05_q.docx
+- **2026-10-18**: Ingested raw source: tmp3gxrng5g.docx

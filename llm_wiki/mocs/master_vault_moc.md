@@ -4,11 +4,11 @@
 
 ## Domain Maps of Content
 - [[personal_moc]] — 1 active notes
-- [[research_moc]] — 42 active notes
+- [[research_moc]] — 58 active notes
 - [[business_moc]] — 0 active notes
 - [[competitive_moc]] — 0 active notes
 - [[development_moc]] — 3 active notes
-- [[domain_content_manager_moc]] — 240 notes (Domain Content Manager)
+- [[domain_content_manager_moc]] — 241 notes (Domain Content Manager)
 
 ## Active Projects (10_Projects)
 - [[domain_content_manager]]
@@ -17,6 +17,7 @@
 - [[sharons]]
 
 ## Deep Research Sessions (20_Research)
+- [[2026-10-18-optimal-ketone-levels-for-cognitive-resi]]
 - [[api_test_capture]]
 - [[can_we_treat_it_using_stoping_the_inflamanation]]
 - [[chatgpt_research_on_butyrate]]
@@ -31,4 +32,3 @@
 - [[what_environmenatl_condition_dietand_other_way_of_]]
 - [[what_environmental_condition_dietand_other_way_of_]]
 - [[מה_לפי_המחקרים_הסיבות_למחלות_אוטואימוניות_ובמיוחד_]]
-- [[סיבות_אפריות_להתפרצות_מחלות_אוטואימוניות_בכלל_ותסמ]]

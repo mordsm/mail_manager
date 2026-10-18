@@ -68,9 +68,11 @@ async def ingest_file(
     subsubject: Optional[str] = Form(None)
 ):
     target_domain = normalize_domain(domain)
-    with tempfile.NamedTemporaryFile(delete=False, suffix=Path(file.filename).suffix) as tmp:
-        shutil.copyfileobj(file.file, tmp)
-        tmp_path = Path(tmp.name)
+    temp_dir = Path(tempfile.mkdtemp())
+    safe_name = Path(file.filename).name or "uploaded_file"
+    tmp_path = temp_dir / safe_name
+    with open(tmp_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
 
     try:
         result = pipeline.process_file(tmp_path, domain=target_domain)
@@ -78,8 +80,7 @@ async def ingest_file(
             result["subsubject"] = subsubject
         return result
     finally:
-        if tmp_path.exists():
-            tmp_path.unlink()
+        shutil.rmtree(temp_dir, ignore_errors=True)
 
 @router.post("/ingest/text")
 async def ingest_text(

@@ -33,7 +33,7 @@ class LLMWikiPipeline:
 
         # 2. Parse Source Content
         parsed_data = {}
-        if raw_path.suffix.lower() in [".md", ".txt"]:
+        if raw_path.suffix.lower() in [".md", ".txt", ".docx"]:
             parsed_data = self.parser.parse_file(raw_path)
             content = parsed_data.get("content", "")
         else:
